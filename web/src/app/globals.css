@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #effaf6;
+  --color-brand-100: #d7f2e8;
+  --color-brand-200: #b2e4d4;
+  --color-brand-500: #16a37f;
+  --color-brand-600: #0d8467;
+  --color-brand-700: #0c6a54;
+  --color-brand-800: #0d5545;
+  --color-brand-900: #0c463a;
+
+  --color-ink: #0f1f1b;
+  --color-muted: #5b6b66;
+  --color-line: #e3e8e6;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f8f7;
+
+  --font-sans: var(--font-geist-sans), var(--font-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Keep bottom nav clear of the iOS home indicator. */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
