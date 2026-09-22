@@ -26,17 +26,24 @@ export type ProductHit = Pick<
 
 const PAGE_SIZE = 20;
 
+/** How many top matches are re-ranked so buyable products come first (10 pages). */
+const RANK_WINDOW = 200;
+
 /**
  * Catalog search. Free text goes through Atlas Search (typo-tolerant, prefix
  * matching on brand and salt names); a condition alone is a plain indexed find.
+ *
+ * Within the top RANK_WINDOW matches, products that verified sellers have in
+ * stock are moved to the front (stable, so relevance order is kept inside each
+ * group) — a buyer searching "dolo" should see the Dolo they can order first.
  */
 export async function searchProducts(opts: { q?: string; condition?: string; page?: number }) {
   await connectDB();
   const q = opts.q?.trim().slice(0, 80) ?? "";
   const page = Math.max(1, opts.page ?? 1);
-  const skip = (page - 1) * PAGE_SIZE;
+  const start = (page - 1) * PAGE_SIZE;
 
-  let docs: (ProductDoc & { _id: mongoose.Types.ObjectId })[];
+  let candidates: (ProductDoc & { _id: mongoose.Types.ObjectId })[];
   if (q) {
     const filter: Record<string, unknown>[] = [{ equals: { path: "active", value: true } }];
     if (opts.condition) filter.push({ equals: { path: "conditions", value: opts.condition } });
@@ -56,21 +63,21 @@ export async function searchProducts(opts: { q?: string; condition?: string; pag
           },
         },
       },
-      { $skip: skip },
-      { $limit: PAGE_SIZE },
+      { $limit: RANK_WINDOW },
     ];
-    docs = await Product.aggregate(pipeline);
+    candidates = await Product.aggregate(pipeline);
   } else if (opts.condition) {
-    docs = await Product.find({ conditions: opts.condition, active: true })
-      .sort({ _id: 1 })
-      .skip(skip)
-      .limit(PAGE_SIZE)
-      .lean();
+    candidates = await Product.find({ conditions: opts.condition, active: true }).sort({ _id: 1 }).limit(RANK_WINDOW).lean();
   } else {
-    docs = [];
+    candidates = [];
   }
 
-  const offers = await offerSummaries(docs.map((d) => d._id));
+  const offers = await offerSummaries(candidates.map((d) => d._id));
+  const withOffers = candidates.filter((d) => offers.has(String(d._id)));
+  const without = candidates.filter((d) => !offers.has(String(d._id)));
+  const ranked = [...withOffers, ...without];
+  const docs = ranked.slice(start, start + PAGE_SIZE);
+
   const hits: ProductHit[] = docs.map((d) => ({
     id: String(d._id),
     name: d.name,
@@ -82,7 +89,7 @@ export async function searchProducts(opts: { q?: string; condition?: string; pag
     conditions: d.conditions,
     offers: offers.get(String(d._id)) ?? null,
   }));
-  return { hits, page, hasMore: docs.length === PAGE_SIZE };
+  return { hits, page, hasMore: ranked.length > start + PAGE_SIZE };
 }
 
 /** Best price / margin / seller count per product, from sellable listings. */

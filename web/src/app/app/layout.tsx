@@ -31,11 +31,11 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           </Link>
         </div>
         <div className="border-y border-line px-4 py-3">
-          <p className="truncate text-sm font-semibold">{businessName}</p>
-          <p className="mb-2 text-xs text-muted">
-            {t(`businessType.${business.type}`)} · {t(`role.${role}`)}
-          </p>
-          <BusinessSwitcher current={String(business._id)} options={options} />
+          <BusinessSwitcher
+            current={String(business._id)}
+            options={options}
+            subtitle={`${t(`businessType.${business.type}`)} · ${t(`role.${role}`)}`}
+          />
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-3">
           <SideNav items={items} soonLabel={t("common.comingSoon")} />
@@ -74,8 +74,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
                 ) : null}
               </Link>
             ) : null}
-            <LanguageSwitcher />
-            <SignOutButton />
+            {/* Language and sign-out live on the More page on phones, keeping this bar uncluttered. */}
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 sm:px-6 lg:pb-10 lg:pt-8">{children}</main>

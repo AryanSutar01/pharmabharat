@@ -35,8 +35,10 @@ function createAuth() {
       },
     },
     session: {
-      // Short-lived signed cookie cache avoids a DB hit on every request.
-      cookieCache: { enabled: true, maxAge: 5 * 60 },
+      // No cookie cache: role changes, bans and the ADMIN_EMAILS promotion must
+      // take effect on the very next request (a cached cookie kept the old role
+      // for up to 5 minutes). Costs one indexed DB lookup per request.
+      cookieCache: { enabled: false },
     },
     databaseHooks: {
       user: {

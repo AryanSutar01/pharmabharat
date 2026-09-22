@@ -123,7 +123,27 @@
     "featureGstTitle": "GST-तयार इनव्हॉइस",
     "featureGst": "HSN कोडसह आपोआप CGST/SGST किंवा IGST, प्रत्येक ऑर्डरनंतर ईमेलवर.",
     "whoTitle": "पुरवठा साखळीतील प्रत्येकासाठी",
-    "footer": "© {year} PharmaBharat"
+    "footer": "© {year} PharmaBharat",
+    "ctaSecondary": "कसे काम करते ते पहा",
+    "trust1": "GST व ड्रग लायसन्सने सत्यापित",
+    "trust2": "सामील होणे मोफत",
+    "trust3": "English, हिन्दी, मराठी",
+    "previewTitle": "Dolo 650 Tablet",
+    "previewSub": "Paracetamol 650mg · 15 ची स्ट्रिप",
+    "previewMrp": "MRP ₹33.60",
+    "previewBest": "सर्वोत्तम मार्जिन",
+    "previewSellers": "3 सत्यापित डिस्ट्रिब्युटर",
+    "statMedicines": "औषधे कॅटलॉगमध्ये",
+    "statLanguages": "भाषा",
+    "statGst": "GST इनव्हॉइस, आपोआप",
+    "statVerified": "फक्त सत्यापित व्यवसाय",
+    "howTitle": "कसे काम करते",
+    "step1Title": "पडताळणी करा",
+    "step1": "Google ने साइन इन करा, GSTIN व ड्रग लायसन्स जोडा आणि कागदपत्रे अपलोड करा. आम्ही 1–2 कामकाजाच्या दिवसांत पडताळणी करतो.",
+    "step2Title": "तुलना करा व ऑर्डर द्या",
+    "step2": "ब्रँड, सॉल्ट किंवा आजारानुसार शोधा, डिस्ट्रिब्युटरच्या मार्जिनची तुलना करा आणि एकाच चेकआउटमध्ये अनेकांकडून ऑर्डर द्या.",
+    "step3Title": "सगळे ट्रॅक करा",
+    "step3": "ऑर्डरची स्थिती, GST इनव्हॉइस, किंमत घटल्याचे अलर्ट आणि डिस्ट्रिब्युटरशी चॅट — सर्व एकाच ठिकाणी."
   },
   "signIn": {
     "title": "PharmaBharat मध्ये साइन इन करा",
@@ -147,7 +167,10 @@
     "notifications": "सूचना",
     "alerts": "किंमत अलर्ट",
     "support": "मदत",
-    "supportDesk": "सपोर्ट डेस्क"
+    "supportDesk": "सपोर्ट डेस्क",
+    "sectionTrade": "व्यापार",
+    "sectionAccount": "तुमचे खाते",
+    "sectionPlatform": "PharmaBharat टीम"
   },
   "onboarding": {
     "title": "तुमचा व्यवसाय सेट करा",
@@ -786,6 +809,7 @@
     "outOfStock": "स्टॉक संपला",
     "expiring": "90 दिवसांत एक्सपायर",
     "companyIntro": "कंपनी डॅशबोर्ड (प्रदेशनिहाय उत्पादनाची मागणी) लॉन्चनंतर येतील. तोपर्यंत तुम्ही कॅटलॉग पाहू शकता आणि डिस्ट्रिब्युटरशी चॅट करू शकता.",
-    "announcements": "घोषणा"
+    "announcements": "घोषणा",
+    "noDataBuyer": "मागील 30 दिवसांत खरेदी नाही. पहिली ऑर्डर देण्यासाठी कॅटलॉग पहा."
   }
 }

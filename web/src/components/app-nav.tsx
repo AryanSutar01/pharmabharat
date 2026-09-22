@@ -11,6 +11,8 @@ export type NavItem = {
   soon?: boolean;
   mobile?: boolean;
   badge?: number;
+  /** Sidebar group heading this item sits under. */
+  section?: string;
 };
 
 const ICONS = {
@@ -55,11 +57,15 @@ export function SideNav({ items, soonLabel }: { items: NavItem[]; soonLabel: str
   const pathname = usePathname();
   return (
     <nav className="flex flex-col gap-0.5">
-      {items.map((item) => {
+      {items.map((item, i) => {
+        const heading = item.section && item.section !== items[i - 1]?.section ? item.section : null;
         const active = isActive(pathname, item.href);
         return (
+          <div key={item.href}>
+          {heading ? (
+            <p className={cn("px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted/80", i > 0 && "pt-4")}>{heading}</p>
+          ) : null}
           <Link
-            key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
@@ -74,6 +80,7 @@ export function SideNav({ items, soonLabel }: { items: NavItem[]; soonLabel: str
             ) : null}
             {item.soon ? <span className="text-[10px] uppercase tracking-wide text-muted/70">{soonLabel}</span> : null}
           </Link>
+          </div>
         );
       })}
     </nav>

@@ -28,7 +28,10 @@ export const getNav = cache(async () => {
   ]);
 
   // Phone bottom bar: 5 slots. Sellers get Inventory in place of Chat; "More" holds the rest.
-  const items: NavItem[] = [
+  const trade = t("nav.sectionTrade");
+  const account = t("nav.sectionAccount");
+  const platform = t("nav.sectionPlatform");
+  const raw: NavItem[] = [
     { href: "/app", label: t("nav.home"), icon: "home", mobile: true },
     { href: "/app/catalog", label: t("nav.catalog"), icon: "catalog", mobile: true },
     ...(seller ? [{ href: "/app/inventory", label: t("nav.inventory"), icon: "inventory" as const, mobile: true }] : []),
@@ -43,6 +46,15 @@ export const getNav = cache(async () => {
     ...(staff ? [{ href: "/support-desk", label: t("nav.supportDesk"), icon: "desk" as const }] : []),
     ...(session.user.platformRole === "admin" ? [{ href: "/admin", label: t("nav.admin"), icon: "admin" as const }] : []),
   ];
+
+  // Sidebar sections: trading first, then account/help, then platform staff tools.
+  const sectionOf = (href: string) =>
+    ["/support-desk", "/admin"].includes(href)
+      ? platform
+      : ["/app/notifications", "/app/alerts", "/app/team", "/app/business", "/app/support"].includes(href)
+        ? account
+        : trade;
+  const items = raw.map((i) => ({ ...i, section: sectionOf(i.href) }));
 
   const more: NavItem = { href: "/app/more", label: t("nav.more"), icon: "more", mobile: true };
   return { items, bottom: [...items.filter((i) => i.mobile), more], buyer, inCart, unread };

@@ -4,6 +4,9 @@
 //
 //   node scripts/seed-demo.mts            # create / refresh demo data
 //   node scripts/seed-demo.mts --remove   # delete all demo businesses + their listings
+//   node scripts/seed-demo.mts --member you@gmail.com
+//        also creates a [DEMO] retailer and makes that (already signed-up) user owner of it and of
+//        the first demo distributor, so both buyer and seller screens can be tried with one login
 
 import { readFileSync } from "node:fs";
 import { MongoClient } from "mongodb";
@@ -66,8 +69,9 @@ async function main() {
   if (process.argv.includes("--remove")) {
     const ids = existing.map((b) => b._id);
     const l = await listings.deleteMany({ sellerId: { $in: ids } });
+    const m = await db.collection("memberships").deleteMany({ businessId: { $in: ids } });
     const b = await businesses.deleteMany({ _id: { $in: ids } });
-    console.log(`removed ${b.deletedCount} demo businesses and ${l.deletedCount} listings`);
+    console.log(`removed ${b.deletedCount} demo businesses, ${l.deletedCount} listings, ${m.deletedCount} memberships`);
     await client.close();
     return;
   }
@@ -132,6 +136,41 @@ async function main() {
     }
   }
   console.log(`demo: ${SELLERS.length} distributors, ${listingCount} listings (remove with --remove)`);
+
+  const memberIdx = process.argv.indexOf("--member");
+  if (memberIdx > 0) {
+    const email = (process.argv[memberIdx + 1] ?? "").toLowerCase();
+    const user = await db.collection("user").findOne({ email });
+    if (!user) throw new Error(`No signed-up user with email ${email} — sign in once first.`);
+    const retailer = await businesses.findOneAndUpdate(
+      { ownerUserId: DEMO_OWNER, legalName: "[DEMO] Shree Ganesh Medical" },
+      {
+        $set: {
+          type: "retailer",
+          tradeName: "[DEMO] Shree Ganesh Medical",
+          phone: "9000000001",
+          email: "demo-retailer@example.invalid",
+          address: { line1: "Sample address (demo data)", city: "Nashik", stateCode: "27", pincode: "422001" },
+          drugLicenses: [{ form: "20", number: "DEMO-NSK-20", validTill: new Date("2030-12-31") }],
+          pharmacist: { name: "Demo Pharmacist", registrationNumber: "DEMO-REG-1" },
+          documents: [],
+          kyc: { status: "approved", reviewedAt: now, reviewedBy: DEMO_OWNER, remarks: "Demo data" },
+          updatedAt: now,
+        },
+        $setOnInsert: { legalName: "[DEMO] Shree Ganesh Medical", ownerUserId: DEMO_OWNER, createdAt: now },
+      },
+      { upsert: true, returnDocument: "after" },
+    );
+    const distributor = await businesses.findOne({ ownerUserId: DEMO_OWNER, legalName: SELLERS[0].legalName });
+    for (const b of [retailer!, distributor!]) {
+      await db.collection("memberships").updateOne(
+        { businessId: b._id, userId: String(user._id) },
+        { $set: { role: "owner", status: "active", updatedAt: now }, $setOnInsert: { createdAt: now } },
+        { upsert: true },
+      );
+    }
+    console.log(`demo: ${email} is now owner of "${retailer!.legalName}" and "${distributor!.legalName}"`);
+  }
   await client.close();
 }
 

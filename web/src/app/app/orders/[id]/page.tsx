@@ -52,7 +52,7 @@ export default async function OrderPage({ params }: PageProps<"/app/orders/[id]"
         }
       />
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_20rem]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="space-y-5">
           <Card>
             <CardHeader

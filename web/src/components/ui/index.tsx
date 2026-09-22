@@ -66,7 +66,7 @@ export function Field({
 }
 
 export function Card({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("rounded-xl border border-line bg-surface", className)} {...props} />;
+  return <div className={cn("rounded-xl border border-line bg-surface shadow-[0_1px_2px_rgba(15,31,27,0.04)]", className)} {...props} />;
 }
 
 export function CardHeader({ title, description, action }: { title: ReactNode; description?: ReactNode; action?: ReactNode }) {
@@ -92,7 +92,7 @@ const BADGE: Record<Tone, string> = {
 
 export function Badge({ tone = "neutral", children }: { tone?: Tone; children: ReactNode }) {
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium", BADGE[tone])}>
+    <span className={cn("inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium", BADGE[tone])}>
       {children}
     </span>
   );
@@ -130,3 +130,20 @@ export function Logo({ className }: { className?: string }) {
     </span>
   );
 }
+
+/** Grey placeholder block for loading skeletons. */
+export function Skeleton({ className }: { className?: string }) {
+  return <div className={cn("animate-pulse rounded-md bg-line/70", className)} aria-hidden />;
+}
+
+/** Friendly empty state: icon, message and an optional action. */
+export function EmptyState({ icon, title, action }: { icon?: ReactNode; title: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="flex flex-col items-center gap-3 px-4 py-12 text-center">
+      {icon ? <span className="grid size-12 place-items-center rounded-full bg-canvas text-muted">{icon}</span> : null}
+      <p className="max-w-sm text-sm text-muted">{title}</p>
+      {action}
+    </div>
+  );
+}
+

@@ -113,11 +113,11 @@ async function SellerView({
         <StatTile label={t("dashboard.expiring")} value={String(d.stock.expiring)} hint={t("dashboard.stockHealth")} />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <Card className="min-w-0">
           <CardHeader title={t("dashboard.dailySales")} />
           <div className="p-4 sm:p-5">
-            <ColumnChart points={d.daily} title={t("dashboard.dailySales")} tableLabel={t("dashboard.viewTable")} />
+            <ColumnChart points={d.daily} title={t("dashboard.dailySales")} tableLabel={t("dashboard.viewTable")} emptyText={t("dashboard.noData")} />
           </div>
         </Card>
         <div className="space-y-5">
@@ -190,14 +190,14 @@ async function BuyerView({
         {/* Spending more or less is neither good nor bad, so the change stays grey. */}
         <StatTile label={t("dashboard.spend")} value={inrCompact(d.spend.current)} change={d.spend.change} changeLabel={t("dashboard.vsPrev")} neutral />
         <StatTile label={t("dashboard.orders")} value={String(d.orders.current)} change={d.orders.change} changeLabel={t("dashboard.vsPrev")} />
-        <StatTile label={t("dashboard.saved")} value={inrCompact(d.saved)} hint={t("dashboard.savedHint", { pct: d.savedPct })} />
+        <StatTile label={t("dashboard.saved")} value={inrCompact(d.saved)} hint={d.saved > 0 ? t("dashboard.savedHint", { pct: d.savedPct }) : undefined} />
         <StatTile label={t("dashboard.openOrders")} value={String(d.openOrders)} />
       </div>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <Card className="min-w-0">
           <CardHeader title={t("dashboard.dailySpend")} />
           <div className="p-4 sm:p-5">
-            <ColumnChart points={d.daily} title={t("dashboard.dailySpend")} tableLabel={t("dashboard.viewTable")} />
+            <ColumnChart points={d.daily} title={t("dashboard.dailySpend")} tableLabel={t("dashboard.viewTable")} emptyText={t("dashboard.noDataBuyer")} />
           </div>
         </Card>
         <Card className="h-fit">

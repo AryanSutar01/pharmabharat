@@ -26,7 +26,7 @@ export default async function TeamPage() {
   return (
     <>
       <PageHeader title={t("team.title")} description={t("team.subtitle")} />
-      <div className="grid gap-5 lg:grid-cols-[1fr_22rem]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-5">
           <Card>
             <CardHeader title={t("team.members")} />

@@ -48,7 +48,7 @@ export default async function CartPage() {
   return (
     <>
       <PageHeader title={t("cart.title")} description={t("cart.subtitle")} />
-      <div className="grid gap-5 lg:grid-cols-[1fr_22rem]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-5">
           {groups.map((g) => (
             <Card key={g.sellerId}>
@@ -96,7 +96,7 @@ export default async function CartPage() {
           ))}
         </div>
 
-        <Card className="h-fit lg:sticky lg:top-8">
+        <Card className="h-fit xl:sticky xl:top-8">
           <CardHeader title={t("cart.summary")} description={t("cart.orders", { count: groups.length })} />
           <div className="space-y-4 p-4 sm:p-5">
             <dl className="space-y-1 text-sm">

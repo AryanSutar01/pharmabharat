@@ -123,7 +123,27 @@
     "featureGstTitle": "GST-ready invoices",
     "featureGst": "Automatic CGST/SGST or IGST with HSN codes, emailed after every order.",
     "whoTitle": "Built for everyone in the supply chain",
-    "footer": "© {year} PharmaBharat"
+    "footer": "© {year} PharmaBharat",
+    "ctaSecondary": "See how it works",
+    "trust1": "GST & drug-licence verified",
+    "trust2": "Free to join",
+    "trust3": "English, हिन्दी, मराठी",
+    "previewTitle": "Dolo 650 Tablet",
+    "previewSub": "Paracetamol 650mg · strip of 15",
+    "previewMrp": "MRP ₹33.60",
+    "previewBest": "Best margin",
+    "previewSellers": "3 verified distributors",
+    "statMedicines": "medicines in the catalogue",
+    "statLanguages": "languages",
+    "statGst": "GST invoices, automatic",
+    "statVerified": "verified businesses only",
+    "howTitle": "How it works",
+    "step1Title": "Get verified",
+    "step1": "Sign in with Google, add your GSTIN and drug licence, and upload documents. We verify within 1–2 working days.",
+    "step2Title": "Compare & order",
+    "step2": "Search by brand, salt or condition, compare margins across distributors, and order from several in one checkout.",
+    "step3Title": "Track everything",
+    "step3": "Order status, GST invoices, price-drop alerts and chat with your distributor — all in one place."
   },
   "signIn": {
     "title": "Sign in to PharmaBharat",
@@ -147,7 +167,10 @@
     "notifications": "Notifications",
     "alerts": "Price alerts",
     "support": "Help & support",
-    "supportDesk": "Support desk"
+    "supportDesk": "Support desk",
+    "sectionTrade": "Trade",
+    "sectionAccount": "Your account",
+    "sectionPlatform": "PharmaBharat team"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -786,6 +809,7 @@
     "outOfStock": "Out of stock",
     "expiring": "Expiring in 90 days",
     "companyIntro": "Company dashboards (product demand by region) are coming after launch. Meanwhile you can browse the catalog and chat with distributors.",
-    "announcements": "Announcements"
+    "announcements": "Announcements",
+    "noDataBuyer": "No purchases in the last 30 days. Browse the catalog to place your first order."
   }
 }

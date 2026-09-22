@@ -28,7 +28,7 @@ export default async function AdminOverview() {
         <Card className="min-w-0">
           <CardHeader title={t("admin.dailyGmv")} />
           <div className="p-4 sm:p-5">
-            <ColumnChart points={d.daily} title={t("admin.dailyGmv")} tableLabel={t("dashboard.viewTable")} />
+            <ColumnChart points={d.daily} title={t("admin.dailyGmv")} tableLabel={t("dashboard.viewTable")} emptyText={t("dashboard.noData")} />
           </div>
         </Card>
         <div className="space-y-5">

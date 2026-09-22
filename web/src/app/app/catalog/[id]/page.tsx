@@ -55,87 +55,47 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
         }
       />
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_20rem]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="space-y-5">
           <Card>
             <CardHeader title={t("catalog.offersTitle")} description={t("catalog.priceExclGst")} />
             {offers.length === 0 ? (
               <p className="px-4 py-8 text-center text-sm text-muted sm:px-5">{t("catalog.offersEmpty")}</p>
             ) : (
-              <>
-                {/* Phone: stacked cards */}
-                <ul className="divide-y divide-line md:hidden">
-                  {offers.map((o) => (
-                    <li key={o.id} className="space-y-2 px-4 py-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="truncate font-medium">{o.sellerName}</p>
-                          <p className="text-xs text-muted">
-                            {o.sellerCity}, {stateName(o.sellerStateCode)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">{inr(o.price)}</p>
-                          <Badge tone="success">{t("catalog.marginValue", { value: o.margin })}</Badge>
-                        </div>
+              // One responsive row per offer (a table didn't fit next to the sidebar on laptops).
+              <ul className="divide-y divide-line">
+                {offers.map((o, i) => (
+                  <li key={o.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-5 sm:px-5">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-medium">{o.sellerName}</p>
+                        {i === 0 && offers.length > 1 ? <Badge tone="success">{t("catalog.bestPrice")}</Badge> : null}
                       </div>
-                      <p className="text-xs text-muted">
+                      <p className="mt-0.5 text-xs text-muted">
+                        {o.sellerCity}, {stateName(o.sellerStateCode)}
+                      </p>
+                      <p className="mt-1 text-xs text-muted">
                         {t("catalog.expiry")} {monthYear(o.expiryDate)} · {t("catalog.stock")} {o.stock} · {t("catalog.moq")}{" "}
                         {o.minOrderQty} · {t("catalog.gst")} {o.gstRate}%
                       </p>
-                      {buyable(o.sellerId) ? (
-                        <AddToCart listingId={o.id} minOrderQty={o.minOrderQty} stock={o.stock} />
-                      ) : null}
-                      {canChat && o.sellerId !== String(business._id) ? <ChatButton businessId={o.sellerId} className="w-full" /> : null}
-                    </li>
-                  ))}
-                </ul>
-                {/* Tablet / desktop: table */}
-                <div className="hidden overflow-x-auto md:block">
-                  <table className="w-full text-sm">
-                    <thead className="text-left text-xs uppercase tracking-wide text-muted">
-                      <tr className="border-b border-line">
-                        <th className="px-5 py-2 font-medium">{t("catalog.seller")}</th>
-                        <th className="px-3 py-2 text-right font-medium">{t("catalog.price")}</th>
-                        <th className="px-3 py-2 text-right font-medium">{t("catalog.margin")}</th>
-                        <th className="px-3 py-2 font-medium">{t("catalog.expiry")}</th>
-                        <th className="px-3 py-2 text-right font-medium">{t("catalog.stock")}</th>
-                        <th className="px-3 py-2 text-right font-medium">{t("catalog.gst")}</th>
-                        {canBuy ? <th className="px-5 py-2" /> : null}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-line">
-                      {offers.map((o) => (
-                        <tr key={o.id}>
-                          <td className="px-5 py-3">
-                            <p className="font-medium">{o.sellerName}</p>
-                            <p className="text-xs text-muted">
-                              {o.sellerCity}, {stateName(o.sellerStateCode)} · {t("catalog.moq")} {o.minOrderQty}
-                            </p>
-                            {canChat && o.sellerId !== String(business._id) ? (
-                              <ChatButton businessId={o.sellerId} className="mt-1 h-7 px-2 text-xs" />
-                            ) : null}
-                          </td>
-                          <td className="px-3 py-3 text-right font-semibold tabular-nums">{inr(o.price)}</td>
-                          <td className="px-3 py-3 text-right">
-                            <Badge tone="success">{o.margin}%</Badge>
-                          </td>
-                          <td className="px-3 py-3 tabular-nums">{monthYear(o.expiryDate)}</td>
-                          <td className="px-3 py-3 text-right tabular-nums">{o.stock}</td>
-                          <td className="px-3 py-3 text-right tabular-nums">{o.gstRate}%</td>
-                          {canBuy ? (
-                            <td className="px-5 py-3">
-                              {buyable(o.sellerId) ? (
-                                <AddToCart listingId={o.id} minOrderQty={o.minOrderQty} stock={o.stock} compact />
-                              ) : null}
-                            </td>
-                          ) : null}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 sm:justify-end">
+                      <div className="text-left sm:text-right">
+                        <p className="text-lg font-semibold tabular-nums leading-tight">{inr(o.price)}</p>
+                        <p className="text-xs font-medium text-brand-700">{t("catalog.marginValue", { value: o.margin })}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {buyable(o.sellerId) ? (
+                          <AddToCart listingId={o.id} minOrderQty={o.minOrderQty} stock={o.stock} compact />
+                        ) : null}
+                        {canChat && o.sellerId !== String(business._id) ? (
+                          <ChatButton businessId={o.sellerId} iconOnly label={t("chat.chatWith", { name: o.sellerName })} />
+                        ) : null}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             )}
           </Card>
 

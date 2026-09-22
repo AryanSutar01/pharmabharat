@@ -80,7 +80,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/app/in
         ))}
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_22rem]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <Card>
           {listings.length === 0 ? (
             <p className="px-4 py-12 text-center text-sm text-muted">{t("inventory.empty")}</p>

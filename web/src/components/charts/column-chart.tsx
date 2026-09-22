@@ -31,7 +31,18 @@ function columnPath(x: number, y: number, w: number, h: number) {
  * Single-series daily column chart (one hue, so no legend — the card title names it).
  * Hover/focus shows a tooltip; the same numbers are available as a table below.
  */
-export function ColumnChart({ points, title, tableLabel }: { points: Point[]; title: string; tableLabel: string }) {
+export function ColumnChart({
+  points,
+  title,
+  tableLabel,
+  emptyText,
+}: {
+  points: Point[];
+  title: string;
+  tableLabel: string;
+  /** Shown instead of an empty axis when every value is zero. */
+  emptyText?: string;
+}) {
   const format = useFormatter();
   const id = useId();
   const [width, setWidth] = useState(640);
@@ -49,6 +60,14 @@ export function ColumnChart({ points, title, tableLabel }: { points: Point[]; ti
   const ticks = [0, max / 2, max];
   const y = (v: number) => PAD.top + plotH - (v / max) * plotH;
   const total = points.reduce((a, p) => a + p.value, 0);
+
+  if (total === 0 && emptyText) {
+    return (
+      <div className="grid h-[180px] place-items-center rounded-lg border border-dashed border-line text-center text-sm text-muted">
+        <p className="max-w-xs px-4">{emptyText}</p>
+      </div>
+    );
+  }
 
   return (
     <div>

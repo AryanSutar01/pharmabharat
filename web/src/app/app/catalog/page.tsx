@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
-import { Badge, Button, Card, Input, PageHeader, buttonClass, cn } from "@/components/ui";
+import { NavIcon } from "@/components/app-nav";
+import { Badge, Button, Card, EmptyState, Input, PageHeader, buttonClass, cn } from "@/components/ui";
 import { formatComposition } from "@/lib/catalog/normalize";
 import { listConditions, searchProducts } from "@/lib/catalog/queries";
 import { requireBusiness } from "@/lib/session";
@@ -52,7 +53,9 @@ export default async function CatalogPage({ searchParams }: PageProps<"/app/cata
 
       <div className="mt-4">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">{t("catalog.byCondition")}</p>
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+        {/* One scrollable row at every width, so results stay above the fold. */}
+        <div className="relative -mx-4 sm:mx-0">
+          <div className="flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:thin] sm:px-0 sm:pr-10">
           <Link
             href={href({ q })}
             className={cn(
@@ -76,14 +79,20 @@ export default async function CatalogPage({ searchParams }: PageProps<"/app/cata
               {c.label}
             </Link>
           ))}
+          </div>
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-canvas to-transparent" />
         </div>
       </div>
 
       <div className="mt-5">
         {!active ? (
-          <Card className="px-4 py-12 text-center text-sm text-muted">{t("catalog.startHint")}</Card>
+          <Card>
+            <EmptyState icon={<NavIcon name="catalog" className="size-6" />} title={t("catalog.startHint")} />
+          </Card>
         ) : hits.length === 0 ? (
-          <Card className="px-4 py-12 text-center text-sm text-muted">{t("catalog.noResults")}</Card>
+          <Card>
+            <EmptyState icon={<NavIcon name="catalog" className="size-6" />} title={t("catalog.noResults")} />
+          </Card>
         ) : (
           <>
             <Card>

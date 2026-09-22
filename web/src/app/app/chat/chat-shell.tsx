@@ -29,7 +29,8 @@ export function ChatShell({
   const activeId = params.id;
   // On the support desk every thread is a "support" thread and belongs in the main list.
   const desk = emptyText !== undefined;
-  const community = desk ? [] : conversations.filter((c) => c.type === "community" || c.type === "support");
+  const support = desk ? [] : conversations.filter((c) => c.type === "support");
+  const community = desk ? [] : conversations.filter((c) => c.type === "community");
   const direct = desk ? conversations : conversations.filter((c) => c.type === "direct");
 
   const item = (c: ConversationSummary) => (
@@ -76,11 +77,13 @@ export function ChatShell({
   );
 
   return (
-    <div className="grid gap-5 lg:h-[calc(100dvh-8rem)] lg:grid-cols-[20rem_1fr]">
+    <div className="grid gap-5 lg:h-[calc(100dvh-8rem)] lg:grid-cols-[18rem_minmax(0,1fr)]">
       <Card className={cn("overflow-hidden lg:flex lg:flex-col", activeId && "hidden lg:flex")}>
         <div className="overflow-y-auto">
           {desk ? null : (
             <>
+              {/* Private support thread, pinned above the public rooms. */}
+              {support.length ? <ul className="border-b border-line">{support.map(item)}</ul> : null}
               <p className="px-4 pb-1 pt-3 text-xs font-medium uppercase tracking-wide text-muted">{t("community")}</p>
               <ul>{community.map(item)}</ul>
               <p className="border-t border-line px-4 pb-1 pt-3 text-xs font-medium uppercase tracking-wide text-muted">{t("direct")}</p>
