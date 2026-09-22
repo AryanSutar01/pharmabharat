@@ -126,4 +126,4 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `carts`, `counters` | app | cart per (business, user); atomic sequences for order/invoice numbers |
 | `conditions` | app | condition tags (en/hi/mr) → salts |
 | `pricealerts`, `notifications` | app | per-user price subscriptions; in-app notifications (TTL 90 days) |
-| `messages`, `conversations`, `messages`, `tickets` ⏳ | app | |
+| `conversations`, `messages`, `tickets` ⏳ | app | |
