@@ -1,12 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { BottomNav, SideNav, type NavItem } from "@/components/app-nav";
+import { BottomNav, NavIcon, SideNav, type NavItem } from "@/components/app-nav";
 import { BusinessSwitcher } from "@/components/business-switcher";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Logo } from "@/components/ui";
 import { isSellerType } from "@/lib/catalog/seller";
+import { cartCount } from "@/lib/orders/cart";
 import { can } from "@/lib/permissions";
 import { requireBusiness } from "@/lib/session";
 
@@ -15,12 +16,15 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const t = await getTranslations();
 
   const seller = isSellerType(business.type) && can(role, "inventory.manage");
+  const buyer = business.type !== "company" && can(role, "orders.place");
+  const inCart = buyer ? await cartCount(business._id, session.user.id) : 0;
   // Bottom bar on phones holds at most 5 items; sellers get Inventory in place of Chat.
   const items: NavItem[] = [
     { href: "/app", label: t("nav.home"), icon: "home", mobile: true },
     { href: "/app/catalog", label: t("nav.catalog"), icon: "catalog", mobile: true },
     ...(seller ? [{ href: "/app/inventory", label: t("nav.inventory"), icon: "inventory" as const, mobile: true }] : []),
-    { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true, soon: true },
+    ...(buyer ? [{ href: "/app/cart", label: t("nav.cart"), icon: "cart" as const, badge: inCart }] : []),
+    { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true },
     { href: "/app/chat", label: t("nav.chat"), icon: "chat", mobile: !seller, soon: true },
     ...(can(role, "team.manage") ? [{ href: "/app/team", label: t("nav.team"), icon: "team" as const }] : []),
     { href: "/app/business", label: t("nav.business"), icon: "business", mobile: true },
@@ -70,6 +74,16 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
             <p className="text-xs text-muted">{t(`role.${role}`)}</p>
           </div>
           <div className="flex items-center gap-3">
+            {buyer ? (
+              <Link href="/app/cart" className="relative p-1 text-ink" aria-label={t("nav.cart")}>
+                <NavIcon name="cart" className="size-6" />
+                {inCart ? (
+                  <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-brand-600 px-1 text-center text-[10px] font-semibold leading-4 text-white">
+                    {inCart}
+                  </span>
+                ) : null}
+              </Link>
+            ) : null}
             <LanguageSwitcher />
             <SignOutButton />
           </div>

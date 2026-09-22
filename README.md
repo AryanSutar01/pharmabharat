@@ -28,7 +28,8 @@ docs/SRS.md     Requirements, decisions, build plan
 | `npm run dev` | Dev server |
 | `npm run typecheck` | Generate route types and run `tsc` |
 | `npm run lint` | ESLint |
-| `npm test` | Vitest unit tests |
+| `npm test` | Vitest unit tests (offline) |
+| `npm run test:integration` | Order/checkout tests against a throwaway `pharmabharat_test` database on your cluster |
 | `npm run build` | Production build |
 | `npm run import:medicines` | Import the medicine master from `web/.data/indian_medicine_data.csv` and create the Atlas Search index (re-runnable) |
 | `npm run seed:demo` | Add two `[DEMO]` distributors with sample listings (`-- --remove` to delete) |

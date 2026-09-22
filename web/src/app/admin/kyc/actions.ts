@@ -39,7 +39,7 @@ export async function decideKyc(businessId: string, _: DecisionState, formData: 
   const business = await Business.findOneAndUpdate(
     { _id: businessId, "kyc.status": { $in: from } },
     remarks ? { $set: { ...set, "kyc.remarks": remarks } } : { $set: set, $unset: { "kyc.remarks": "" } },
-    { new: true },
+    { returnDocument: "after" },
   ).lean();
   if (!business) return { error: "invalid" };
 

@@ -20,7 +20,7 @@ export async function acceptInvite(token: string) {
       email: session.user.email.toLowerCase(),
     },
     { status: "accepted", acceptedBy: session.user.id },
-    { new: true },
+    { returnDocument: "after" },
   ).lean();
   if (!invite) redirect(`/invite/${encodeURIComponent(token)}`);
 

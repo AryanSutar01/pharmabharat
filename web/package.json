@@ -10,9 +10,11 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "import:medicines": "node scripts/import-medicines.mts",
-    "seed:demo": "node scripts/seed-demo.mts"
+    "seed:demo": "node scripts/seed-demo.mts",
+    "test:integration": "vitest run --config vitest.integration.config.mts"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.9.0",
     "better-auth": "^1.7.5",
     "cloudinary": "^2.11.0",
     "csv-parse": "^7.0.2",

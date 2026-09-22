@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { AddToCart } from "@/components/add-to-cart";
 import { Badge, Card, CardHeader, PageHeader, buttonClass } from "@/components/ui";
 import { stateName } from "@/lib/india";
 import { formatComposition, marginPercent } from "@/lib/catalog/normalize";
@@ -29,6 +30,8 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
   const monthYear = (d: Date) => format.dateTime(new Date(d), { month: "short", year: "numeric" });
   const conditionName = new Map(conditions.map((c) => [c.slug, c.label]));
   const canSell = isSellerType(business.type) && can(role, "inventory.manage");
+  const canBuy = business.type !== "company" && can(role, "orders.place");
+  const buyable = (sellerId: string) => canBuy && sellerId !== String(business._id);
 
   return (
     <>
@@ -75,9 +78,9 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
                         {t("catalog.expiry")} {monthYear(o.expiryDate)} · {t("catalog.stock")} {o.stock} · {t("catalog.moq")}{" "}
                         {o.minOrderQty} · {t("catalog.gst")} {o.gstRate}%
                       </p>
-                      <button type="button" disabled className={buttonClass("secondary", "h-9 w-full")}>
-                        {t("catalog.addToCart")} · {t("common.comingSoon")}
-                      </button>
+                      {buyable(o.sellerId) ? (
+                        <AddToCart listingId={o.id} minOrderQty={o.minOrderQty} stock={o.stock} />
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -92,6 +95,7 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
                         <th className="px-3 py-2 font-medium">{t("catalog.expiry")}</th>
                         <th className="px-3 py-2 text-right font-medium">{t("catalog.stock")}</th>
                         <th className="px-3 py-2 text-right font-medium">{t("catalog.gst")}</th>
+                        {canBuy ? <th className="px-5 py-2" /> : null}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-line">
@@ -110,6 +114,13 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
                           <td className="px-3 py-3 tabular-nums">{monthYear(o.expiryDate)}</td>
                           <td className="px-3 py-3 text-right tabular-nums">{o.stock}</td>
                           <td className="px-3 py-3 text-right tabular-nums">{o.gstRate}%</td>
+                          {canBuy ? (
+                            <td className="px-5 py-3">
+                              {buyable(o.sellerId) ? (
+                                <AddToCart listingId={o.id} minOrderQty={o.minOrderQty} stock={o.stock} compact />
+                              ) : null}
+                            </td>
+                          ) : null}
                         </tr>
                       ))}
                     </tbody>

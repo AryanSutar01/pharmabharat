@@ -78,13 +78,14 @@ Status: ✅ done · 🚧 in progress · ⏳ planned (v1) · 🔜 after launch (v
 - Only **wholesalers** with `inventory.manage` can list stock. Retailers and companies browse.
 - Dev helper: `npm run seed:demo` creates two `[DEMO]` distributors (MH and GJ) with sample listings; `--remove` deletes them.
 
-### 3.4 Cart, orders & GST ⏳ (Days 8–10)
-- FR-15 One cart holds items from many sellers and is **split into one order per seller** at checkout.
-- FR-16 GST: if seller state = buyer state, charge CGST + SGST at half the rate each; otherwise IGST. Totals are HSN-wise.
-- FR-17 Placing an order reserves stock (atomic decrement). Cancelling before dispatch releases it.
-- FR-18 Order status: Placed → Accepted → Packed → Dispatched → Delivered (plus Rejected/Cancelled). Email and in-app notice on each change.
-- FR-19 Payment: **no gateway in v1**. Orders are "Pay on delivery / credit"; the seller marks the invoice paid.
-- FR-20 GST tax invoice is generated as a PDF on demand. The email template has a "Download invoice" button.
+### 3.4 Cart, orders & GST ✅
+- FR-15 The cart is stored per (buyer business, user), so staff don't overwrite each other's carts. Checkout **splits it into one order per seller**, and all the resulting orders share a `groupId`. Retailers and wholesalers can buy; pharma companies can't, and nobody can buy their own stock.
+- FR-16 GST is calculated per line on the taxable value (price excluding GST × qty), rounded to paise. Same state → CGST + SGST (half each; the split always adds back to the full GST). Different states → IGST. The order total is rounded to the rupee, with a separate round-off line. Pure functions live in `src/lib/orders/gst.ts`, with unit tests.
+- FR-17 Checkout runs in **one MongoDB transaction**. Each line's stock is decremented only if `stock ≥ qty`, so if any line fails, nothing is written and the cart is kept. Rejecting or cancelling an order returns its stock.
+- FR-18 Order status: Placed → Accepted → (Packed) → Dispatched → Delivered, or Rejected (seller, note required) / Cancelled (buyer, before dispatch). Each change is a conditional update, so two people clicking at once can't both apply it. Every change is logged in the order's history and triggers an email.
+- FR-19 Payment is Credit or Cash on delivery; there's no gateway. The seller marks the order paid once it's dispatched or delivered.
+- FR-20 On acceptance the order gets an invoice number `INV/<FY>/<seq>`, sequential per seller per financial year. The **GST tax invoice PDF** is generated when requested at `/api/orders/[id]/invoice`, with HSN summary, amount in words, place of supply, batch and expiry. Buyer and seller details are frozen at order time. Status emails include a "Download invoice" link.
+- Integration tests (`npm run test:integration`, using a throwaway `pharmabharat_test` database) cover: split orders, CGST/SGST vs IGST, stock reservation, full rollback when stock runs out, own-listing block, invoice numbering, and stock release on reject.
 
 ### 3.5 Alerts ⏳ (Day 11)
 - FR-21 Subscribe to price changes per product (drop and/or rise, optional % threshold). Delivered in-app and by email.
@@ -120,6 +121,7 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `invitations` | app | tokenHash (sha256), role, expiresAt, status |
 | `products` | app | medicine master; Atlas Search index `products_search` |
 | `listings` | app | seller × product × batch, price, stock |
-| `orders` ⏳ | app | one per seller, line items snapshot, GST breakdown |
+| `orders` | app | one per seller; frozen line items + parties; GST totals; status history; invoice no. |
+| `carts`, `counters` | app | cart per (business, user); atomic sequences for order/invoice numbers |
 | `conditions` | app | condition tags (en/hi/mr) → salts |
 | `alerts`, `notifications`, `conversations`, `messages`, `tickets` ⏳ | app | |

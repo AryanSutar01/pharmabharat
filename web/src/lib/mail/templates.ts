@@ -53,3 +53,88 @@ export function kycDecisionEmail(opts: { businessName: string; approved: boolean
     text: `${subject}\n${opts.remarks ?? ""}\n${url}`,
   };
 }
+
+// ------------------------------------------------------------------ orders
+
+const inr = (n: number) => `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+type OrderSummary = {
+  id: string;
+  orderNo: string;
+  counterparty: string;
+  itemCount: number;
+  grandTotal: number;
+};
+
+function orderTable(orders: OrderSummary[]) {
+  const rows = orders
+    .map(
+      (o) =>
+        `<tr><td style="padding:8px 0;border-bottom:1px solid #e3e8e6">${esc(o.orderNo)}<br><span style="color:#5b6b66;font-size:13px">${esc(o.counterparty)} · ${o.itemCount} item(s)</span></td><td style="padding:8px 0;border-bottom:1px solid #e3e8e6;text-align:right;font-weight:600">${inr(o.grandTotal)}</td></tr>`,
+    )
+    .join("");
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;margin:8px 0 4px">${rows}</table>`;
+}
+
+export function newOrderSellerEmail(o: OrderSummary) {
+  const url = `${env().BETTER_AUTH_URL}/app/orders/${o.id}`;
+  const subject = `New order ${o.orderNo} from ${o.counterparty}`;
+  return {
+    subject,
+    html: layout({
+      heading: "You have a new order",
+      body: orderTable([o]) + p("Accept or reject it from your Orders page. Stock has been reserved for this order."),
+      cta: { label: "Review order", url },
+    }),
+    text: `${subject}\nTotal: ${inr(o.grandTotal)}\n${url}`,
+  };
+}
+
+export function orderConfirmationEmail(orders: OrderSummary[]) {
+  const url = `${env().BETTER_AUTH_URL}/app/orders`;
+  const subject =
+    orders.length === 1 ? `Order ${orders[0].orderNo} placed` : `${orders.length} orders placed on PharmaBharat`;
+  return {
+    subject,
+    html: layout({
+      heading: "Order placed",
+      body:
+        p(orders.length > 1 ? "Your cart was split into one order per distributor:" : "Thank you for your order.") +
+        orderTable(orders) +
+        p("You'll get an email when each distributor accepts and dispatches your order."),
+      cta: { label: "Track orders", url },
+    }),
+    text: `${subject}\n${orders.map((o) => `${o.orderNo} ${o.counterparty} ${inr(o.grandTotal)}`).join("\n")}\n${url}`,
+  };
+}
+
+const STATUS_COPY: Record<string, { heading: string; line: string }> = {
+  accepted: { heading: "Order accepted", line: "The distributor has accepted your order. Your GST invoice is ready." },
+  packed: { heading: "Order packed", line: "Your order has been packed and will be dispatched soon." },
+  dispatched: { heading: "Order dispatched", line: "Your order is on its way." },
+  delivered: { heading: "Order delivered", line: "Your order has been marked as delivered." },
+  rejected: { heading: "Order rejected", line: "The distributor could not fulfil this order." },
+  cancelled: { heading: "Order cancelled", line: "This order has been cancelled." },
+};
+
+export function orderStatusEmail(o: OrderSummary & { status: string; note?: string; hasInvoice: boolean }) {
+  const base = env().BETTER_AUTH_URL;
+  const copy = STATUS_COPY[o.status] ?? { heading: "Order updated", line: `Status: ${o.status}` };
+  const subject = `${copy.heading}: ${o.orderNo}`;
+  const invoiceLink = o.hasInvoice
+    ? `<p style="margin:0 0 12px"><a href="${esc(`${base}/api/orders/${o.id}/invoice`)}" style="color:#0d8467;font-weight:600">Download GST invoice (PDF)</a></p>`
+    : "";
+  return {
+    subject,
+    html: layout({
+      heading: copy.heading,
+      body:
+        orderTable([o]) +
+        p(copy.line) +
+        (o.note ? p(`<b>Note from ${esc(o.counterparty)}:</b> ${esc(o.note)}`) : "") +
+        invoiceLink,
+      cta: { label: "View order", url: `${base}/app/orders/${o.id}` },
+    }),
+    text: `${subject}\n${copy.line}\n${o.note ?? ""}\n${base}/app/orders/${o.id}`,
+  };
+}

@@ -78,7 +78,7 @@ export async function deleteListing(listingId: string) {
   const { business } = await requireSeller();
   if (!isValidObjectId(listingId)) return;
   await connectDB();
-  // TODO(orders): once orders exist, block deletion of listings on open orders.
+  // Safe even with open orders: orders keep a frozen copy of each line item.
   await Listing.deleteOne({ _id: listingId, sellerId: business._id });
   revalidatePath("/app/inventory");
 }

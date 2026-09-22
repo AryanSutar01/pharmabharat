@@ -4,13 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/components/ui";
 
-export type NavItem = { href: string; label: string; icon: keyof typeof ICONS; soon?: boolean; mobile?: boolean };
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: keyof typeof ICONS;
+  soon?: boolean;
+  mobile?: boolean;
+  badge?: number;
+};
 
 const ICONS = {
   home: "M3 9.5 10 4l7 5.5V16a1 1 0 0 1-1 1h-4v-5H8v5H4a1 1 0 0 1-1-1z",
   catalog: "M8.5 14a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM12.5 12.5 17 17",
   inventory: "M3 6.5 10 3l7 3.5v7L10 17l-7-3.5zM3 6.5 10 10l7-3.5M10 10v7",
   orders: "M5 3h10l1 14H4zM8 7h4M8 10h4",
+  cart: "M2.5 3.5h2l1.8 9h9l1.7-6.5H5.5M8 16.5a1 1 0 1 0 0-.01M14.5 16.5a1 1 0 1 0 0-.01",
   chat: "M4 5h12v8H9l-4 3v-3H4z",
   team: "M7 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM2.5 16c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4M13.5 9a2 2 0 1 0 0-4M13 12c2.2 0 4.5 1.3 4.5 4",
   business: "M3 17V7l7-3 7 3v10M7 17v-5h6v5M3 17h14",
@@ -56,6 +64,9 @@ export function SideNav({ items, soonLabel }: { items: NavItem[]; soonLabel: str
           >
             <NavIcon name={item.icon} />
             <span className="flex-1">{item.label}</span>
+            {item.badge ? (
+              <span className="rounded-full bg-brand-600 px-1.5 text-[11px] font-semibold leading-5 text-white">{item.badge}</span>
+            ) : null}
             {item.soon ? <span className="text-[10px] uppercase tracking-wide text-muted/70">{soonLabel}</span> : null}
           </Link>
         );
