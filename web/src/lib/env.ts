@@ -5,6 +5,8 @@ const schema = z.object({
   BETTER_AUTH_URL: z.url().default("http://localhost:3000"),
   BETTER_AUTH_SECRET: z.string().min(32, "BETTER_AUTH_SECRET must be at least 32 chars"),
   MONGODB_URI: z.string().startsWith("mongodb"),
+  // Explicit so a URI without a /dbname path doesn't silently write to "test".
+  MONGODB_DB: z.string().min(1).default("pharmabharat"),
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   ADMIN_EMAILS: z.string().default(""),

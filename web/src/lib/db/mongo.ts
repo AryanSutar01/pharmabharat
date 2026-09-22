@@ -10,7 +10,12 @@ const g = globalThis as unknown as {
   _mongoosePromise?: Promise<typeof mongoose>;
 };
 
-/** Native driver client — used by better-auth. Connects lazily on first op. */
+/** The app database via the native driver (better-auth collections live here too). */
+export function mongoDb() {
+  return mongoClient().db(env().MONGODB_DB);
+}
+
+/** Shared native driver client. Connects lazily on first operation. */
 export function mongoClient(): MongoClient {
   g._mongoClient ??= new MongoClient(env().MONGODB_URI, { maxPoolSize: 5 });
   return g._mongoClient;
@@ -19,7 +24,7 @@ export function mongoClient(): MongoClient {
 /** Mongoose connection — used by the app's domain models. Await before querying. */
 export function connectDB(): Promise<typeof mongoose> {
   g._mongoosePromise ??= mongoose
-    .connect(env().MONGODB_URI, { maxPoolSize: 5, bufferCommands: false })
+    .connect(env().MONGODB_URI, { dbName: env().MONGODB_DB, maxPoolSize: 5, bufferCommands: false })
     .catch((err) => {
       g._mongoosePromise = undefined;
       throw err;

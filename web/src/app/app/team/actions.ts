@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { isValidObjectId } from "mongoose";
 import { z } from "zod";
-import { connectDB, mongoClient } from "@/lib/db/mongo";
+import { connectDB, mongoDb } from "@/lib/db/mongo";
 import { Invitation, Membership } from "@/lib/models/membership";
 import { ASSIGNABLE_ROLES } from "@/lib/permissions";
 import { requireBusiness } from "@/lib/session";
@@ -27,7 +27,7 @@ export async function inviteMember(_: TeamFormState, formData: FormData): Promis
   const { email, role } = parsed.data;
 
   await connectDB();
-  const existingUser = await mongoClient().db().collection("user").findOne({ email }, { projection: { _id: 1 } });
+  const existingUser = await mongoDb().collection("user").findOne({ email }, { projection: { _id: 1 } });
   if (existingUser && (await Membership.exists({ businessId: business._id, userId: String(existingUser._id) }))) {
     return { error: "already_member" };
   }

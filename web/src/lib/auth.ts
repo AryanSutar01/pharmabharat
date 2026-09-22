@@ -4,7 +4,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { nextCookies } from "better-auth/next-js";
 import { ObjectId } from "mongodb";
 import { adminEmails, env } from "@/lib/env";
-import { mongoClient } from "@/lib/db/mongo";
+import { mongoClient, mongoDb } from "@/lib/db/mongo";
 
 /**
  * Platform-level role. Business-level roles (owner, manager, ...) live on
@@ -20,7 +20,7 @@ function createAuth() {
   return betterAuth({
     baseURL: e.BETTER_AUTH_URL,
     secret: e.BETTER_AUTH_SECRET,
-    database: mongodbAdapter(client.db(), { client }),
+    database: mongodbAdapter(mongoDb(), { client }),
     socialProviders: {
       google: {
         clientId: e.GOOGLE_CLIENT_ID,
@@ -50,8 +50,7 @@ function createAuth() {
       session: {
         create: {
           before: async (session) => {
-            const u = await client
-              .db()
+            const u = await mongoDb()
               .collection("user")
               .findOne({ _id: toObjectId(session.userId) }, { projection: { banned: 1 } });
             if (u?.banned) return false;
