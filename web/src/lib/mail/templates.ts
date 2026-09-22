@@ -138,3 +138,52 @@ export function orderStatusEmail(o: OrderSummary & { status: string; note?: stri
     text: `${subject}\n${copy.line}\n${o.note ?? ""}\n${base}/app/orders/${o.id}`,
   };
 }
+
+// ------------------------------------------------------------------ alerts
+
+export function priceAlertEmail(opts: { productName: string; from: number; to: number; change: number; link: string }) {
+  const url = `${env().BETTER_AUTH_URL}${opts.link}`;
+  const dropped = opts.to < opts.from;
+  const subject = `${dropped ? "Price drop" : "Price rise"}: ${opts.productName} now ${inr(opts.to)}`;
+  return {
+    subject,
+    html: layout({
+      heading: dropped ? "Price dropped" : "Price went up",
+      body:
+        p(`<b>${esc(opts.productName)}</b>`) +
+        p(`Best price changed from <b>${inr(opts.from)}</b> to <b>${inr(opts.to)}</b> (${opts.change > 0 ? "+" : ""}${opts.change}%).`) +
+        p("Prices are per pack, excluding GST."),
+      cta: { label: "View sellers", url },
+    }),
+    text: `${subject}\nWas ${inr(opts.from)}, now ${inr(opts.to)} (${opts.change}%)\n${url}`,
+  };
+}
+
+export function expiryDigestEmail(opts: {
+  businessName: string;
+  items: { name: string; batchNo: string; expiryDate: Date; daysLeft: number; stock: number }[];
+}) {
+  const url = `${env().BETTER_AUTH_URL}/app/inventory?filter=expiring`;
+  const subject = `${opts.items.length} batch(es) nearing expiry — ${opts.businessName}`;
+  const shown = opts.items.slice(0, 25);
+  const rows = shown
+    .map(
+      (i) =>
+        `<tr><td style="padding:6px 0;border-bottom:1px solid #e3e8e6">${esc(i.name)}<br><span style="color:#5b6b66;font-size:13px">Batch ${esc(i.batchNo)} · ${i.stock} in stock</span></td><td style="padding:6px 0;border-bottom:1px solid #e3e8e6;text-align:right;white-space:nowrap;color:${i.daysLeft <= 30 ? "#b91c1c" : "#92400e"}">${i.daysLeft} days<br><span style="color:#5b6b66;font-size:13px">${i.expiryDate.toISOString().slice(0, 10)}</span></td></tr>`,
+    )
+    .join("");
+  const more = opts.items.length > shown.length ? p(`…and ${opts.items.length - shown.length} more.`) : "";
+  return {
+    subject,
+    html: layout({
+      heading: "Stock nearing expiry",
+      body:
+        p("These batches will expire soon. Consider offering a better price or returning them to the manufacturer.") +
+        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px">${rows}</table>` +
+        more +
+        p("Batches within 30 days of expiry are hidden from buyers automatically."),
+      cta: { label: "Open inventory", url },
+    }),
+    text: `${subject}\n${opts.items.map((i) => `${i.name} (${i.batchNo}) ${i.daysLeft} days, ${i.stock} in stock`).join("\n")}\n${url}`,
+  };
+}

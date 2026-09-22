@@ -8,6 +8,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { Logo } from "@/components/ui";
 import { isSellerType } from "@/lib/catalog/seller";
 import { cartCount } from "@/lib/orders/cart";
+import { unreadCount } from "@/lib/notifications";
 import { can } from "@/lib/permissions";
 import { requireBusiness } from "@/lib/session";
 
@@ -17,7 +18,10 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
 
   const seller = isSellerType(business.type) && can(role, "inventory.manage");
   const buyer = business.type !== "company" && can(role, "orders.place");
-  const inCart = buyer ? await cartCount(business._id, session.user.id) : 0;
+  const [inCart, unread] = await Promise.all([
+    buyer ? cartCount(business._id, session.user.id) : 0,
+    unreadCount(session.user.id, business._id),
+  ]);
   // Bottom bar on phones holds at most 5 items; sellers get Inventory in place of Chat.
   const items: NavItem[] = [
     { href: "/app", label: t("nav.home"), icon: "home", mobile: true },
@@ -26,6 +30,8 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
     ...(buyer ? [{ href: "/app/cart", label: t("nav.cart"), icon: "cart" as const, badge: inCart }] : []),
     { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true },
     { href: "/app/chat", label: t("nav.chat"), icon: "chat", mobile: !seller, soon: true },
+    { href: "/app/notifications", label: t("nav.notifications"), icon: "bell", badge: unread },
+    { href: "/app/alerts", label: t("nav.alerts"), icon: "alert" },
     ...(can(role, "team.manage") ? [{ href: "/app/team", label: t("nav.team"), icon: "team" as const }] : []),
     { href: "/app/business", label: t("nav.business"), icon: "business", mobile: true },
     ...(session.user.platformRole === "admin"
@@ -74,6 +80,14 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
             <p className="text-xs text-muted">{t(`role.${role}`)}</p>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/app/notifications" className="relative p-1 text-ink" aria-label={t("nav.notifications")}>
+              <NavIcon name="bell" className="size-6" />
+              {unread ? (
+                <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-red-600 px-1 text-center text-[10px] font-semibold leading-4 text-white">
+                  {unread > 99 ? "99+" : unread}
+                </span>
+              ) : null}
+            </Link>
             {buyer ? (
               <Link href="/app/cart" className="relative p-1 text-ink" aria-label={t("nav.cart")}>
                 <NavIcon name="cart" className="size-6" />

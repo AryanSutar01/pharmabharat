@@ -104,7 +104,8 @@
     "own_listing": "You can't order your own stock",
     "cart_full": "Your cart can hold up to 100 items",
     "invalid_transition": "This order was already updated. Refresh to see the latest status.",
-    "forbidden": "You don't have permission to do this"
+    "forbidden": "You don't have permission to do this",
+    "alerts_full": "You can have up to 200 price alerts"
   },
   "landing": {
     "tagline": "India's B2B pharma marketplace",
@@ -139,7 +140,9 @@
     "switchBusiness": "Switch business",
     "addBusiness": "Add another business",
     "inventory": "Inventory",
-    "cart": "Cart"
+    "cart": "Cart",
+    "notifications": "Notifications",
+    "alerts": "Price alerts"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -348,7 +351,9 @@
     "csvResult": "{created} added, {updated} updated",
     "csvErrors": "Rows with problems",
     "csvRow": "Row {row}",
-    "stockSaved": "Stock updated"
+    "stockSaved": "Stock updated",
+    "filterAll": "All",
+    "filterExpiring": "Expiring in 90 days"
   },
   "dosageForm": {
     "tablet": "Tablet",
@@ -475,5 +480,42 @@
       "rejected": "Rejected",
       "cancelled": "Cancelled"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "You're all caught up.",
+    "markAllRead": "Mark all as read",
+    "manageAlerts": "Manage price alerts",
+    "new": "New",
+    "kind": {
+      "price_drop": "Price drop: {product} is now {to} (was {from}, −{change}%)",
+      "price_rise": "Price rise: {product} is now {to} (was {from}, +{change}%)",
+      "expiry_soon": "{count, plural, one {# batch expires} other {# batches expire}} within {days} days",
+      "order_placed": "New order {orderNo} from {party} · {total}",
+      "order_status": "Order {orderNo} ({party}) is now {status}",
+      "kyc_decision": "{approved, select, 1 {Your business is verified. You can start trading.} other {Verification needs changes. Please update your details.}}"
+    }
+  },
+  "alerts": {
+    "title": "Price alerts",
+    "subtitle": "Get notified in-app and by email when the best price changes.",
+    "empty": "No price alerts yet. Open any product and tap “Alert me”.",
+    "alertMe": "Alert me on price change",
+    "editAlert": "Edit price alert",
+    "watching": "Price alert on",
+    "direction": "Notify me when the price",
+    "drop": "drops",
+    "rise": "rises",
+    "any": "changes either way",
+    "threshold": "By at least (%)",
+    "thresholdHint": "0 = any change",
+    "email": "Also send an email",
+    "save": "Save alert",
+    "remove": "Remove alert",
+    "saved": "Alert saved",
+    "reference": "Tracking from",
+    "current": "Best price now",
+    "noSellers": "No sellers yet — we'll start tracking when one lists it.",
+    "summary": "{direction, select, drop {Drops} rise {Rises} other {Any change}} {threshold, select, 0 {} other {≥ {threshold}%}}"
   }
 }

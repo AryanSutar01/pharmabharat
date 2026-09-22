@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { AddToCart } from "@/components/add-to-cart";
+import { PriceAlertForm } from "@/components/price-alert-form";
+import { PriceAlert } from "@/lib/models/price-alert";
 import { Badge, Card, CardHeader, PageHeader, buttonClass } from "@/components/ui";
 import { stateName } from "@/lib/india";
 import { formatComposition, marginPercent } from "@/lib/catalog/normalize";
@@ -13,7 +15,7 @@ import { requireBusiness } from "@/lib/session";
 export const metadata = { title: "Product" };
 
 export default async function ProductPage({ params }: PageProps<"/app/catalog/[id]">) {
-  const { business, role } = await requireBusiness();
+  const { business, role, session } = await requireBusiness();
   const { id } = await params;
   const data = await getProductWithOffers(id);
   if (!data) notFound();
@@ -31,6 +33,7 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
   const conditionName = new Map(conditions.map((c) => [c.slug, c.label]));
   const canSell = isSellerType(business.type) && can(role, "inventory.manage");
   const canBuy = business.type !== "company" && can(role, "orders.place");
+  const alert = await PriceAlert.findOne({ userId: session.user.id, businessId: business._id, productId: product._id }).lean();
   const buyable = (sellerId: string) => canBuy && sellerId !== String(business._id);
 
   return (
@@ -169,6 +172,16 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
 
         <Card className="h-fit">
           <CardHeader title={t("catalog.composition")} />
+          <div className="px-4 pt-4 sm:px-5">
+            <PriceAlertForm
+              productId={String(product._id)}
+              existing={
+                alert
+                  ? { id: String(alert._id), direction: alert.direction ?? "drop", thresholdPct: alert.thresholdPct ?? 0, email: alert.email ?? true }
+                  : null
+              }
+            />
+          </div>
           <dl className="space-y-3 p-4 text-sm sm:p-5">
             <div>
               <dt className="text-muted">{t("catalog.composition")}</dt>

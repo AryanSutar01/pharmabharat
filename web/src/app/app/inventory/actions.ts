@@ -1,9 +1,11 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Types, isValidObjectId } from "mongoose";
 import { parse } from "csv-parse/sync";
+import { checkPriceAlertsSafely } from "@/lib/alerts/price";
 import { connectDB } from "@/lib/db/mongo";
 import { compositionKeys, saltKeyOf } from "@/lib/catalog/normalize";
 import { requireSeller } from "@/lib/catalog/seller";
@@ -44,8 +46,14 @@ export async function saveListing(listingId: string | null, _: ListingFormState,
   try {
     if (listingId) {
       if (!isValidObjectId(listingId)) return { message: "not_found", values };
-      const res = await Listing.updateOne({ _id: listingId, sellerId: business._id }, { $set: doc });
-      if (!res.matchedCount) return { message: "not_found", values };
+      const existing = await Listing.findOne({ _id: listingId, sellerId: business._id }, { expiryDate: 1 }).lean();
+      if (!existing) return { message: "not_found", values };
+      // A corrected expiry date restarts the 90/60/30-day warnings for this batch.
+      const expiryChanged = new Date(existing.expiryDate).getTime() !== doc.expiryDate.getTime();
+      await Listing.updateOne(
+        { _id: listingId, sellerId: business._id },
+        { $set: { ...doc, ...(expiryChanged ? { expiryAlertLevel: null } : {}) } },
+      );
     } else {
       await Listing.create(doc);
     }
@@ -53,6 +61,7 @@ export async function saveListing(listingId: string | null, _: ListingFormState,
     if ((err as { code?: number }).code === 11000) return { errors: { batchNo: "batch_exists" }, values };
     throw err;
   }
+  after(() => checkPriceAlertsSafely([data.productId]));
   revalidatePath("/app/inventory");
   redirect("/app/inventory");
 }
@@ -61,7 +70,8 @@ export async function setListingStatus(listingId: string, status: "active" | "pa
   const { business } = await requireSeller();
   if (!isValidObjectId(listingId) || (status !== "active" && status !== "paused")) return;
   await connectDB();
-  await Listing.updateOne({ _id: listingId, sellerId: business._id }, { status });
+  const l = await Listing.findOneAndUpdate({ _id: listingId, sellerId: business._id }, { status }, { projection: { productId: 1 } }).lean();
+  if (l) after(() => checkPriceAlertsSafely([l.productId]));
   revalidatePath("/app/inventory");
 }
 
@@ -69,7 +79,9 @@ export async function updateStock(listingId: string, stock: number) {
   const { business } = await requireSeller();
   if (!isValidObjectId(listingId) || !Number.isInteger(stock) || stock < 0 || stock > 1_000_000) return { error: "invalid" };
   await connectDB();
-  await Listing.updateOne({ _id: listingId, sellerId: business._id }, { stock });
+  const l = await Listing.findOneAndUpdate({ _id: listingId, sellerId: business._id }, { stock }, { projection: { productId: 1 } }).lean();
+  // Going in or out of stock can change the best price.
+  if (l) after(() => checkPriceAlertsSafely([l.productId]));
   revalidatePath("/app/inventory");
   return { ok: true };
 }
@@ -79,7 +91,8 @@ export async function deleteListing(listingId: string) {
   if (!isValidObjectId(listingId)) return;
   await connectDB();
   // Safe even with open orders: orders keep a frozen copy of each line item.
-  await Listing.deleteOne({ _id: listingId, sellerId: business._id });
+  const l = await Listing.findOneAndDelete({ _id: listingId, sellerId: business._id }, { projection: { productId: 1 } }).lean();
+  if (l) after(() => checkPriceAlertsSafely([l.productId]));
   revalidatePath("/app/inventory");
 }
 
@@ -224,6 +237,7 @@ export async function importListingsCsv(_: CsvImportState, formData: FormData): 
     const res = await Listing.bulkWrite(ops, { ordered: false });
     created = res.upsertedCount;
     updated = res.modifiedCount;
+    after(() => checkPriceAlertsSafely(ids));
   }
   revalidatePath("/app/inventory");
   errors.sort((x, y) => x.row - y.row);

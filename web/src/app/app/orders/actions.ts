@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { isValidObjectId } from "mongoose";
 import { z } from "zod";
+import { checkPriceAlertsSafely } from "@/lib/alerts/price";
 import { connectDB } from "@/lib/db/mongo";
 import { Order } from "@/lib/models/order";
 import { notifyStatusChange } from "@/lib/orders/notify";
@@ -41,7 +42,10 @@ export async function orderAction(orderId: string, _: OrderActionResult, formDat
     if (action === "reject" && !note) return { error: "remarks_required" };
     const updated = await transitionOrder({ orderId, action, userId: session.user.id, note });
     if (!updated) return { error: "invalid_transition" };
-    after(() => notifyStatusChange(updated, note));
+    after(async () => {
+      await notifyStatusChange(updated, note);
+      if (t.releasesStock) await checkPriceAlertsSafely(updated.items.map((i) => i.productId));
+    });
   }
 
   revalidatePath(`/app/orders/${orderId}`);

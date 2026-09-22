@@ -28,6 +28,8 @@ const listingSchema = new Schema(
     conditions: { type: [String], default: [] },
 
     status: { type: String, enum: ["active", "paused"], default: "active" },
+    // Last near-expiry warning sent for this batch (90 / 60 / 30 days); see lib/alerts/expiry.ts.
+    expiryAlertLevel: { type: Number, enum: [90, 60, 30, null], default: null },
     // Denormalised for filtering/sorting without a join.
     sellerStateCode: { type: String, required: true },
   },

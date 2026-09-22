@@ -4,6 +4,7 @@ import type { OrderDoc } from "@/lib/models/order";
 import { sendMail } from "@/lib/mail";
 import { newOrderSellerEmail, orderConfirmationEmail, orderStatusEmail } from "@/lib/mail/templates";
 import { hasInvoice, type OrderStatus } from "@/lib/orders/status";
+import { notify } from "@/lib/notifications";
 import { getUsersByIds } from "@/lib/users";
 
 /** Business email + owner's login email (deduplicated). */
@@ -26,6 +27,13 @@ const summary = (o: OrderDoc, counterparty: string) => ({
 export async function notifyOrdersPlaced(orders: OrderDoc[]) {
   if (!orders.length) return;
   for (const o of orders) {
+    await notify({
+      businessId: o.sellerId,
+      permission: "orders.manage",
+      kind: "order_placed",
+      params: { orderNo: o.orderNo, party: o.buyer.name, total: o.totals?.grandTotal ?? 0 },
+      link: `/app/orders/${o._id}`,
+    });
     for (const to of await recipients(o.sellerId)) await sendMail({ to, ...newOrderSellerEmail(summary(o, o.buyer.name)) });
   }
   const mail = orderConfirmationEmail(orders.map((o) => summary(o, o.seller.name)));
@@ -34,6 +42,15 @@ export async function notifyOrdersPlaced(orders: OrderDoc[]) {
 
 export async function notifyStatusChange(o: OrderDoc, note?: string) {
   const status = o.status as OrderStatus;
+  // Cancellations are news for the seller; everything else for the buyer.
+  const toSeller = status === "cancelled";
+  await notify({
+    businessId: toSeller ? o.sellerId : o.buyerId,
+    permission: toSeller ? "orders.manage" : "orders.place",
+    kind: "order_status",
+    params: { orderNo: o.orderNo, party: toSeller ? o.buyer.name : o.seller.name, status },
+    link: `/app/orders/${o._id}`,
+  });
   if (status === "cancelled") {
     // Buyer cancelled → tell the seller.
     for (const to of await recipients(o.sellerId)) {

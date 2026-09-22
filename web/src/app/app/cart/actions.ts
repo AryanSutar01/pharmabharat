@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isValidObjectId } from "mongoose";
 import { z } from "zod";
+import { checkPriceAlertsSafely } from "@/lib/alerts/price";
 import { connectDB } from "@/lib/db/mongo";
 import { Cart } from "@/lib/models/cart";
 import { Listing } from "@/lib/models/listing";
@@ -67,7 +68,11 @@ export async function checkout(_: CartActionResult, formData: FormData): Promise
     const result = await placeOrders({ buyer: business, userId: session.user.id, ...parsed.data });
     groupId = result.groupId;
     // Emails go out after the response so checkout stays fast.
-    after(() => notifyOrdersPlaced(result.orders));
+    after(async () => {
+      await notifyOrdersPlaced(result.orders);
+      // Buying out the cheapest batch can raise the best price for others.
+      await checkPriceAlertsSafely(result.orders.flatMap((o) => o.items.map((i) => i.productId)));
+    });
   } catch (err) {
     if (err instanceof CheckoutError) {
       revalidatePath("/app/cart");

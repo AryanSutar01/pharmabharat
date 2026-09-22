@@ -12,13 +12,23 @@ export const metadata = { title: "Inventory" };
 
 const DAY = 24 * 3600 * 1000;
 
-export default async function InventoryPage() {
+export default async function InventoryPage({ searchParams }: PageProps<"/app/inventory">) {
   const { business } = await requireSeller();
   const t = await getTranslations();
   const format = await getFormatter();
 
+  const expiringOnly = (await searchParams).filter === "expiring";
+  // Captured once per request so the query and every row use the same "now".
+  const now = new Date().getTime();
+
   await connectDB();
-  const listings = await Listing.find({ sellerId: business._id }).sort({ updatedAt: -1 }).limit(500).lean();
+  const listings = await Listing.find({
+    sellerId: business._id,
+    ...(expiringOnly ? { expiryDate: { $lte: new Date(now + 90 * DAY) } } : {}),
+  })
+    .sort(expiringOnly ? { expiryDate: 1 } : { updatedAt: -1 })
+    .limit(500)
+    .lean();
   const products = await Product.find(
     { _id: { $in: listings.map((l) => l.productId) } },
     { name: 1, manufacturer: 1, packSizeLabel: 1 },
@@ -26,8 +36,6 @@ export default async function InventoryPage() {
   const productById = new Map(products.map((p) => [String(p._id), p]));
   const inr = (v: number) => format.number(v, { style: "currency", currency: "INR", maximumFractionDigits: 2 });
   const monthYear = (d: Date) => format.dateTime(new Date(d), { month: "short", year: "numeric" });
-  // Captured once per request so every row uses the same "now".
-  const now = new Date().getTime();
 
   function flags(l: (typeof listings)[number]) {
     const days = (new Date(l.expiryDate).getTime() - now) / DAY;
@@ -50,6 +58,25 @@ export default async function InventoryPage() {
           </Link>
         }
       />
+
+      <div className="mb-4 flex gap-2 text-sm">
+        {[
+          { href: "/app/inventory", label: t("inventory.filterAll"), on: !expiringOnly },
+          { href: "/app/inventory?filter=expiring", label: t("inventory.filterExpiring"), on: expiringOnly },
+        ].map((f) => (
+          <Link
+            key={f.href}
+            href={f.href}
+            className={
+              f.on
+                ? "rounded-full border border-brand-600 bg-brand-50 px-3 py-1 text-brand-800"
+                : "rounded-full border border-line bg-white px-3 py-1 text-muted"
+            }
+          >
+            {f.label}
+          </Link>
+        ))}
+      </div>
 
       <div className="grid gap-5 xl:grid-cols-[1fr_22rem]">
         <Card>

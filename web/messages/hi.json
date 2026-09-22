@@ -104,7 +104,8 @@
     "own_listing": "आप अपना ही स्टॉक ऑर्डर नहीं कर सकते",
     "cart_full": "कार्ट में अधिकतम 100 आइटम हो सकते हैं",
     "invalid_transition": "यह ऑर्डर पहले ही अपडेट हो चुका है। नवीनतम स्थिति देखने के लिए रीफ़्रेश करें।",
-    "forbidden": "आपको यह करने की अनुमति नहीं है"
+    "forbidden": "आपको यह करने की अनुमति नहीं है",
+    "alerts_full": "आप अधिकतम 200 कीमत अलर्ट रख सकते हैं"
   },
   "landing": {
     "tagline": "भारत का B2B फार्मा मार्केटप्लेस",
@@ -139,7 +140,9 @@
     "switchBusiness": "व्यवसाय बदलें",
     "addBusiness": "दूसरा व्यवसाय जोड़ें",
     "inventory": "इन्वेंटरी",
-    "cart": "कार्ट"
+    "cart": "कार्ट",
+    "notifications": "सूचनाएँ",
+    "alerts": "कीमत अलर्ट"
   },
   "onboarding": {
     "title": "अपना व्यवसाय सेट करें",
@@ -348,7 +351,9 @@
     "csvResult": "{created} जोड़े गए, {updated} अपडेट हुए",
     "csvErrors": "समस्या वाली पंक्तियाँ",
     "csvRow": "पंक्ति {row}",
-    "stockSaved": "स्टॉक अपडेट हुआ"
+    "stockSaved": "स्टॉक अपडेट हुआ",
+    "filterAll": "सभी",
+    "filterExpiring": "90 दिनों में एक्सपायर"
   },
   "dosageForm": {
     "tablet": "टैबलेट",
@@ -475,5 +480,42 @@
       "rejected": "अस्वीकृत",
       "cancelled": "रद्द"
     }
+  },
+  "notifications": {
+    "title": "सूचनाएँ",
+    "empty": "कोई नई सूचना नहीं।",
+    "markAllRead": "सभी पढ़ी हुई मानें",
+    "manageAlerts": "कीमत अलर्ट प्रबंधित करें",
+    "new": "नया",
+    "kind": {
+      "price_drop": "कीमत घटी: {product} अब {to} (पहले {from}, −{change}%)",
+      "price_rise": "कीमत बढ़ी: {product} अब {to} (पहले {from}, +{change}%)",
+      "expiry_soon": "{count, plural, one {# बैच} other {# बैच}} {days} दिनों में एक्सपायर हो रहे हैं",
+      "order_placed": "{party} से नया ऑर्डर {orderNo} · {total}",
+      "order_status": "ऑर्डर {orderNo} ({party}) अब {status} है",
+      "kyc_decision": "{approved, select, 1 {आपका व्यवसाय सत्यापित हो गया है। अब आप व्यापार शुरू कर सकते हैं।} other {सत्यापन में बदलाव आवश्यक हैं। कृपया अपना विवरण अपडेट करें।}}"
+    }
+  },
+  "alerts": {
+    "title": "कीमत अलर्ट",
+    "subtitle": "सबसे अच्छी कीमत बदलने पर ऐप में और ईमेल से सूचना पाएँ।",
+    "empty": "अभी कोई कीमत अलर्ट नहीं। कोई भी उत्पाद खोलें और “अलर्ट करें” दबाएँ।",
+    "alertMe": "कीमत बदलने पर अलर्ट करें",
+    "editAlert": "कीमत अलर्ट बदलें",
+    "watching": "कीमत अलर्ट चालू",
+    "direction": "मुझे सूचित करें जब कीमत",
+    "drop": "घटे",
+    "rise": "बढ़े",
+    "any": "किसी भी तरफ़ बदले",
+    "threshold": "कम से कम (%)",
+    "thresholdHint": "0 = कोई भी बदलाव",
+    "email": "ईमेल भी भेजें",
+    "save": "अलर्ट सहेजें",
+    "remove": "अलर्ट हटाएँ",
+    "saved": "अलर्ट सहेजा गया",
+    "reference": "ट्रैकिंग शुरू",
+    "current": "अभी सबसे अच्छी कीमत",
+    "noSellers": "अभी कोई विक्रेता नहीं — किसी के लिस्ट करते ही ट्रैकिंग शुरू होगी।",
+    "summary": "{direction, select, drop {घटने पर} rise {बढ़ने पर} other {कोई भी बदलाव}} {threshold, select, 0 {} other {≥ {threshold}%}}"
   }
 }

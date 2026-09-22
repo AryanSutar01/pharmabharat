@@ -33,3 +33,10 @@ docs/SRS.md     Requirements, decisions, build plan
 | `npm run build` | Production build |
 | `npm run import:medicines` | Import the medicine master from `web/.data/indian_medicine_data.csv` and create the Atlas Search index (re-runnable) |
 | `npm run seed:demo` | Add two `[DEMO]` distributors with sample listings (`-- --remove` to delete) |
+
+## Daily jobs
+
+`/api/cron/daily` sends near-expiry alerts. Set `CRON_SECRET` in the environment, then either:
+- **Vercel:** `web/vercel.json` already schedules it daily (09:00 IST); Vercel sends the secret automatically.
+- **Render / elsewhere:** create a free daily job on cron-job.org that calls `GET https://<your-app>/api/cron/daily` with header `Authorization: Bearer <CRON_SECRET>`.
+

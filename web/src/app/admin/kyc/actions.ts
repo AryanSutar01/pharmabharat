@@ -7,6 +7,7 @@ import { connectDB } from "@/lib/db/mongo";
 import { Business } from "@/lib/models/business";
 import { requirePlatformRole } from "@/lib/session";
 import { getUsersByIds } from "@/lib/users";
+import { notify } from "@/lib/notifications";
 import { sendMail } from "@/lib/mail";
 import { kycDecisionEmail } from "@/lib/mail/templates";
 
@@ -44,6 +45,13 @@ export async function decideKyc(businessId: string, _: DecisionState, formData: 
   if (!business) return { error: "invalid" };
 
   if (decision === "approve" || decision === "reject") {
+    await notify({
+      businessId: business._id,
+      permission: "business.edit",
+      kind: "kyc_decision",
+      params: { approved: decision === "approve" ? 1 : 0 },
+      link: decision === "approve" ? "/app" : "/onboarding",
+    });
     const owner = (await getUsersByIds([business.ownerUserId])).get(business.ownerUserId);
     const to = [owner?.email, business.email].filter((e): e is string => Boolean(e));
     const mail = kycDecisionEmail({

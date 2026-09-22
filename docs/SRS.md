@@ -87,9 +87,10 @@ Status: ✅ done · 🚧 in progress · ⏳ planned (v1) · 🔜 after launch (v
 - FR-20 On acceptance the order gets an invoice number `INV/<FY>/<seq>`, sequential per seller per financial year. The **GST tax invoice PDF** is generated when requested at `/api/orders/[id]/invoice`, with HSN summary, amount in words, place of supply, batch and expiry. Buyer and seller details are frozen at order time. Status emails include a "Download invoice" link.
 - Integration tests (`npm run test:integration`, using a throwaway `pharmabharat_test` database) cover: split orders, CGST/SGST vs IGST, stock reservation, full rollback when stock runs out, own-listing block, invoice numbering, and stock release on reject.
 
-### 3.5 Alerts ⏳ (Day 11)
-- FR-21 Subscribe to price changes per product (drop and/or rise, optional % threshold). Delivered in-app and by email.
-- FR-22 Near-expiry alerts for sellers' stock (90/60/30 days).
+### 3.5 Alerts & notifications ✅
+- FR-21 **Price alerts** per user and product: drop, rise or either way; optional minimum % change; email on/off (in-app is always on). The best price is re-checked whenever it can change: listing save/edit, pause/resume, stock edit, delete, CSV import, checkout, reject/cancel. Checks run after the response (`after()`), so they never slow down the action. Each move is reported once: the reference price moves to the price that triggered the alert. Rules live in `src/lib/alerts/rules.ts`, with unit tests.
+- FR-22 **Near-expiry alerts** for sellers at 90, 60 and 30 days: a daily in-app notification plus one email digest per seller. Idempotent, because each listing stores the last level sent, and correcting an expiry date resets it. Triggered by `GET /api/cron/daily` with `Authorization: Bearer $CRON_SECRET`: Vercel Cron (`vercel.json`, 09:00 IST) or cron-job.org when hosted on Render.
+- **Notification centre** (`/app/notifications`) for price alerts, near-expiry, new orders (sellers), order status changes (buyers; cancellations go to sellers) and KYC decisions. Notifications are stored as kind + values and rendered in the viewer's language. Unread count shows in the navigation. Old notifications are deleted automatically after 90 days to keep the free tier small.
 
 ### 3.6 Chat ⏳ (Day 12)
 - FR-23 Real-time one-to-one chat between two businesses, with image sharing (Cloudinary).
@@ -124,4 +125,5 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `orders` | app | one per seller; frozen line items + parties; GST totals; status history; invoice no. |
 | `carts`, `counters` | app | cart per (business, user); atomic sequences for order/invoice numbers |
 | `conditions` | app | condition tags (en/hi/mr) → salts |
-| `alerts`, `notifications`, `conversations`, `messages`, `tickets` ⏳ | app | |
+| `pricealerts`, `notifications` | app | per-user price subscriptions; in-app notifications (TTL 90 days) |
+| `messages`, `conversations`, `messages`, `tickets` ⏳ | app | |
