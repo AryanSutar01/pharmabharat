@@ -14,7 +14,7 @@ PharmaBharat is a **B2B** marketplace that connects **Retailers (medical stores)
 | Stack | Next.js 16 (App Router) · MongoDB Atlas M0 · Cloudinary · Vercel/Render. |
 | Languages | English, Hindi and Marathi for all interface text. Medicine names stay in English. |
 | Email | Gmail SMTP via Nodemailer now; move to Brevo or Resend when there's a domain. |
-| Realtime | Socket.io service on Render (free tier; sleeps when idle). |
+| Realtime | `realtime/` Socket.io broadcaster on Render free tier (sleeps when idle; clients fall back to polling). |
 
 ### 1.2 Hosting note
 Vercel's free **Hobby plan is for non-commercial use only**. For a paying client, either run everything on Render, or have the client move to Vercel Pro before launch.
@@ -92,9 +92,15 @@ Status: ✅ done · 🚧 in progress · ⏳ planned (v1) · 🔜 after launch (v
 - FR-22 **Near-expiry alerts** for sellers at 90, 60 and 30 days: a daily in-app notification plus one email digest per seller. Idempotent, because each listing stores the last level sent, and correcting an expiry date resets it. Triggered by `GET /api/cron/daily` with `Authorization: Bearer $CRON_SECRET`: Vercel Cron (`vercel.json`, 09:00 IST) or cron-job.org when hosted on Render.
 - **Notification centre** (`/app/notifications`) for price alerts, near-expiry, new orders (sellers), order status changes (buyers; cancellations go to sellers) and KYC decisions. Notifications are stored as kind + values and rendered in the viewer's language. Unread count shows in the navigation. Old notifications are deleted automatically after 90 days to keep the free tier small.
 
-### 3.6 Chat ⏳ (Day 12)
-- FR-23 Real-time one-to-one chat between two businesses, with image sharing (Cloudinary).
-- FR-24 Community rooms (e.g. by city), with report/mute moderation.
+### 3.6 Chat ✅
+- FR-23 **Direct chat** between two verified businesses: exactly one thread per pair, started from "Chat" on a seller's offer or on an order. Text up to 2,000 characters, plus images (JPG/PNG/WebP, 5 MB, private Cloudinary files shown through signed URLs), a "Seen" marker, unread badges, and paging through older messages.
+- FR-24 **Community rooms**: "All India" plus one room per state, open to verified businesses in scope. Community rules are shown in the room. Any message can be reported, and admins can hide reported messages (admin screen: Day 14).
+- Architecture: the Next.js app stores messages in MongoDB (source of truth) and pushes them through `realtime/`, a **stateless Socket.io broadcaster** (Render free tier; `render.yaml`).
+  - Browsers get a 10-minute HMAC token from `/api/realtime/token` that lists the only rooms they may join: their business, and their community rooms.
+  - The app publishes with a shared secret.
+  - When the socket is down (free tier asleep, network loss), the client polls every 15 s and catches up after reconnecting, so no messages are lost.
+- Limits: 30 messages per minute per user; chat requires the `chat.use` permission.
+- Tests: `realtime/` has node tests for token verification, room isolation and publish auth. `web/` checks token compatibility between the two implementations, and chat integration tests cover pair uniqueness, access rules and unread/read tracking.
 
 ### 3.7 Customer care ⏳ (Day 13)
 - FR-25 Support tickets (category, priority, status, threaded replies), an FAQ page, call-back requests, and live chat with support agents (reuses the chat service).
@@ -126,4 +132,5 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `carts`, `counters` | app | cart per (business, user); atomic sequences for order/invoice numbers |
 | `conditions` | app | condition tags (en/hi/mr) → salts |
 | `pricealerts`, `notifications` | app | per-user price subscriptions; in-app notifications (TTL 90 days) |
-| `conversations`, `messages`, `tickets` ⏳ | app | |
+| `conversations`, `messages` | app | direct (pairKey) + community (slug) threads; read markers; message reports |
+| `tickets` ⏳ | app | |

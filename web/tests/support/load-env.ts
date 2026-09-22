@@ -8,3 +8,6 @@ for (const line of readFileSync(".env.local", "utf8").split(/\r?\n/)) {
 process.env.MONGODB_DB = "pharmabharat_test";
 process.env.SMTP_USER = "";
 process.env.SMTP_PASS = "";
+// Tests never push to a live realtime server.
+delete process.env.REALTIME_URL;
+delete process.env.REALTIME_SECRET;

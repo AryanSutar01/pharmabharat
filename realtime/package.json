@@ -1,0 +1,21 @@
+{
+  "name": "pharmabharat-realtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Stateless Socket.io broadcaster for PharmaBharat chat",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --env-file-if-exists=.env --watch server.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

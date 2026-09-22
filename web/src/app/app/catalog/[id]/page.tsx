@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { AddToCart } from "@/components/add-to-cart";
+import { ChatButton } from "@/components/chat-button";
 import { PriceAlertForm } from "@/components/price-alert-form";
 import { PriceAlert } from "@/lib/models/price-alert";
 import { Badge, Card, CardHeader, PageHeader, buttonClass } from "@/components/ui";
@@ -33,6 +34,7 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
   const conditionName = new Map(conditions.map((c) => [c.slug, c.label]));
   const canSell = isSellerType(business.type) && can(role, "inventory.manage");
   const canBuy = business.type !== "company" && can(role, "orders.place");
+  const canChat = can(role, "chat.use");
   const alert = await PriceAlert.findOne({ userId: session.user.id, businessId: business._id, productId: product._id }).lean();
   const buyable = (sellerId: string) => canBuy && sellerId !== String(business._id);
 
@@ -84,6 +86,7 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
                       {buyable(o.sellerId) ? (
                         <AddToCart listingId={o.id} minOrderQty={o.minOrderQty} stock={o.stock} />
                       ) : null}
+                      {canChat && o.sellerId !== String(business._id) ? <ChatButton businessId={o.sellerId} className="w-full" /> : null}
                     </li>
                   ))}
                 </ul>
@@ -109,6 +112,9 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
                             <p className="text-xs text-muted">
                               {o.sellerCity}, {stateName(o.sellerStateCode)} · {t("catalog.moq")} {o.minOrderQty}
                             </p>
+                            {canChat && o.sellerId !== String(business._id) ? (
+                              <ChatButton businessId={o.sellerId} className="mt-1 h-7 px-2 text-xs" />
+                            ) : null}
                           </td>
                           <td className="px-3 py-3 text-right font-semibold tabular-nums">{inr(o.price)}</td>
                           <td className="px-3 py-3 text-right">

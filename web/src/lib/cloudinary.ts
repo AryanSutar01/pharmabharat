@@ -73,3 +73,51 @@ export function kycDownloadUrl(publicId: string, format: string) {
 export async function deleteKycAsset(publicId: string) {
   await client().uploader.destroy(publicId, { type: "authenticated", resource_type: "image", invalidate: true });
 }
+
+// ------------------------------------------------------------------ chat images
+
+export const CHAT_IMAGE_FORMATS = ["jpg", "jpeg", "png", "webp"];
+
+export function chatFolder(conversationId: string) {
+  return `pharmabharat/chat/${conversationId}`;
+}
+
+/** Signed direct upload for a chat image (private "authenticated" asset). */
+export function signChatUpload(conversationId: string) {
+  const c = client();
+  const e = env();
+  const timestamp = Math.round(Date.now() / 1000);
+  const params = {
+    timestamp,
+    folder: chatFolder(conversationId),
+    type: "authenticated",
+    allowed_formats: CHAT_IMAGE_FORMATS.join(","),
+  };
+  return {
+    ...params,
+    signature: c.utils.api_sign_request(params, e.CLOUDINARY_API_SECRET!),
+    apiKey: e.CLOUDINARY_API_KEY!,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${e.CLOUDINARY_CLOUD_NAME}/image/upload`,
+  };
+}
+
+export async function verifyChatImage(conversationId: string, publicId: string) {
+  if (!publicId.startsWith(`${chatFolder(conversationId)}/`)) return null;
+  try {
+    const r = await client().api.resource(publicId, { type: "authenticated", resource_type: "image" });
+    if (r.bytes > KYC_MAX_BYTES || !CHAT_IMAGE_FORMATS.includes(r.format)) return null;
+    return { publicId: r.public_id as string, width: r.width as number, height: r.height as number };
+  } catch {
+    return null;
+  }
+}
+
+/** Signed, resized delivery URL (unguessable; only issued to people who can see the chat). */
+export function chatImageUrl(publicId: string, width = 800) {
+  return client().url(publicId, {
+    type: "authenticated",
+    sign_url: true,
+    secure: true,
+    transformation: [{ width, crop: "limit", quality: "auto", fetch_format: "auto" }],
+  });
+}

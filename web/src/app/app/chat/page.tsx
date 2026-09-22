@@ -1,9 +1,12 @@
 import { getTranslations } from "next-intl/server";
-import { ComingSoon } from "@/components/coming-soon";
-import { requireBusiness } from "@/lib/session";
+import { Card } from "@/components/ui";
 
-export default async function Page() {
-  await requireBusiness();
-  const t = await getTranslations("nav");
-  return <ComingSoon title={t("chat")} />;
+/** Right pane placeholder on large screens; on phones the list (from the layout) is shown instead. */
+export default async function ChatIndex() {
+  const t = await getTranslations("chat");
+  return (
+    <Card className="grid h-full min-h-60 place-items-center p-6 text-sm text-muted">
+      <p>{t("select")}</p>
+    </Card>
+  );
 }

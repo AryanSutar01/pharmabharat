@@ -9,6 +9,7 @@ import { Order } from "@/lib/models/order";
 import { STATUS_TONE, availableActions, hasInvoice, type OrderStatus } from "@/lib/orders/status";
 import { can } from "@/lib/permissions";
 import { requireBusiness } from "@/lib/session";
+import { ChatButton } from "@/components/chat-button";
 import { OrderActions } from "./order-actions";
 
 export const metadata = { title: "Order" };
@@ -133,6 +134,14 @@ export default async function OrderPage({ params }: PageProps<"/app/orders/[id]"
               )}
             </div>
           </Card>
+
+          {can(role, "chat.use") ? (
+            <ChatButton
+              businessId={String(side === "seller" ? order.buyerId : order.sellerId)}
+              label={t("chat.chatWith", { name: other.name })}
+              className="w-full"
+            />
+          ) : null}
 
           {actions.length ? (
             <Card>

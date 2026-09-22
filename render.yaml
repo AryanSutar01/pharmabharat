@@ -1,0 +1,16 @@
+# Render Blueprint — realtime chat service (free web service).
+# The Next.js app is deployed separately (Vercel or another Render service).
+services:
+  - type: web
+    name: pharmabharat-realtime
+    runtime: node
+    plan: free
+    rootDir: realtime
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: REALTIME_SECRET
+        sync: false # paste the same value as the web app's REALTIME_SECRET
+      - key: APP_ORIGIN
+        sync: false # e.g. https://pharmabharat.vercel.app

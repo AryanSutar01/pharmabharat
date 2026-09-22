@@ -105,7 +105,8 @@
     "cart_full": "Your cart can hold up to 100 items",
     "invalid_transition": "This order was already updated. Refresh to see the latest status.",
     "forbidden": "You don't have permission to do this",
-    "alerts_full": "You can have up to 200 price alerts"
+    "alerts_full": "You can have up to 200 price alerts",
+    "rate_limited": "You're sending messages too fast. Wait a minute and try again."
   },
   "landing": {
     "tagline": "India's B2B pharma marketplace",
@@ -517,5 +518,32 @@
     "current": "Best price now",
     "noSellers": "No sellers yet — we'll start tracking when one lists it.",
     "summary": "{direction, select, drop {Drops} rise {Rises} other {Any change}} {threshold, select, 0 {} other {≥ {threshold}%}}"
+  },
+  "chat": {
+    "title": "Chat",
+    "subtitle": "Talk to distributors and other businesses on PharmaBharat.",
+    "community": "Community",
+    "direct": "Direct messages",
+    "allIndia": "All India",
+    "communityHint": "Open to all verified businesses",
+    "noDirect": "No conversations yet. Use “Chat” on a seller's offer or an order to start one.",
+    "select": "Select a conversation",
+    "placeholder": "Type a message…",
+    "send": "Send",
+    "attach": "Attach image",
+    "uploading": "Uploading image…",
+    "loadOlder": "Load earlier messages",
+    "empty": "No messages yet. Say hello!",
+    "seen": "Seen",
+    "hidden": "This message was removed by a moderator.",
+    "report": "Report",
+    "reportReason": "Why are you reporting this message?",
+    "reported": "Thanks — our team will review it.",
+    "live": "Live",
+    "offline": "Reconnecting — messages will still arrive",
+    "chatWithSeller": "Chat",
+    "chatWith": "Chat with {name}",
+    "you": "You",
+    "communityRules": "Be respectful. No selling of prescription-only drugs outside orders, no personal data, no spam."
   }
 }

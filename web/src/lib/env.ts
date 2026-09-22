@@ -19,6 +19,9 @@ const schema = z.object({
   SMTP_PASS: z.string().optional(),
   // Shared secret for /api/cron/* (sent as "Authorization: Bearer <secret>").
   CRON_SECRET: z.string().min(16).optional(),
+  // Realtime chat service (optional: without it chat falls back to polling).
+  REALTIME_URL: z.url().optional(),
+  REALTIME_SECRET: z.string().min(16).optional(),
   MAIL_FROM: z.string().default("PharmaBharat <no-reply@pharmabharat.local>"),
 });
 

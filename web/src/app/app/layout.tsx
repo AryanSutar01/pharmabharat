@@ -9,6 +9,7 @@ import { Logo } from "@/components/ui";
 import { isSellerType } from "@/lib/catalog/seller";
 import { cartCount } from "@/lib/orders/cart";
 import { unreadCount } from "@/lib/notifications";
+import { unreadDirectCount } from "@/lib/chat/service";
 import { can } from "@/lib/permissions";
 import { requireBusiness } from "@/lib/session";
 
@@ -18,9 +19,11 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
 
   const seller = isSellerType(business.type) && can(role, "inventory.manage");
   const buyer = business.type !== "company" && can(role, "orders.place");
-  const [inCart, unread] = await Promise.all([
+  const canChat = can(role, "chat.use");
+  const [inCart, unread, unreadChats] = await Promise.all([
     buyer ? cartCount(business._id, session.user.id) : 0,
     unreadCount(session.user.id, business._id),
+    canChat ? unreadDirectCount(business) : 0,
   ]);
   // Bottom bar on phones holds at most 5 items; sellers get Inventory in place of Chat.
   const items: NavItem[] = [
@@ -29,7 +32,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
     ...(seller ? [{ href: "/app/inventory", label: t("nav.inventory"), icon: "inventory" as const, mobile: true }] : []),
     ...(buyer ? [{ href: "/app/cart", label: t("nav.cart"), icon: "cart" as const, badge: inCart }] : []),
     { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true },
-    { href: "/app/chat", label: t("nav.chat"), icon: "chat", mobile: !seller, soon: true },
+    ...(canChat ? [{ href: "/app/chat", label: t("nav.chat"), icon: "chat" as const, mobile: !seller, badge: unreadChats }] : []),
     { href: "/app/notifications", label: t("nav.notifications"), icon: "bell", badge: unread },
     { href: "/app/alerts", label: t("nav.alerts"), icon: "alert" },
     ...(can(role, "team.manage") ? [{ href: "/app/team", label: t("nav.team"), icon: "team" as const }] : []),
