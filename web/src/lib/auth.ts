@@ -50,10 +50,15 @@ function createAuth() {
       session: {
         create: {
           before: async (session) => {
-            const u = await mongoDb()
-              .collection("user")
-              .findOne({ _id: toObjectId(session.userId) }, { projection: { banned: 1 } });
+            const users = mongoDb().collection("user");
+            const _id = toObjectId(session.userId);
+            const u = await users.findOne({ _id }, { projection: { banned: 1, email: 1, platformRole: 1 } });
             if (u?.banned) return false;
+            // Re-checked on every sign-in so adding an email to ADMIN_EMAILS later
+            // promotes an existing account. Only promotes; demotion is a manual action.
+            if (u && u.platformRole !== "admin" && adminEmails().has(String(u.email).toLowerCase())) {
+              await users.updateOne({ _id }, { $set: { platformRole: "admin" } });
+            }
             return { data: session };
           },
         },
