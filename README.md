@@ -30,3 +30,5 @@ docs/SRS.md     Requirements, decisions, build plan
 | `npm run lint` | ESLint |
 | `npm test` | Vitest unit tests |
 | `npm run build` | Production build |
+| `npm run import:medicines` | Import the medicine master from `web/.data/indian_medicine_data.csv` and create the Atlas Search index (re-runnable) |
+| `npm run seed:demo` | Add two `[DEMO]` distributors with sample listings (`-- --remove` to delete) |

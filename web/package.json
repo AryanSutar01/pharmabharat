@@ -8,11 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "import:medicines": "node scripts/import-medicines.mts",
+    "seed:demo": "node scripts/seed-demo.mts"
   },
   "dependencies": {
     "better-auth": "^1.7.5",
     "cloudinary": "^2.11.0",
+    "csv-parse": "^7.0.2",
     "mongodb": "^7.6.0",
     "mongoose": "^9.10.1",
     "next": "16.3.5",

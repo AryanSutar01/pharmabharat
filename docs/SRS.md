@@ -67,13 +67,16 @@ Status: ✅ done · 🚧 in progress · ⏳ planned (v1) · 🔜 after launch (v
 ### 3.2 Team ✅
 - FR-8 Owner invites by email and role; can revoke pending invites, change roles, and disable or enable members. The owner's own role can't be changed.
 
-### 3.3 Catalog & search ⏳ (Days 5–7)
-- FR-9 **Medicine master** seeded from a public Indian dataset (licence to be checked): brand, manufacturer, composition/salts, pack size, dosage form, Rx/OTC schedule.
-- FR-10 **Condition tags**: a list managed by admins (Diabetes, Hypertension…). Sellers choose tags from the list, not free text.
-- FR-11 **Seller listing** = master product + seller-specific fields: batch no., mfg/expiry date, MRP, selling price (PTR), GST rate, HSN code, stock quantity, minimum order quantity, storage conditions (room temperature, 2–8 °C cold chain, protect from light), and compliance (Schedule H/H1/X, narcotic flag).
-- FR-12 Stock can be updated manually or by CSV upload. Tally/Marg sync is 🔜.
-- FR-13 Search by brand, salt/composition, manufacturer and condition, tolerant of typos (Atlas Search fuzzy). "Substitutes" means the same salt combination and strength.
-- FR-14 **Margin comparison**: reference price = MRP on the pack. Margin % = (MRP − seller price) / MRP. Show lowest and average price across sellers for the same product.
+### 3.3 Catalog & search ✅
+- FR-9 **Medicine master**: 246,064 active products imported by `npm run import:medicines`. Each has brand, manufacturer, salts with strengths, dosage form, pack and MRP.
+  > ⚠️ **Licensing:** the source is [junioralive/Indian-Medicine-Dataset](https://github.com/junioralive/Indian-Medicine-Dataset). It's labelled MIT, but appears to be derived from the Kaggle "A-Z Medicine Dataset of India", which is **CC BY-NC-SA 4.0 (non-commercial)**. Use it for development and the demo only. Before a commercial launch, license data or rely on seller- and company-created products. Only factual columns are imported, never descriptive text.
+- FR-10 **Condition tags**: 20 conditions with names in English, Hindi and Marathi, mapped to salts in `src/lib/catalog/conditions-seed.ts`. The table was written for this project; admins will edit it. Products are tagged from their salts, and sellers can add tags per listing.
+- FR-11 **Seller listing** = product + batch, mfg/expiry, MRP, selling price (per pack, excluding GST, ≤ MRP), GST rate (default 5% under GST 2.0), HSN, stock, MOQ, storage condition, drug schedule. Unique per seller + product + batch.
+- FR-12 Stock is managed by manual form, inline stock edit, or CSV import (up to 2,000 rows; upserts by product + batch; template at `/templates/listings-template.csv`). If a product is missing, a seller can add it to the master. Tally/Marg sync is 🔜.
+- FR-13 Search uses Atlas Search (free tier): fuzzy autocomplete on brand and salt, plus manufacturer, filterable by condition. Substitutes are products with the same `compositionKey` (salts + strengths), cheapest seller first.
+- FR-14 Margin % = (MRP − price) / MRP. The catalog shows the best price, best margin and number of sellers. Only listings that are active, in stock and more than 30 days from expiry are shown to buyers.
+- Only **wholesalers** with `inventory.manage` can list stock. Retailers and companies browse.
+- Dev helper: `npm run seed:demo` creates two `[DEMO]` distributors (MH and GJ) with sample listings; `--remove` deletes them.
 
 ### 3.4 Cart, orders & GST ⏳ (Days 8–10)
 - FR-15 One cart holds items from many sellers and is **split into one order per seller** at checkout.
@@ -115,7 +118,8 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `businesses` | app | type, profile, licences, documents[], kyc{status, remarks, reviewedBy…} |
 | `memberships` | app | (businessId, userId) unique, role, status |
 | `invitations` | app | tokenHash (sha256), role, expiresAt, status |
-| `products` ⏳ | app | medicine master + text-search index |
-| `listings` ⏳ | app | seller × product × batch, price, stock |
+| `products` | app | medicine master; Atlas Search index `products_search` |
+| `listings` | app | seller × product × batch, price, stock |
 | `orders` ⏳ | app | one per seller, line items snapshot, GST breakdown |
+| `conditions` | app | condition tags (en/hi/mr) → salts |
 | `alerts`, `notifications`, `conversations`, `messages`, `tickets` ⏳ | app | |

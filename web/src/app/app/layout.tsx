@@ -6,6 +6,7 @@ import { BusinessSwitcher } from "@/components/business-switcher";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Logo } from "@/components/ui";
+import { isSellerType } from "@/lib/catalog/seller";
 import { can } from "@/lib/permissions";
 import { requireBusiness } from "@/lib/session";
 
@@ -13,11 +14,14 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const { business, role, memberships, session } = await requireBusiness();
   const t = await getTranslations();
 
+  const seller = isSellerType(business.type) && can(role, "inventory.manage");
+  // Bottom bar on phones holds at most 5 items; sellers get Inventory in place of Chat.
   const items: NavItem[] = [
     { href: "/app", label: t("nav.home"), icon: "home", mobile: true },
-    { href: "/app/catalog", label: t("nav.catalog"), icon: "catalog", mobile: true, soon: true },
+    { href: "/app/catalog", label: t("nav.catalog"), icon: "catalog", mobile: true },
+    ...(seller ? [{ href: "/app/inventory", label: t("nav.inventory"), icon: "inventory" as const, mobile: true }] : []),
     { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true, soon: true },
-    { href: "/app/chat", label: t("nav.chat"), icon: "chat", mobile: true, soon: true },
+    { href: "/app/chat", label: t("nav.chat"), icon: "chat", mobile: !seller, soon: true },
     ...(can(role, "team.manage") ? [{ href: "/app/team", label: t("nav.team"), icon: "team" as const }] : []),
     { href: "/app/business", label: t("nav.business"), icon: "business", mobile: true },
     ...(session.user.platformRole === "admin"
