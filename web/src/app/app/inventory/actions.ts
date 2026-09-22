@@ -70,7 +70,12 @@ export async function setListingStatus(listingId: string, status: "active" | "pa
   const { business } = await requireSeller();
   if (!isValidObjectId(listingId) || (status !== "active" && status !== "paused")) return;
   await connectDB();
-  const l = await Listing.findOneAndUpdate({ _id: listingId, sellerId: business._id }, { status }, { projection: { productId: 1 } }).lean();
+  // Listings held by an admin can't be resumed by the seller.
+  const l = await Listing.findOneAndUpdate(
+    { _id: listingId, sellerId: business._id, ...(status === "active" ? { "moderation.held": { $ne: true } } : {}) },
+    { status },
+    { projection: { productId: 1 } },
+  ).lean();
   if (l) after(() => checkPriceAlertsSafely([l.productId]));
   revalidatePath("/app/inventory");
 }

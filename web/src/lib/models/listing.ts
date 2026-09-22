@@ -28,6 +28,13 @@ const listingSchema = new Schema(
     conditions: { type: [String], default: [] },
 
     status: { type: String, enum: ["active", "paused"], default: "active" },
+    // Admin moderation: a held listing stays paused until an admin releases it.
+    moderation: {
+      held: { type: Boolean, default: false },
+      reason: String,
+      by: String,
+      at: Date,
+    },
     // Last near-expiry warning sent for this batch (90 / 60 / 30 days); see lib/alerts/expiry.ts.
     expiryAlertLevel: { type: Number, enum: [90, 60, 30, null], default: null },
     // Denormalised for filtering/sorting without a join.

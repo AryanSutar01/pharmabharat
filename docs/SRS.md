@@ -119,9 +119,28 @@ Status: ✅ done · 🚧 in progress · ⏳ planned (v1) · 🔜 after launch (v
 - Phone navigation: the bottom bar has 4 sections plus **More** (`/app/more`), which lists everything else (Team, Alerts, Help, Support desk, Admin…). The navigation list lives in one place, `src/lib/nav.ts`.
 - Integration tests cover ticket numbering, reply-driven status changes, customer close, in-app notices, and support-chat isolation and unread tracking on both sides.
 
-### 3.8 Admin & analytics ⏳ (Day 14)
-- FR-26 Admin: users and businesses (suspend), listing moderation, condition tags, banners, dispute notes.
-- FR-27 Dashboards: sales trend, top products, order counts, near-expiry stock (wholesaler); spend and savings (retailer).
+### 3.8 Admin & analytics ✅
+- FR-26 **Admin panel** (`/admin`, platform role `admin`), with tabs and pending counts on the tabs:
+  - **Overview:** order value (GMV) and orders (30 days vs previous 30), daily GMV chart, verified businesses by type, pending KYC, reported messages, open tickets.
+  - **Verification:** the existing KYC queue.
+  - **Users:** search; change platform role (user / support agent / admin); ban/unban. A ban deletes the user's sessions, and admins can't change or ban themselves.
+  - **Listings:** search by seller or product (Atlas Search). **Hold** pauses a listing with a reason the seller sees, and the seller can't resume it until an admin releases the hold.
+  - **Reports:** reported chat messages → hide (shown as "removed by a moderator") or dismiss.
+  - **Conditions:** edit names (en/hi/mr) and salts, add new tags. Saving re-tags every product that contains or no longer contains those salts.
+  - **Banners:** title and text in three languages, optional link, audience (all / retailer / wholesaler / company), style, date window; turn on/off or delete. Shown on the app home page.
+- FR-27 **Dashboards** on `/app`, shown to roles with `analytics.view`; roles without it get quick links:
+  - **Wholesaler:** sales, orders, average order (30 days vs previous 30); daily sales chart; orders waiting at each status; stock health (live, low ≤10, out, expiring ≤90 days); top 5 products by sales.
+  - **Retailer:** purchases (change shown in neutral grey), orders, **savings vs MRP** (₹ and %), open orders; daily purchases chart; top suppliers.
+  - **Pharma company:** placeholder; demand analytics are after launch.
+  - Cancelled and rejected orders never count. Days are bucketed in IST.
+- Charts follow the dataviz guidance:
+  - one brand hue, validated for contrast on the surface (passes);
+  - columns at most 24px wide with 2px gaps and 4px rounded tops;
+  - three date labels, not one per column;
+  - hover/focus tooltips, plus a "View as table" fallback;
+  - changes marked with an arrow and text, not colour alone;
+  - fluid width, checked at 375px wide.
+- Tests: `tests/integration/analytics.test.ts` checks every dashboard figure against real orders placed through checkout, including cancelled-order exclusion and savings.
 
 ### 3.9 After launch 🔜
 Plus membership and Razorpay · commission model · pharma company promotions and regional demand analytics · Tally/Marg integration · returns and disputes workflow · delivery tracking · installable PWA with offline support · prescription records (DPDP-compliant) · retailer-side inventory.
@@ -145,6 +164,7 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `orders` | app | one per seller; frozen line items + parties; GST totals; status history; invoice no. |
 | `carts`, `counters` | app | cart per (business, user); atomic sequences for order/invoice numbers |
 | `conditions` | app | condition tags (en/hi/mr) → salts |
+| `banners` | app | home-page announcements by audience + date window |
 | `pricealerts`, `notifications` | app | per-user price subscriptions; in-app notifications (TTL 90 days) |
 | `conversations`, `messages` | app | direct (pairKey) + community (slug) threads; read markers; message reports |
 | `tickets` | app | tickets + call-backs with embedded replies; `TKT-` numbers from `counters` |

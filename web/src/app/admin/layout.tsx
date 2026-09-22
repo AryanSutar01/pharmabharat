@@ -3,11 +3,20 @@ import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Logo } from "@/components/ui";
+import { connectDB } from "@/lib/db/mongo";
+import { Business } from "@/lib/models/business";
+import { Message } from "@/lib/models/chat";
 import { requirePlatformRole } from "@/lib/session";
+import { AdminTabs } from "./admin-tabs";
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   await requirePlatformRole("admin");
   const t = await getTranslations();
+  await connectDB();
+  const [pendingKyc, reported] = await Promise.all([
+    Business.countDocuments({ "kyc.status": "pending" }),
+    Message.countDocuments({ "reports.0": { $exists: true }, hidden: false }),
+  ]);
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
@@ -32,11 +41,17 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             <SignOutButton />
           </div>
         </div>
-        <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 sm:px-6">
-          <Link href="/admin/kyc" className="border-b-2 border-brand-600 px-2 py-2 text-sm font-medium text-brand-800">
-            {t("admin.kycQueue")}
-          </Link>
-        </nav>
+        <AdminTabs
+          tabs={[
+            { href: "/admin", label: t("admin.overview") },
+            { href: "/admin/kyc", label: t("admin.kycQueue"), badge: pendingKyc },
+            { href: "/admin/users", label: t("admin.usersTab") },
+            { href: "/admin/listings", label: t("admin.listingsTab") },
+            { href: "/admin/reports", label: t("admin.reportsTab"), badge: reported },
+            { href: "/admin/conditions", label: t("admin.conditionsTab") },
+            { href: "/admin/banners", label: t("admin.bannersTab") },
+          ]}
+        />
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">{children}</main>
     </div>
