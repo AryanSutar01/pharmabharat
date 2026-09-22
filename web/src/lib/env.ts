@@ -22,6 +22,8 @@ const schema = z.object({
   // Realtime chat service (optional: without it chat falls back to polling).
   REALTIME_URL: z.url().optional(),
   REALTIME_SECRET: z.string().min(16).optional(),
+  // Public contact address shown on /help (optional).
+  SUPPORT_EMAIL: z.email().optional(),
   MAIL_FROM: z.string().default("PharmaBharat <no-reply@pharmabharat.local>"),
 });
 

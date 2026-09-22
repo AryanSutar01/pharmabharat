@@ -1,11 +1,19 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { cloudinaryConfigured } from "@/lib/cloudinary";
-import { communityTitle, getConversation, getMessages, markRead, otherReadAt } from "@/lib/chat/service";
+import { communityTitle, getConversation, getMessages, markRead, otherReadAt, supportReadAtIso } from "@/lib/chat/service";
 import { connectDB } from "@/lib/db/mongo";
 import { stateName } from "@/lib/india";
 import { Business } from "@/lib/models/business";
 import { requireBusiness } from "@/lib/session";
+import {
+  fetchNewMessages,
+  fetchOlderMessages,
+  getChatUploadSignature,
+  markConversationRead,
+  reportMessage,
+  sendChatMessage,
+} from "../actions";
 import { ChatThread } from "./chat-thread";
 
 export const metadata = { title: "Chat" };
@@ -22,6 +30,9 @@ export default async function ConversationPage({ params }: PageProps<"/app/chat/
   if (conv.type === "community") {
     title = conv.slug === "india" ? t("allIndia") : communityTitle(conv.slug!);
     subtitle = t("communityRules");
+  } else if (conv.type === "support") {
+    title = t("supportTitle");
+    subtitle = t("supportHint");
   } else {
     await connectDB();
     const otherId = conv.participants.find((p) => String(p) !== String(business._id));
@@ -36,13 +47,24 @@ export default async function ConversationPage({ params }: PageProps<"/app/chat/
     <ChatThread
       key={id}
       conversationId={id}
-      myBusinessId={String(business._id)}
+      viewer={{ kind: "business", businessId: String(business._id) }}
+      backHref="/app/chat"
+      actions={{
+        send: sendChatMessage,
+        fetchNew: fetchNewMessages,
+        fetchOlder: fetchOlderMessages,
+        markRead: markConversationRead,
+        uploadSignature: getChatUploadSignature,
+        report: conv.type === "support" ? undefined : reportMessage,
+      }}
       isCommunity={conv.type === "community"}
       title={title}
       subtitle={subtitle}
       initialMessages={messages}
       initialHasMore={hasMore}
-      initialOtherReadAt={conv.type === "direct" ? otherReadAt(conv, business) : null}
+      initialOtherReadAt={
+        conv.type === "direct" ? otherReadAt(conv, business) : conv.type === "support" ? supportReadAtIso(conv) : null
+      }
       canUploadImages={cloudinaryConfigured()}
     />
   );

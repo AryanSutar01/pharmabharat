@@ -79,7 +79,10 @@ export default async function Home() {
       </main>
 
       <footer className="border-t border-line py-6 text-center text-xs text-muted">
-        {t("landing.footer", { year: new Date().getFullYear() })}
+        {t("landing.footer", { year: new Date().getFullYear() })} ·{" "}
+        <Link href="/help" className="hover:underline">
+          {t("help.title")}
+        </Link>
       </footer>
     </div>
   );

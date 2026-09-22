@@ -8,14 +8,27 @@ import { Card, cn } from "@/components/ui";
 import { useErrorText } from "@/components/use-error-text";
 import { useRealtime } from "@/components/use-realtime";
 import type { ChatMessage } from "@/lib/chat/service";
-import {
-  fetchNewMessages,
-  fetchOlderMessages,
-  getChatUploadSignature,
-  markConversationRead,
-  reportMessage,
-  sendChatMessage,
-} from "../actions";
+
+/** Server actions the thread needs. Businesses and support agents pass different implementations. */
+export type ChatThreadActions = {
+  send: (conversationId: string, input: { text: string; imagePublicId?: string }) => Promise<{ message?: ChatMessage; error?: string }>;
+  fetchNew: (conversationId: string, afterIso: string) => Promise<ChatMessage[]>;
+  fetchOlder: (conversationId: string, beforeIso: string) => Promise<{ messages: ChatMessage[]; hasMore: boolean }>;
+  markRead: (conversationId: string) => Promise<void>;
+  uploadSignature: (conversationId: string) => Promise<{
+    apiKey: string;
+    timestamp: number;
+    signature: string;
+    folder: string;
+    type: string;
+    allowed_formats: string;
+    uploadUrl: string;
+  }>;
+  report?: (messageId: string, reason: string) => Promise<unknown>;
+};
+
+/** Who is looking: a business member, or a support agent. */
+export type ChatViewer = { kind: "business"; businessId: string } | { kind: "support" };
 
 const POLL_MS = 15_000;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -29,7 +42,9 @@ function merge(list: ChatMessage[], incoming: ChatMessage[]) {
 
 export function ChatThread(props: {
   conversationId: string;
-  myBusinessId: string;
+  viewer: ChatViewer;
+  actions: ChatThreadActions;
+  backHref: string;
   isCommunity: boolean;
   title: string;
   subtitle: string;
@@ -38,7 +53,12 @@ export function ChatThread(props: {
   initialOtherReadAt: string | null;
   canUploadImages: boolean;
 }) {
-  const { conversationId, myBusinessId, isCommunity } = props;
+  const { conversationId, viewer, actions, isCommunity } = props;
+  const isMine = useCallback(
+    (m: ChatMessage) => (viewer.kind === "support" ? m.fromSupport : !m.fromSupport && m.senderBusinessId === viewer.businessId),
+    [viewer],
+  );
+  const myReadId = viewer.kind === "support" ? "support" : viewer.businessId;
   const t = useTranslations("chat");
   const err = useErrorText();
   const format = useFormatter();
@@ -68,16 +88,16 @@ export function ChatThread(props: {
         return;
       }
       setMessages((list) => merge(list, [m]));
-      if (m.senderBusinessId !== myBusinessId) void markConversationRead(conversationId);
+      if (!isMine(m)) void actions.markRead(conversationId);
     },
-    [conversationId, myBusinessId, router],
+    [conversationId, isMine, actions, router],
   );
 
   const { connected } = useRealtime({
     message: (p) => onIncoming(p as ChatMessage),
     read: (p) => {
       const r = p as { conversationId: string; businessId: string; at: string };
-      if (r.conversationId === conversationId && r.businessId !== myBusinessId) setOtherReadAt(r.at);
+      if (r.conversationId === conversationId && r.businessId !== myReadId) setOtherReadAt(r.at);
     },
   });
 
@@ -85,7 +105,7 @@ export function ChatThread(props: {
   useEffect(() => {
     let cancelled = false;
     const catchUp = async () => {
-      const fresh = await fetchNewMessages(conversationId, lastAtRef.current);
+      const fresh = await actions.fetchNew(conversationId, lastAtRef.current);
       if (!cancelled && fresh.length) setMessages((list) => merge(list, fresh));
     };
     void catchUp();
@@ -95,7 +115,7 @@ export function ChatThread(props: {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [connected, conversationId]);
+  }, [connected, conversationId, actions]);
 
   // Keep the view pinned to the newest message unless the user scrolled up.
   useLayoutEffect(() => {
@@ -108,7 +128,7 @@ export function ChatThread(props: {
     if (!body && !imagePublicId) return;
     setError(undefined);
     startSend(async () => {
-      const r = await sendChatMessage(conversationId, { text: body, imagePublicId });
+      const r = await actions.send(conversationId, { text: body, imagePublicId });
       if (r.error) return setError(err(r.error));
       if (!imagePublicId) setText("");
       stickToBottom.current = true;
@@ -123,7 +143,7 @@ export function ChatThread(props: {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return setError(err("file_type"));
     setUploading(true);
     try {
-      const sig = await getChatUploadSignature(conversationId);
+      const sig = await actions.uploadSignature(conversationId);
       const body = new FormData();
       body.set("file", file);
       body.set("api_key", sig.apiKey);
@@ -149,19 +169,19 @@ export function ChatThread(props: {
     if (!first) return;
     stickToBottom.current = false;
     startOlder(async () => {
-      const r = await fetchOlderMessages(conversationId, first.createdAt);
+      const r = await actions.fetchOlder(conversationId, first.createdAt);
       setMessages((list) => merge(r.messages, list));
       setHasMore(r.hasMore);
     });
   }
 
-  const lastMine = [...messages].reverse().find((m) => m.senderBusinessId === myBusinessId);
+  const lastMine = [...messages].reverse().find(isMine);
   const seen = !isCommunity && lastMine && otherReadAt && otherReadAt >= lastMine.createdAt;
 
   return (
     <Card className="flex h-[calc(100dvh-11rem)] flex-col overflow-hidden lg:h-full">
       <div className="flex items-center gap-3 border-b border-line px-4 py-3">
-        <Link href="/app/chat" className="text-sm text-muted hover:text-ink lg:hidden" aria-label={t("title")}>
+        <Link href={props.backHref} className="text-sm text-muted hover:text-ink lg:hidden" aria-label={t("title")}>
           ←
         </Link>
         <div className="min-w-0 flex-1">
@@ -193,7 +213,7 @@ export function ChatThread(props: {
         ) : null}
         {messages.length === 0 ? <p className="py-10 text-center text-sm text-muted">{t("empty")}</p> : null}
         {messages.map((m) => {
-          const mine = m.senderBusinessId === myBusinessId;
+          const mine = isMine(m);
           return (
             <div key={m.id} className={cn("group flex", mine ? "justify-end" : "justify-start")}>
               <div
@@ -202,7 +222,7 @@ export function ChatThread(props: {
                   mine ? "rounded-br-sm bg-brand-600 text-white" : "rounded-bl-sm border border-line bg-white",
                 )}
               >
-                {!mine && isCommunity ? (
+                {!mine && (isCommunity || viewer.kind === "support" || m.fromSupport) ? (
                   <p className="mb-0.5 text-xs font-semibold text-brand-700">
                     {m.senderBusinessName}
                     {m.senderCity ? <span className="font-normal text-muted"> · {m.senderCity}</span> : null}
@@ -224,7 +244,7 @@ export function ChatThread(props: {
                 )}
                 <p className={cn("mt-0.5 text-[10px]", mine ? "text-white/75" : "text-muted")}>
                   {mine ? t("you") : m.senderUserName} · {format.dateTime(new Date(m.createdAt), { timeStyle: "short" })}
-                  {!mine && !m.hidden ? <ReportLink messageId={m.id} /> : null}
+                  {!mine && !m.hidden && actions.report ? <ReportLink messageId={m.id} report={actions.report} /> : null}
                 </p>
               </div>
             </div>
@@ -289,7 +309,7 @@ export function ChatThread(props: {
   );
 }
 
-function ReportLink({ messageId }: { messageId: string }) {
+function ReportLink({ messageId, report }: { messageId: string; report: NonNullable<ChatThreadActions["report"]> }) {
   const t = useTranslations("chat");
   const [done, setDone] = useState(false);
   if (done) return <span className="ml-1">· ✓</span>;
@@ -300,7 +320,7 @@ function ReportLink({ messageId }: { messageId: string }) {
       onClick={async () => {
         const reason = prompt(t("reportReason"));
         if (!reason) return;
-        await reportMessage(messageId, reason);
+        await report(messageId, reason);
         setDone(true);
         alert(t("reported"));
       }}

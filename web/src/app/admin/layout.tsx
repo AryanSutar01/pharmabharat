@@ -22,6 +22,9 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/support-desk" className="hidden text-sm text-muted hover:text-ink sm:inline">
+              {t("nav.supportDesk")}
+            </Link>
             <Link href="/app" className="hidden text-sm text-muted hover:text-ink sm:inline">
               {t("nav.home")}
             </Link>

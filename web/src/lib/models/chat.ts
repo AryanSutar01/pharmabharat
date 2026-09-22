@@ -2,19 +2,24 @@ import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
 
 /**
  * A chat thread. "direct" = exactly two businesses; "community" = an open room
- * (all-India, or one per state) that every approved business in scope can read.
+ * (all-India, or one per state) that every approved business in scope can read;
+ * "support" = one business and the PharmaBharat support team.
  */
 const conversationSchema = new Schema(
   {
-    type: { type: String, enum: ["direct", "community"], required: true },
+    type: { type: String, enum: ["direct", "community", "support"], required: true },
     participants: { type: [Schema.Types.ObjectId], ref: "Business", default: [] },
-    // Sorted "idA:idB" — guarantees one direct thread per pair of businesses.
+    // Sorted "idA:idB" for direct chats, "support:<businessId>" for the support
+    // thread — guarantees one thread per pair.
     pairKey: { type: String, unique: true, sparse: true },
     // Community rooms: "india" or "state-27".
     slug: { type: String, unique: true, sparse: true },
     lastMessageAt: Date,
     lastMessagePreview: String,
     lastSenderBusinessId: Schema.Types.ObjectId,
+    lastFromSupport: { type: Boolean, default: false },
+    // When a support agent last read this support thread (agent-side unread).
+    supportReadAt: Date,
     // Per-business read marker (direct chats) for unread badges and "Seen".
     reads: {
       type: [{ _id: false, businessId: Schema.Types.ObjectId, at: Date }],
@@ -35,7 +40,9 @@ export const Conversation: Model<ConversationDoc> =
 const messageSchema = new Schema(
   {
     conversationId: { type: Schema.Types.ObjectId, ref: "Conversation", required: true },
-    senderBusinessId: { type: Schema.Types.ObjectId, ref: "Business", required: true },
+    // Unset for messages written by support agents (fromSupport = true).
+    senderBusinessId: { type: Schema.Types.ObjectId, ref: "Business" },
+    fromSupport: { type: Boolean, default: false },
     senderUserId: { type: String, required: true },
     // Snapshots so rendering needs no joins.
     senderBusinessName: { type: String, required: true },

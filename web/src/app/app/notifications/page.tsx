@@ -20,7 +20,9 @@ export default async function NotificationsPage() {
   function text(n: NotificationDoc) {
     const p = { ...(n.params as Record<string, string | number>) };
     for (const k of ["from", "to", "total"]) if (k in p) p[k] = inr(p[k]);
-    if (typeof p.status === "string") p.status = t(`orders.statusLabel.${p.status}`);
+    if (typeof p.status === "string") {
+      p.status = n.kind === "support_update" ? t(`support.statusLabel.${p.status}`) : t(`orders.statusLabel.${p.status}`);
+    }
     return t(`notifications.kind.${n.kind}`, p);
   }
 

@@ -16,6 +16,9 @@ export async function SimpleHeader() {
           <Logo />
         </Link>
         <div className="flex items-center gap-4">
+          <Link href="/help" className="text-sm text-muted hover:text-ink">
+            {t("support")}
+          </Link>
           {session?.user.platformRole === "admin" ? (
             <Link href="/admin" className="text-sm font-medium text-brand-700 hover:underline">
               {t("admin")}

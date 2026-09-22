@@ -7,6 +7,7 @@ export const NOTIFICATION_KINDS = [
   "order_placed",
   "order_status",
   "kyc_decision",
+  "support_update",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 

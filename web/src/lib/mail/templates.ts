@@ -187,3 +187,63 @@ export function expiryDigestEmail(opts: {
     text: `${subject}\n${opts.items.map((i) => `${i.name} (${i.batchNo}) ${i.daysLeft} days, ${i.stock} in stock`).join("\n")}\n${url}`,
   };
 }
+
+// ------------------------------------------------------------------ support
+
+type TicketLike = {
+  _id: unknown;
+  number: string;
+  kind?: string | null;
+  businessName: string;
+  createdByName: string;
+  subject: string;
+  category: string;
+  priority?: string | null;
+  status?: string | null;
+  callback?: { phone?: string | null; slot?: string | null; language?: string | null } | null;
+  replies: { text: string }[];
+};
+
+export function newTicketStaffEmail(t: TicketLike) {
+  const url = `${env().BETTER_AUTH_URL}/support-desk/tickets/${t._id}`;
+  const isCallback = t.kind === "callback";
+  const subject = `${isCallback ? "📞 Call-back" : "🎫 Ticket"} ${t.number}: ${t.subject} — ${t.businessName}`;
+  const callback = isCallback
+    ? p(`<b>Call:</b> ${esc(t.callback?.phone ?? "")} · <b>When:</b> ${esc(t.callback?.slot ?? "")} · <b>Language:</b> ${esc(t.callback?.language ?? "en")}`)
+    : "";
+  const first = t.replies[0]?.text;
+  return {
+    subject,
+    html: layout({
+      heading: isCallback ? "New call-back request" : "New support ticket",
+      body:
+        p(`<b>${esc(t.businessName)}</b> (${esc(t.createdByName)}) · ${esc(t.category)} · priority ${esc(t.priority ?? "normal")}`) +
+        callback +
+        (first ? p(esc(first).replace(/\n/g, "<br>")) : ""),
+      cta: { label: "Open in support desk", url },
+    }),
+    text: `${subject}\n${first ?? ""}\n${url}`,
+  };
+}
+
+export function ticketUpdateEmail(opts: { ticket: TicketLike; audience: "business" | "staff"; event: "reply" | "status"; text?: string }) {
+  const { ticket: t } = opts;
+  const base = env().BETTER_AUTH_URL;
+  const url = opts.audience === "business" ? `${base}/app/support/${t._id}` : `${base}/support-desk/tickets/${t._id}`;
+  const status = (t.status ?? "").replace(/_/g, " ");
+  const subject =
+    opts.event === "reply"
+      ? `New reply on ${t.number}: ${t.subject}`
+      : `${t.number} is now ${status}: ${t.subject}`;
+  return {
+    subject,
+    html: layout({
+      heading: opts.event === "reply" ? (opts.audience === "business" ? "Support replied" : `${t.businessName} replied`) : `Ticket ${status}`,
+      body:
+        p(`<b>${esc(t.number)}</b> · ${esc(t.subject)}`) +
+        (opts.text ? p(esc(opts.text).replace(/\n/g, "<br>")) : p(`Status: <b>${esc(status)}</b>`)),
+      cta: { label: "View ticket", url },
+    }),
+    text: `${subject}\n${opts.text ?? ""}\n${url}`,
+  };
+}

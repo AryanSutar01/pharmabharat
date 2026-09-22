@@ -1,46 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { BottomNav, NavIcon, SideNav, type NavItem } from "@/components/app-nav";
+import { BottomNav, NavIcon, SideNav } from "@/components/app-nav";
 import { BusinessSwitcher } from "@/components/business-switcher";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Logo } from "@/components/ui";
-import { isSellerType } from "@/lib/catalog/seller";
-import { cartCount } from "@/lib/orders/cart";
-import { unreadCount } from "@/lib/notifications";
-import { unreadDirectCount } from "@/lib/chat/service";
-import { can } from "@/lib/permissions";
+import { getNav } from "@/lib/nav";
 import { requireBusiness } from "@/lib/session";
 
 export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const { business, role, memberships, session } = await requireBusiness();
   const t = await getTranslations();
 
-  const seller = isSellerType(business.type) && can(role, "inventory.manage");
-  const buyer = business.type !== "company" && can(role, "orders.place");
-  const canChat = can(role, "chat.use");
-  const [inCart, unread, unreadChats] = await Promise.all([
-    buyer ? cartCount(business._id, session.user.id) : 0,
-    unreadCount(session.user.id, business._id),
-    canChat ? unreadDirectCount(business) : 0,
-  ]);
-  // Bottom bar on phones holds at most 5 items; sellers get Inventory in place of Chat.
-  const items: NavItem[] = [
-    { href: "/app", label: t("nav.home"), icon: "home", mobile: true },
-    { href: "/app/catalog", label: t("nav.catalog"), icon: "catalog", mobile: true },
-    ...(seller ? [{ href: "/app/inventory", label: t("nav.inventory"), icon: "inventory" as const, mobile: true }] : []),
-    ...(buyer ? [{ href: "/app/cart", label: t("nav.cart"), icon: "cart" as const, badge: inCart }] : []),
-    { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true },
-    ...(canChat ? [{ href: "/app/chat", label: t("nav.chat"), icon: "chat" as const, mobile: !seller, badge: unreadChats }] : []),
-    { href: "/app/notifications", label: t("nav.notifications"), icon: "bell", badge: unread },
-    { href: "/app/alerts", label: t("nav.alerts"), icon: "alert" },
-    ...(can(role, "team.manage") ? [{ href: "/app/team", label: t("nav.team"), icon: "team" as const }] : []),
-    { href: "/app/business", label: t("nav.business"), icon: "business", mobile: true },
-    ...(session.user.platformRole === "admin"
-      ? [{ href: "/admin", label: t("nav.admin"), icon: "admin" as const }]
-      : []),
-  ];
+  const { items, bottom, buyer, inCart, unread } = await getNav();
 
   const businessName = business.tradeName || business.legalName;
   const options = memberships.map((m) => ({
@@ -108,7 +81,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 sm:px-6 lg:pb-10 lg:pt-8">{children}</main>
       </div>
 
-      <BottomNav items={items} />
+      <BottomNav items={bottom} />
     </div>
   );
 }

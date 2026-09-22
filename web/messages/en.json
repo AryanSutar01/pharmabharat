@@ -106,7 +106,9 @@
     "invalid_transition": "This order was already updated. Refresh to see the latest status.",
     "forbidden": "You don't have permission to do this",
     "alerts_full": "You can have up to 200 price alerts",
-    "rate_limited": "You're sending messages too fast. Wait a minute and try again."
+    "rate_limited": "You're sending messages too fast. Wait a minute and try again.",
+    "too_short": "Please add a little more detail",
+    "invalid_order_no": "Order numbers look like PB-2609-000123"
   },
   "landing": {
     "tagline": "India's B2B pharma marketplace",
@@ -143,7 +145,9 @@
     "inventory": "Inventory",
     "cart": "Cart",
     "notifications": "Notifications",
-    "alerts": "Price alerts"
+    "alerts": "Price alerts",
+    "support": "Help & support",
+    "supportDesk": "Support desk"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -494,7 +498,8 @@
       "expiry_soon": "{count, plural, one {# batch expires} other {# batches expire}} within {days} days",
       "order_placed": "New order {orderNo} from {party} · {total}",
       "order_status": "Order {orderNo} ({party}) is now {status}",
-      "kyc_decision": "{approved, select, 1 {Your business is verified. You can start trading.} other {Verification needs changes. Please update your details.}}"
+      "kyc_decision": "{approved, select, 1 {Your business is verified. You can start trading.} other {Verification needs changes. Please update your details.}}",
+      "support_update": "Support ticket {number} was updated ({status})"
     }
   },
   "alerts": {
@@ -544,6 +549,139 @@
     "chatWithSeller": "Chat",
     "chatWith": "Chat with {name}",
     "you": "You",
-    "communityRules": "Be respectful. No selling of prescription-only drugs outside orders, no personal data, no spam."
+    "communityRules": "Be respectful. No selling of prescription-only drugs outside orders, no personal data, no spam.",
+    "supportTitle": "PharmaBharat Support",
+    "supportHint": "Chat with our support team"
+  },
+  "support": {
+    "title": "Help & support",
+    "subtitle": "Raise a ticket, request a call back, or chat with our team.",
+    "newTicket": "New ticket",
+    "callback": "Request a call back",
+    "liveChat": "Chat with support",
+    "faq": "FAQ",
+    "myTickets": "My tickets",
+    "noTickets": "No tickets yet.",
+    "ticketTitle": "New support ticket",
+    "callbackTitle": "Request a call back",
+    "callbackHelp": "Our team will call you in the chosen time slot (Mon–Sat).",
+    "category": "Topic",
+    "priority": "Priority",
+    "subject": "Subject",
+    "message": "Describe the issue",
+    "messageOptional": "Anything we should know? (optional)",
+    "orderNo": "Order number (optional)",
+    "phone": "Phone number",
+    "slot": "Preferred time",
+    "language": "Preferred language",
+    "submit": "Submit",
+    "submitted": "Thanks! We've received your request and will get back to you by email.",
+    "reply": "Reply",
+    "replyPlaceholder": "Write a reply…",
+    "send": "Send reply",
+    "close": "Close ticket",
+    "reopen": "Re-open",
+    "supportTeam": "Support team",
+    "assignedTo": "Assigned to {name}",
+    "unassigned": "Not assigned yet",
+    "callbackDetails": "Call {phone} · {slot} · {language}",
+    "updated": "Updated {when}",
+    "categoryLabel": {
+      "order": "Orders",
+      "payment": "Payments",
+      "invoice": "Invoices & GST",
+      "account": "Account & team",
+      "kyc": "Verification (KYC)",
+      "catalog": "Catalog & listings",
+      "technical": "Technical problem",
+      "other": "Other"
+    },
+    "priorityLabel": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "statusLabel": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "waiting_on_customer": "Waiting for you",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "slotLabel": {
+      "morning": "Morning (9–12)",
+      "afternoon": "Afternoon (12–4)",
+      "evening": "Evening (4–7)"
+    },
+    "kindLabel": {
+      "ticket": "Ticket",
+      "callback": "Call-back"
+    }
+  },
+  "desk": {
+    "title": "Support desk",
+    "tickets": "Tickets",
+    "liveChat": "Live chat",
+    "filterActive": "Active",
+    "filterAll": "All",
+    "empty": "Nothing in the queue. 🎉",
+    "business": "Business",
+    "assignToMe": "Assign to me",
+    "update": "Update",
+    "internalHint": "Replies are emailed to the customer.",
+    "noChats": "No support chats yet.",
+    "selectChat": "Select a chat"
+  },
+  "help": {
+    "title": "Help centre",
+    "subtitle": "Answers to common questions about PharmaBharat.",
+    "stillNeedHelp": "Still need help?",
+    "contactSignedIn": "Raise a ticket, request a call back or chat with us from Help & support.",
+    "contactSignedOut": "Sign in to raise a ticket or request a call back.",
+    "goToSupport": "Go to Help & support",
+    "email": "Email us at {email}",
+    "q": {
+      "verify": {
+        "q": "How do I get my business verified?",
+        "a": "After signing in, choose your business type and fill in your GSTIN, PAN, address and drug licence numbers. Upload the required documents (GST certificate, drug licence, PAN, and for medical stores the pharmacist certificate), then submit. An admin reviews it, usually within 1–2 working days, and you'll get an email."
+      },
+      "rejected": {
+        "q": "My verification was rejected. What now?",
+        "a": "Open Set up your business to see the reviewer's note, correct the details or upload clearer documents, and submit again."
+      },
+      "staff": {
+        "q": "Can my staff use the same account?",
+        "a": "Each person signs in with their own Google account. The owner invites them from Team and picks a role — Manager, Inventory, Billing or Viewer — which controls what they can do."
+      },
+      "margin": {
+        "q": "How is the margin calculated?",
+        "a": "Margin = (MRP − distributor's price) ÷ MRP. Prices shown are per pack and exclude GST."
+      },
+      "split": {
+        "q": "Why was my cart split into several orders?",
+        "a": "Each distributor fulfils and invoices separately, so one checkout creates one order per distributor. You get a separate GST invoice from each."
+      },
+      "gst": {
+        "q": "Why do some invoices show IGST and others CGST + SGST?",
+        "a": "If the distributor is in your state, GST is split equally into CGST and SGST. If they are in another state, IGST is charged at the full rate. The total tax is the same."
+      },
+      "payment": {
+        "q": "How do I pay?",
+        "a": "Choose credit or cash on delivery at checkout and settle with the distributor as usual. The distributor marks the order paid once they receive it."
+      },
+      "cancel": {
+        "q": "Can I cancel an order?",
+        "a": "Yes, until it is dispatched. Open the order and choose Cancel order. The reserved stock goes back to the distributor."
+      },
+      "alerts": {
+        "q": "How do price alerts work?",
+        "a": "Open any product and choose Alert me on price change. We'll notify you in the app (and by email if you choose) when the best price moves by your chosen percentage."
+      },
+      "expiry": {
+        "q": "Will buyers see stock that is about to expire?",
+        "a": "No. Batches within 30 days of expiry are hidden from buyers automatically, and distributors get reminders at 90, 60 and 30 days."
+      }
+    }
   }
 }

@@ -102,8 +102,22 @@ Status: ✅ done · 🚧 in progress · ⏳ planned (v1) · 🔜 after launch (v
 - Limits: 30 messages per minute per user; chat requires the `chat.use` permission.
 - Tests: `realtime/` has node tests for token verification, room isolation and publish auth. `web/` checks token compatibility between the two implementations, and chat integration tests cover pair uniqueness, access rules and unread/read tracking.
 
-### 3.7 Customer care ⏳ (Day 13)
-- FR-25 Support tickets (category, priority, status, threaded replies), an FAQ page, call-back requests, and live chat with support agents (reuses the chat service).
+### 3.7 Customer care ✅
+- FR-25 **Support tickets** (`/app/support`):
+  - Fields: category, priority, subject, optional order number. Tickets are numbered `TKT-000001`.
+  - Threaded replies between the business and agents, with statuses Open → In progress → Waiting for you → Resolved → Closed.
+  - Automatic status changes: a customer reply reopens a waiting or resolved ticket; the first agent reply moves an open ticket to In progress and assigns it to that agent.
+  - Customers can close and reopen their own tickets.
+  - Notifications: agents are emailed about new tickets and customer replies; the business gets an email plus an in-app notice for agent replies and status changes.
+- **Call-back requests** are a ticket type that also stores phone, time slot (morning/afternoon/evening) and preferred language (en/hi/mr). They're highlighted in the desk queue.
+- **FAQ** at `/help`: a public page with 10 questions in all three languages. Businesses still in verification, who can't use `/app` yet, can request a call back from there.
+- **Live chat with support** reuses Day 12's chat as a third thread type, `support`: one thread per business, pinned in its chat list. Agents receive it through the `support` realtime room, and each side has its own unread count and "Seen".
+- **Support desk** (`/support-desk`, platform roles `support` and `admin`):
+  - Ticket queue with an Active/All filter, sorted by priority, then most recent activity.
+  - Ticket view with reply, status and priority changes, and "assign to me".
+  - Live-chat inbox, with unread highlighted.
+- Phone navigation: the bottom bar has 4 sections plus **More** (`/app/more`), which lists everything else (Team, Alerts, Help, Support desk, Admin…). The navigation list lives in one place, `src/lib/nav.ts`.
+- Integration tests cover ticket numbering, reply-driven status changes, customer close, in-app notices, and support-chat isolation and unread tracking on both sides.
 
 ### 3.8 Admin & analytics ⏳ (Day 14)
 - FR-26 Admin: users and businesses (suspend), listing moderation, condition tags, banners, dispute notes.
@@ -133,4 +147,4 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `conditions` | app | condition tags (en/hi/mr) → salts |
 | `pricealerts`, `notifications` | app | per-user price subscriptions; in-app notifications (TTL 90 days) |
 | `conversations`, `messages` | app | direct (pairKey) + community (slug) threads; read markers; message reports |
-| `tickets` ⏳ | app | |
+| `tickets` | app | tickets + call-backs with embedded replies; `TKT-` numbers from `counters` |

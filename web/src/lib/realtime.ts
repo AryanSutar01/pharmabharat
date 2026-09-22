@@ -40,4 +40,6 @@ export async function publish(rooms: string[], event: string, payload: unknown) 
 export const rooms = {
   business: (id: unknown) => `biz:${String(id)}`,
   community: (slug: string) => `community:${slug}`,
+  /** All support agents. */
+  support: "support",
 };

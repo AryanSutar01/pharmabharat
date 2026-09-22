@@ -14,6 +14,7 @@ export type ChatMessage = {
   id: string;
   conversationId: string;
   senderBusinessId: string;
+  fromSupport: boolean;
   senderBusinessName: string;
   senderUserName: string;
   senderCity: string;
@@ -25,7 +26,7 @@ export type ChatMessage = {
 
 export type ConversationSummary = {
   id: string;
-  type: "direct" | "community";
+  type: "direct" | "community" | "support";
   /** Community rooms only: "india" or "state-27" (the UI translates "india"). */
   slug?: string;
   title: string;
@@ -56,12 +57,15 @@ export function communityTitle(slug: string) {
 // ---------------------------------------------------------------- access
 
 export function canAccess(conv: Pick<ConversationDoc, "type" | "participants" | "slug">, business: BusinessDoc) {
-  if (conv.type === "direct") return conv.participants.some((p) => String(p) === String(business._id));
+  if (conv.type === "direct" || conv.type === "support") {
+    return conv.participants.some((p) => String(p) === String(business._id));
+  }
   return communitySlugs(business).includes(conv.slug ?? "");
 }
 
 /** Rooms that should receive live events for a conversation. */
 function roomsFor(conv: Pick<ConversationDoc, "type" | "participants" | "slug">) {
+  if (conv.type === "support") return [...conv.participants.map(rooms.business), rooms.support];
   return conv.type === "direct" ? conv.participants.map(rooms.business) : [rooms.community(conv.slug!)];
 }
 
@@ -85,6 +89,17 @@ export async function getOrCreateDirect(me: BusinessDoc, otherId: string) {
   ).lean();
 }
 
+/** The business's single thread with the support team (created on first use). */
+export async function getOrCreateSupport(business: BusinessDoc) {
+  await connectDB();
+  const key = `support:${business._id}`;
+  return Conversation.findOneAndUpdate(
+    { pairKey: key },
+    { $setOnInsert: { type: "support", pairKey: key, participants: [business._id] } },
+    { upsert: true, returnDocument: "after" },
+  ).lean();
+}
+
 export async function getConversation(id: string, business: BusinessDoc) {
   if (!mongoose.isValidObjectId(id)) return null;
   await connectDB();
@@ -93,15 +108,18 @@ export async function getConversation(id: string, business: BusinessDoc) {
 }
 
 function isUnread(conv: ConversationDoc, businessId: mongoose.Types.ObjectId) {
-  if (conv.type !== "direct" || !conv.lastMessageAt) return false;
-  if (String(conv.lastSenderBusinessId) === String(businessId)) return false;
+  if (conv.type === "community" || !conv.lastMessageAt) return false;
+  if (!conv.lastFromSupport && String(conv.lastSenderBusinessId) === String(businessId)) return false;
   const read = conv.reads.find((r) => String(r.businessId) === String(businessId))?.at;
   return !read || new Date(read) < new Date(conv.lastMessageAt);
 }
 
 export async function listConversations(business: BusinessDoc): Promise<ConversationSummary[]> {
   await connectDB();
-  const communities = await Promise.all(communitySlugs(business).map(ensureCommunity));
+  const [communities, support] = await Promise.all([
+    Promise.all(communitySlugs(business).map(ensureCommunity)),
+    getOrCreateSupport(business),
+  ]);
   const direct = await Conversation.find({ type: "direct", participants: business._id, lastMessageAt: { $ne: null } })
     .sort({ lastMessageAt: -1 })
     .limit(100)
@@ -122,6 +140,7 @@ export async function listConversations(business: BusinessDoc): Promise<Conversa
   });
 
   return [
+    ...(support ? [toSummary(support, "PharmaBharat Support", "support")] : []),
     ...communities.filter((c): c is NonNullable<typeof c> => Boolean(c)).map((c) => toSummary(c, communityTitle(c.slug!), "community")),
     ...direct.map((c, i) => {
       const o = otherById.get(String(otherIds[i]));
@@ -133,8 +152,8 @@ export async function listConversations(business: BusinessDoc): Promise<Conversa
 export async function unreadDirectCount(business: BusinessDoc) {
   await connectDB();
   const convs = await Conversation.find(
-    { type: "direct", participants: business._id, lastMessageAt: { $ne: null }, lastSenderBusinessId: { $ne: business._id } },
-    { reads: 1, lastMessageAt: 1, lastSenderBusinessId: 1, type: 1 },
+    { type: { $in: ["direct", "support"] }, participants: business._id, lastMessageAt: { $ne: null } },
+    { reads: 1, lastMessageAt: 1, lastSenderBusinessId: 1, lastFromSupport: 1, type: 1 },
   )
     .limit(200)
     .lean();
@@ -142,7 +161,7 @@ export async function unreadDirectCount(business: BusinessDoc) {
 }
 
 export async function markRead(conv: ConversationDoc, business: BusinessDoc) {
-  if (conv.type !== "direct") return;
+  if (conv.type === "community") return;
   const now = new Date();
   const res = await Conversation.updateOne(
     { _id: conv._id, "reads.businessId": business._id },
@@ -166,7 +185,8 @@ export function toChatMessage(m: MessageDoc): ChatMessage {
   return {
     id: String(m._id),
     conversationId: String(m.conversationId),
-    senderBusinessId: String(m.senderBusinessId),
+    senderBusinessId: m.senderBusinessId ? String(m.senderBusinessId) : "",
+    fromSupport: Boolean(m.fromSupport),
     senderBusinessName: m.senderBusinessName,
     senderUserName: m.senderUserName,
     senderCity: m.senderCity ?? "",
@@ -195,7 +215,8 @@ export async function getMessagesSince(conversationId: mongoose.Types.ObjectId, 
 
 export async function sendMessage(opts: {
   conv: ConversationDoc;
-  business: BusinessDoc;
+  /** The sending business, or null for a support agent. */
+  business: BusinessDoc | null;
   user: { id: string; name: string };
   text: string;
   image?: { publicId: string; width: number; height: number };
@@ -204,20 +225,75 @@ export async function sendMessage(opts: {
   const { conv, business } = opts;
   const doc = await Message.create({
     conversationId: conv._id,
-    senderBusinessId: business._id,
+    senderBusinessId: business?._id,
+    fromSupport: !business,
     senderUserId: opts.user.id,
-    senderBusinessName: business.tradeName || business.legalName,
+    senderBusinessName: business ? business.tradeName || business.legalName : "PharmaBharat Support",
     senderUserName: opts.user.name,
-    senderCity: business.address?.city,
+    senderCity: business?.address?.city,
     text: opts.text,
     image: opts.image,
   });
   const preview = opts.text ? opts.text.slice(0, 80) : "📷";
   await Conversation.updateOne(
     { _id: conv._id },
-    { $set: { lastMessageAt: doc.createdAt, lastMessagePreview: preview, lastSenderBusinessId: business._id } },
+    {
+      $set: {
+        lastMessageAt: doc.createdAt,
+        lastMessagePreview: preview,
+        lastSenderBusinessId: business?._id ?? null,
+        lastFromSupport: !business,
+        // An agent replying has obviously read the thread.
+        ...(business ? {} : { supportReadAt: doc.createdAt }),
+      },
+    },
   );
   const message = toChatMessage(doc.toObject() as MessageDoc);
   await publish(roomsFor(conv), "message", message);
   return message;
+}
+
+// ---------------------------------------------------------------- support desk (agents)
+
+export async function listSupportConversations(): Promise<ConversationSummary[]> {
+  await connectDB();
+  const convs = await Conversation.find({ type: "support", lastMessageAt: { $ne: null } })
+    .sort({ lastMessageAt: -1 })
+    .limit(200)
+    .lean();
+  const businesses = await Business.find(
+    { _id: { $in: convs.map((c) => c.participants[0]).filter(Boolean) } },
+    { legalName: 1, tradeName: 1, address: 1 },
+  ).lean();
+  const byId = new Map(businesses.map((b) => [String(b._id), b]));
+  return convs.map((c) => {
+    const b = byId.get(String(c.participants[0]));
+    return {
+      id: String(c._id),
+      type: "support" as const,
+      title: b ? b.tradeName || b.legalName : "—",
+      subtitle: b?.address?.city ?? "",
+      lastMessagePreview: c.lastMessagePreview ?? "",
+      lastMessageAt: c.lastMessageAt ? new Date(c.lastMessageAt).toISOString() : null,
+      // Unread for agents when the business spoke last and no agent has read since.
+      unread: !c.lastFromSupport && (!c.supportReadAt || new Date(c.supportReadAt) < new Date(c.lastMessageAt!)),
+    };
+  });
+}
+
+export async function getSupportConversation(id: string) {
+  if (!mongoose.isValidObjectId(id)) return null;
+  await connectDB();
+  return Conversation.findOne({ _id: id, type: "support" }).lean();
+}
+
+export async function markSupportRead(conv: ConversationDoc) {
+  const now = new Date();
+  await Conversation.updateOne({ _id: conv._id }, { $set: { supportReadAt: now } });
+  await publish(roomsFor(conv), "read", { conversationId: String(conv._id), businessId: "support", at: now.toISOString() });
+}
+
+/** For "Seen" on the business side of a support thread. */
+export function supportReadAtIso(conv: ConversationDoc) {
+  return conv.supportReadAt ? new Date(conv.supportReadAt).toISOString() : null;
 }
