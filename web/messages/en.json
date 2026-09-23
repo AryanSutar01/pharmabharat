@@ -189,7 +189,8 @@
     "billing": "Billing",
     "bills": "Bills",
     "customers": "Customers",
-    "shopAlerts": "Stock alerts"
+    "shopAlerts": "Stock alerts",
+    "refills": "Refills due"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -1174,6 +1175,25 @@
     "noRecentSales": "no recent sales",
     "suggestOrder": "Order",
     "reorderLevel": "Minimum",
-    "orderThese": "Order these"
+    "orderThese": "Order these",
+    "refillsTitle": "Refills due",
+    "refillsSubtitle": "Worked out from your customers' own purchase patterns. Nothing extra to type at the counter.",
+    "refillsDue": "Due now",
+    "refillsToCall": "To call",
+    "refillsNoEmail": "no email on file",
+    "refillsOutOfStock": "Not on your shelf",
+    "refillsOpen": "To do",
+    "refillsHandled": "Handled",
+    "refillsList": "Customers due",
+    "refillsListHint": "Emailed automatically where the customer agreed; the rest are for the counter to ring.",
+    "refillsEmpty": "Nobody is due right now.",
+    "refillLate": "{days} days late",
+    "refillDueOn": "due {date}",
+    "notOnShelfShort": "Not in stock",
+    "emailed": "emailed {date}",
+    "called": "called {date}",
+    "call": "Call",
+    "markCalled": "Mark called",
+    "marking": "Saving…"
   }
 }

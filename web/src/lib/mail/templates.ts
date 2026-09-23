@@ -269,6 +269,35 @@ ${env().BETTER_AUTH_URL}/app/business`,
   };
 }
 
+export function refillReminderEmail(opts: {
+  customerName: string;
+  shopName: string;
+  shopPhone?: string;
+  items: { name: string; lastBoughtAt: Date; daysLate: number }[];
+}) {
+  const subject = `Time to refill your medicine${opts.items.length > 1 ? "s" : ""} — ${opts.shopName}`;
+  const list = opts.items
+    .map((i) => `<li style="margin-bottom:4px">${esc(i.name)} <span style="color:#5b6b66">(last bought ${i.lastBoughtAt.toLocaleDateString("en-IN")})</span></li>`)
+    .join("");
+  return {
+    subject,
+    html: layout({
+      heading: "Your refill is due",
+      body:
+        p(`Dear ${esc(opts.customerName)},`) +
+        p("Going by your last few purchases, you are about due for:") +
+        `<ul style="font-size:15px;line-height:1.5;margin:0 0 12px;padding-left:20px">${list}</ul>` +
+        p(
+          `Please drop in to <b>${esc(opts.shopName)}</b>${opts.shopPhone ? `, or call us on ${esc(opts.shopPhone)}` : ""}. If you have stopped taking these, please ignore this message.`,
+        ) +
+        p('<span style="color:#5b6b66;font-size:13px">You are getting this because you agreed to refill reminders at this shop. Tell the shop if you would like them stopped.</span>'),
+    }),
+    text: `${subject}\n${opts.items.map((i) => i.name).join("\n")}\n${opts.shopName}${
+      opts.shopPhone ? ` · ${opts.shopPhone}` : ""
+    }`,
+  };
+}
+
 export function recallEmail(opts: {
   businessName: string;
   audience: "seller" | "buyer";

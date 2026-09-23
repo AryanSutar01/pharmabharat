@@ -189,7 +189,8 @@
     "billing": "बिलिंग",
     "bills": "बिले",
     "customers": "ग्राहक",
-    "shopAlerts": "साठा सूचना"
+    "shopAlerts": "साठा सूचना",
+    "refills": "रिफिल बाकी"
   },
   "onboarding": {
     "title": "तुमचा व्यवसाय सेट करा",
@@ -1174,6 +1175,25 @@
     "noRecentSales": "अलीकडे विक्री नाही",
     "suggestOrder": "मागवा",
     "reorderLevel": "किमान",
-    "orderThese": "हे मागवा"
+    "orderThese": "हे मागवा",
+    "refillsTitle": "रिफिल बाकी",
+    "refillsSubtitle": "तुमच्या ग्राहकांच्या स्वतःच्या खरेदी पद्धतीवरून काढलेले. काउंटरवर वेगळे काही लिहावे लागत नाही.",
+    "refillsDue": "सध्या बाकी",
+    "refillsToCall": "फोन करायचे",
+    "refillsNoEmail": "ईमेल नोंद नाही",
+    "refillsOutOfStock": "तुमच्या साठ्यात नाही",
+    "refillsOpen": "करायचे",
+    "refillsHandled": "झाले",
+    "refillsList": "बाकी ग्राहक",
+    "refillsListHint": "संमती दिलेल्यांना ईमेल आपोआप जातो; उरलेल्यांना काउंटरवरून फोन करा.",
+    "refillsEmpty": "सध्या कोणाची रिफिल बाकी नाही.",
+    "refillLate": "{days} दिवस उशीर",
+    "refillDueOn": "{date} रोजी देय",
+    "notOnShelfShort": "साठ्यात नाही",
+    "emailed": "{date} रोजी ईमेल",
+    "called": "{date} रोजी फोन",
+    "call": "फोन",
+    "markCalled": "फोन केला",
+    "marking": "जतन करत आहे…"
   }
 }
