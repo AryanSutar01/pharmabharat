@@ -45,7 +45,12 @@ const customerSchema = new Schema(
   { timestamps: true },
 );
 // A phone number identifies a customer within one shop (two shops may both know them).
-customerSchema.index({ businessId: 1, phone: 1 }, { unique: true, sparse: true });
+// Partial, not sparse: a compound sparse index would still index the many
+// customers who have no phone — or whose phone was erased — and they'd collide.
+customerSchema.index(
+  { businessId: 1, phone: 1 },
+  { unique: true, partialFilterExpression: { phone: { $type: "string" } } },
+);
 customerSchema.index({ businessId: 1, name: 1 });
 customerSchema.index({ businessId: 1, lastVisitAt: -1 });
 

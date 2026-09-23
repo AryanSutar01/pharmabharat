@@ -4,6 +4,7 @@ import { runExpiryAlerts } from "@/lib/alerts/expiry";
 import { runLicenceChecks } from "@/lib/compliance/service";
 import { env } from "@/lib/env";
 import { runPaymentReminders } from "@/lib/ledger/reminders";
+import { runShopHousekeeping } from "@/lib/retail/jobs";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -26,5 +27,6 @@ export async function GET(req: Request) {
   const expiry = await runExpiryAlerts();
   const payments = await runPaymentReminders();
   const licences = await runLicenceChecks();
-  return NextResponse.json({ ok: true, expiry, payments, licences, ms: Date.now() - started });
+  const shops = await runShopHousekeeping();
+  return NextResponse.json({ ok: true, expiry, payments, licences, shops, ms: Date.now() - started });
 }
