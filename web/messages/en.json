@@ -191,7 +191,8 @@
     "customers": "Customers",
     "shopAlerts": "Stock alerts",
     "refills": "Refills due",
-    "shopSettings": "Shop settings"
+    "shopSettings": "Shop settings",
+    "register": "Schedule H register"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -1219,6 +1220,25 @@
     "pointsBalance": "{points} points",
     "usePoints": "Use {points} points ({value} off)",
     "pointsUsed": "Points used ({points})",
-    "pointsEarned": "Points earned"
+    "pointsEarned": "Points earned",
+    "registerTitle": "Schedule H register",
+    "registerSubtitle": "Every prescription-only medicine you dispensed, with the prescriber and patient.",
+    "registerEntries": "{count, plural, one {# entry} other {# entries}}",
+    "registerHint": "Oldest first, the way an inspector reads it.",
+    "registerEmpty": "No scheduled medicines dispensed in this period.",
+    "registerIncomplete": "{count, plural, one {# entry has} other {# entries have}} no prescriber recorded",
+    "registerIncompleteHint": "Ask the counter to fill in the doctor's name and registration number while billing a Schedule H or H1 medicine.",
+    "exportCsv": "Export CSV",
+    "month": "Month",
+    "schedule": "Schedule",
+    "allSchedules": "All",
+    "show": "Show",
+    "date": "Date",
+    "billNoShort": "Bill",
+    "patient": "Patient",
+    "prescriber": "Prescriber",
+    "prescriberMissing": "Not recorded",
+    "prescriptionsTitle": "Prescriptions",
+    "prescriptionsHint": "Doctors who prescribed for this customer, newest first."
   }
 }

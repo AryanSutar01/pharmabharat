@@ -191,7 +191,8 @@
     "customers": "ग्राहक",
     "shopAlerts": "साठा सूचना",
     "refills": "रिफिल बाकी",
-    "shopSettings": "दुकान सेटिंग"
+    "shopSettings": "दुकान सेटिंग",
+    "register": "शेड्यूल H रजिस्टर"
   },
   "onboarding": {
     "title": "तुमचा व्यवसाय सेट करा",
@@ -1219,6 +1220,25 @@
     "pointsBalance": "{points} पॉइंट्स",
     "usePoints": "{points} पॉइंट्स वापरा ({value} सवलत)",
     "pointsUsed": "पॉइंट्स वापरले ({points})",
-    "pointsEarned": "पॉइंट्स मिळाले"
+    "pointsEarned": "पॉइंट्स मिळाले",
+    "registerTitle": "शेड्यूल H रजिस्टर",
+    "registerSubtitle": "तुम्ही दिलेली प्रत्येक प्रिस्क्रिप्शन औषधे, डॉक्टर व रुग्णाच्या तपशिलासह.",
+    "registerEntries": "{count, plural, one {# नोंद} other {# नोंदी}}",
+    "registerHint": "जुन्या आधी, निरीक्षक वाचतात त्या क्रमाने.",
+    "registerEmpty": "या काळात कोणतीही शेड्यूल औषधे दिली नाहीत.",
+    "registerIncomplete": "{count, plural, one {# नोंदीत} other {# नोंदींत}} डॉक्टरांची माहिती नाही",
+    "registerIncompleteHint": "शेड्यूल H किंवा H1 औषध देताना काउंटरवर डॉक्टरांचे नाव व नोंदणी क्रमांक भरून घ्या.",
+    "exportCsv": "CSV निर्यात",
+    "month": "महिना",
+    "schedule": "शेड्यूल",
+    "allSchedules": "सर्व",
+    "show": "दाखवा",
+    "date": "तारीख",
+    "billNoShort": "बिल",
+    "patient": "रुग्ण",
+    "prescriber": "डॉक्टर",
+    "prescriberMissing": "नोंद नाही",
+    "prescriptionsTitle": "प्रिस्क्रिप्शन",
+    "prescriptionsHint": "या ग्राहकासाठी प्रिस्क्रिप्शन देणारे डॉक्टर, नवीन आधी."
   }
 }

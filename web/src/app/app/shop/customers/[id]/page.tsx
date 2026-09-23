@@ -6,6 +6,7 @@ import { Badge, Card, CardHeader, PageHeader } from "@/components/ui";
 import { listBills } from "@/lib/retail/billing";
 import { customerPurchases, customerSummary, getCustomer } from "@/lib/retail/customers";
 import { requireShop } from "@/lib/retail/guard";
+import { customerPrescriptions } from "@/lib/retail/register";
 import { CustomerForm, DeleteCustomer } from "../customer-forms";
 
 export const metadata = { title: "Customer" };
@@ -19,10 +20,11 @@ export default async function CustomerPage({ params }: PageProps<"/app/shop/cust
 
   const t = await getTranslations("shop");
   const format = await getFormatter();
-  const [summary, purchases, bills] = await Promise.all([
+  const [summary, purchases, bills, prescriptions] = await Promise.all([
     customerSummary(business._id, id),
     customerPurchases(business._id, id),
     listBills(business._id, { customerId: id, limit: 20 }),
+    customerPrescriptions(business._id, id),
   ]);
 
   const inr = (v: number) => format.number(v, { style: "currency", currency: "INR", maximumFractionDigits: 0 });
@@ -98,6 +100,26 @@ export default async function CustomerPage({ params }: PageProps<"/app/shop/cust
               </ul>
             )}
           </Card>
+
+          {prescriptions.length ? (
+            <Card>
+              <CardHeader title={t("prescriptionsTitle")} description={t("prescriptionsHint")} />
+              <ul className="divide-y divide-line">
+                {prescriptions.map((p) => (
+                  <li key={p.billId} className="px-4 py-3 sm:px-5">
+                    <p className="font-medium">
+                      {p.doctorName}
+                      {p.registrationNo ? <span className="ml-2 text-xs font-normal text-muted">{p.registrationNo}</span> : null}
+                    </p>
+                    <p className="text-xs text-muted">
+                      {day(p.date)} · {p.billNo}
+                    </p>
+                    {p.medicines.length ? <p className="mt-0.5 text-sm">{p.medicines.join(", ")}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
 
           <Card>
             <CardHeader title={t("billsTitle")} />
