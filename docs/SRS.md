@@ -149,7 +149,7 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 ## 4. Non-functional requirements
 - **Responsive:** 360 px phones through desktop. Bottom tab bar under 1024 px, sidebar above.
 - **Security:** every mutation re-checks session, business membership and permission on the server. The proxy does only an optimistic cookie check. KYC files are never public. Invite tokens are stored hashed.
-- **Performance on the free tier:** at most 5 connections per pool; session cookie cache (5 min) avoids a database hit on every request.
+- **Performance on the free tier:** at most 5 connections per pool. The session cookie cache is deliberately **off** so role changes, bans and admin promotion apply on the next request, at the cost of one indexed session lookup per request.
 - **i18n:** every UI string comes from `messages/{en,hi,mr}.json`. A test fails if the key sets differ.
 - **Quality gates:** `npm run typecheck`, `npm run lint`, `npm test` and `npm run build` must pass before each commit.
 
