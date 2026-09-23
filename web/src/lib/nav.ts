@@ -18,6 +18,7 @@ export const getNav = cache(async () => {
   const t = await getTranslations();
 
   const seller = isSellerType(business.type) && can(role, "inventory.manage");
+  const shop = business.type === "retailer" && can(role, "retail.manage");
   const buyer = business.type !== "company" && can(role, "orders.place");
   const canChat = can(role, "chat.use");
   const staff = ["support", "admin"].includes(session.user.platformRole as string);
@@ -29,6 +30,7 @@ export const getNav = cache(async () => {
 
   // Phone bottom bar: 5 slots. Sellers get Inventory in place of Chat; "More" holds the rest.
   const trade = t("nav.sectionTrade");
+  const shopSection = t("nav.sectionShop");
   const account = t("nav.sectionAccount");
   const platform = t("nav.sectionPlatform");
   const raw: NavItem[] = [
@@ -38,6 +40,7 @@ export const getNav = cache(async () => {
     ...(buyer ? [{ href: "/app/cart", label: t("nav.cart"), icon: "cart" as const, badge: inCart }] : []),
     { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true },
     ...(can(role, "billing.view") ? [{ href: "/app/ledger", label: t("nav.ledger"), icon: "ledger" as const }] : []),
+    ...(shop ? [{ href: "/app/shop/stock", label: t("nav.shopStock"), icon: "shop" as const }] : []),
     ...(canChat ? [{ href: "/app/chat", label: t("nav.chat"), icon: "chat" as const, mobile: !seller, badge: unreadChats }] : []),
     { href: "/app/notifications", label: t("nav.notifications"), icon: "bell", badge: unread },
     { href: "/app/alerts", label: t("nav.alerts"), icon: "alert" },
@@ -50,7 +53,9 @@ export const getNav = cache(async () => {
 
   // Sidebar sections: trading first, then account/help, then platform staff tools.
   const sectionOf = (href: string) =>
-    ["/support-desk", "/admin"].includes(href)
+    href.startsWith("/app/shop")
+      ? shopSection
+      : ["/support-desk", "/admin"].includes(href)
       ? platform
       : ["/app/notifications", "/app/alerts", "/app/team", "/app/business", "/app/support"].includes(href)
         ? account

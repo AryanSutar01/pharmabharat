@@ -9,6 +9,7 @@ import { connectDB } from "@/lib/db/mongo";
 import { Order } from "@/lib/models/order";
 import { notifyStatusChange } from "@/lib/orders/notify";
 import { markOrderPaid, transitionOrder } from "@/lib/orders/service";
+import { receiveOrderSafely } from "@/lib/retail/stock";
 import { TRANSITIONS, type OrderStatus } from "@/lib/orders/status";
 import { can } from "@/lib/permissions";
 import { requireBusiness } from "@/lib/session";
@@ -44,6 +45,8 @@ export async function orderAction(orderId: string, _: OrderActionResult, formDat
     if (!updated) return { error: "invalid_transition" };
     after(async () => {
       await notifyStatusChange(updated, note);
+      // A delivered order lands on the retailer's own shelf (see lib/retail/stock).
+      if (action === "deliver") await receiveOrderSafely(updated._id, session.user.id);
       if (t.releasesStock) await checkPriceAlertsSafely(updated.items.map((i) => i.productId));
     });
   }

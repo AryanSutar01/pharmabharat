@@ -4,7 +4,9 @@
 
 ## 1. Product
 
-PharmaBharat is a **B2B** marketplace that connects **Retailers (medical stores)**, **Wholesalers / Distributors** and **Pharma Companies**. It is a responsive website for phones, tablets and desktops. **B2C (selling to patients) is out of scope.**
+PharmaBharat is a **B2B** marketplace that connects **Retailers (medical stores)**, **Wholesalers / Distributors** and **Pharma Companies**. It is a responsive website for phones, tablets and desktops.
+
+Retailers also get a **shop module** (§3.10): their own stock, a billing counter, customer records, refill and restock alerts, loyalty, a Schedule H1 register and shop analytics. Patients never sign in and never see PharmaBharat — the shop operates everything on their behalf — so **B2C remains out of scope** in the marketplace sense.
 
 ### 1.1 Constraints
 | Constraint | Decision |
@@ -152,7 +154,27 @@ Built after the SRS scope was complete, for the way these businesses actually tr
 - FR-32 **Cheapest-combination cart** — the cart compares every line against other verified sellers and offers to switch the whole cart in one click, showing the saving and how many deliveries the order would come from. Ties go to a seller already in the cart, so the order does not fragment for nothing.
 - Tests: pure maths (allocation, licence levels, list parsing, swap choice) as unit tests; ledger, recalls, reorder, licence and optimiser flows as integration tests against a throwaway database.
 
-### 3.10 After launch 🔜
+### 3.10 Retailer shop module 🔨
+The medical shop is the busiest user in this ecosystem, so the retailer gets a working shop-management system beside the marketplace. Decisions taken with the client:
+
+| Question | Decision |
+|---|---|
+| End customers | **Records the shop keeps.** Patients never log in. Reminders go by email where there is an address; everyone else lands on a call-list for the counter. |
+| Shop stock | **Delivered marketplace orders flow in automatically** (batch, expiry, cost, supplier), plus manual entry and CSV for stock bought off-platform. |
+| Billing | GST bill with stock decrement, **line discounts and loyalty redemption**. No customer credit and no sales returns in this version. |
+| Reminders | **Email plus a daily counter call-list.** No SMS or WhatsApp (no budget). |
+| Prescriptions | Typed record (doctor, registration number, date, medicines) feeding a **Schedule H1 register** the shop can export. No prescription photos. |
+| Loyalty | **Points per rupee**, with the earn rate, point value, minimum redemption and expiry all set by the shop. |
+| Refill timing | **Learned from the gaps between a customer's own purchases** — nothing extra to type at a busy counter. |
+| Reorder level | **Computed nightly from sales speed** (cover N days, default 15), overridable per medicine. |
+| Supplier comparison | Price history for the same medicine, credit terms and outstanding, and quality problems (recalled batches, short-dated deliveries). |
+| Privacy (DPDP) | Consent captured when a customer is added, deletion that **anonymises bills** rather than destroying accounting records, and a retention window after which inactive customers' contact details are purged. |
+
+Build order (each step tested and committed on its own): shop stock → billing → customers → expiry and low-stock alerts → refill reminders and restock → loyalty → prescriptions and H1 register → shop analytics → supplier comparison.
+
+**Known limitation:** stock and billing work in whole packs (a strip or bottle as the catalogue defines it). Selling loose tablets out of a strip is not supported in this version.
+
+### 3.11 After launch 🔜
 Plus membership and Razorpay · commission model · pharma company promotions and regional demand analytics · Tally/Marg integration · returns and disputes workflow · delivery tracking · installable PWA with offline support · prescription records (DPDP-compliant) · retailer-side inventory.
 
 ## 4. Non-functional requirements

@@ -116,7 +116,8 @@
     "no_open_invoices": "This buyer has no unpaid invoices.",
     "invalid_id": "Account not found.",
     "server_error": "Something went wrong. Please try again.",
-    "credit_limit": "This order crosses your credit limit with the seller. Clear pending invoices or choose cash on delivery."
+    "credit_limit": "This order crosses your credit limit with the seller. Clear pending invoices or choose cash on delivery.",
+    "cost_above_mrp": "Purchase rate cannot be more than the MRP."
   },
   "landing": {
     "tagline": "India's B2B pharma marketplace",
@@ -179,7 +180,9 @@
     "supportDesk": "Support desk",
     "sectionTrade": "Trade",
     "sectionAccount": "Your account",
-    "sectionPlatform": "PharmaBharat team"
+    "sectionPlatform": "PharmaBharat team",
+    "shopStock": "Shop stock",
+    "sectionShop": "Your shop"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -972,5 +975,52 @@
     "companyIntro": "Company dashboards (product demand by region) are coming after launch. Meanwhile you can browse the catalog and chat with distributors.",
     "announcements": "Announcements",
     "noDataBuyer": "No purchases in the last 30 days. Browse the catalog to place your first order."
+  },
+  "shop": {
+    "stockTitle": "Shop stock",
+    "stockSubtitle": "What is on your shelf right now. Orders you mark delivered land here automatically.",
+    "stockValue": "Stock value",
+    "atCost": "at purchase cost",
+    "retailValue": "Retail value",
+    "atMrp": "at MRP",
+    "batches": "Batches",
+    "packs": "{count} packs",
+    "expiringSoon": "Expiring soon",
+    "within90": "within 90 days",
+    "expiredCount": "{count} already expired",
+    "onTheShelf": "On the shelf",
+    "stockFilter": {
+      "all": "All",
+      "expiring": "Expiring",
+      "expired": "Expired",
+      "out": "Out of stock"
+    },
+    "searchShelf": "Search your stock…",
+    "stockEmpty": "Nothing here yet. Add a batch, or mark a purchase order delivered.",
+    "addStock": "Add stock",
+    "addStockHint": "For medicines bought outside PharmaBharat, or an opening stock entry.",
+    "stockAdded": "Added to the shelf.",
+    "findMedicine": "Medicine",
+    "findMedicineHint": "Type at least two letters to search the catalogue.",
+    "changeProduct": "Change",
+    "batchNo": "Batch number",
+    "expiry": "Expiry",
+    "qtyPacks": "Quantity (packs)",
+    "qtyPacksHint": "Whole packs — a strip, a bottle, as the pack is defined.",
+    "cost": "Purchase rate",
+    "costHint": "Per pack, excluding GST. Used for your margin reports.",
+    "mrp": "MRP",
+    "gst": "GST",
+    "hsn": "HSN",
+    "supplier": "Supplier",
+    "supplierHint": "Only needed for stock bought outside PharmaBharat.",
+    "addToShelf": "Add to shelf",
+    "batch": "Batch",
+    "exp": "Exp",
+    "expired": "Expired",
+    "expiresInDays": "Expires in {days} days",
+    "outOfStock": "Out of stock",
+    "fromOrder": "From an order",
+    "remove": "Remove"
   }
 }

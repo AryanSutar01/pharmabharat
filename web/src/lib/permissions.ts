@@ -17,6 +17,8 @@ export const PERMISSIONS = [
   "billing.view", // invoices, GST reports
   "analytics.view",
   "chat.use",
+  "retail.sell", // shop billing counter
+  "retail.manage", // shop stock, customers, shop settings
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -25,8 +27,8 @@ const ALL = [...PERMISSIONS];
 const ROLE_PERMISSIONS: Record<MemberRole, readonly Permission[]> = {
   owner: ALL,
   manager: ALL.filter((p) => p !== "team.manage" && p !== "business.edit"),
-  inventory: ["inventory.manage", "orders.manage", "chat.use"],
-  billing: ["orders.place", "billing.view", "chat.use"],
+  inventory: ["inventory.manage", "orders.manage", "chat.use", "retail.manage", "retail.sell"],
+  billing: ["orders.place", "billing.view", "chat.use", "retail.sell", "retail.manage"],
   viewer: ["analytics.view"],
 };
 
