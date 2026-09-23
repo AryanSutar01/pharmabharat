@@ -5,7 +5,7 @@ import { isValidObjectId } from "mongoose";
 import { connectDB } from "@/lib/db/mongo";
 import { Product } from "@/lib/models/product";
 import { requireShop } from "@/lib/retail/guard";
-import { addStock, removeStock, setStockQty } from "@/lib/retail/stock";
+import { addStock, removeStock, setStockUnits } from "@/lib/retail/stock";
 import { shopStockSchema } from "@/lib/validation/shop-stock";
 
 export type StockFormState = { ok?: boolean; errors?: Record<string, string>; values?: Record<string, string> };
@@ -38,6 +38,7 @@ export async function addShopStock(_: StockFormState, formData: FormData): Promi
       manufacturer: product.manufacturer ?? undefined,
       packSizeLabel: product.packSizeLabel ?? undefined,
       schedule: parsed.data.schedule ?? product.schedule ?? undefined,
+      unitsPerPack: parsed.data.unitsPerPack,
       source: "manual",
     },
     session.user.id,
@@ -46,10 +47,11 @@ export async function addShopStock(_: StockFormState, formData: FormData): Promi
   return { ok: true };
 }
 
-export async function updateShopStockQty(stockId: string, qty: number) {
+/** `units` is in the smallest sellable unit — tablets, not strips. */
+export async function updateShopStockUnits(stockId: string, units: number) {
   const { business } = await requireShop("retail.manage");
-  if (!isValidObjectId(stockId) || !Number.isInteger(qty) || qty < 0 || qty > 1_000_000) return { error: "invalid" };
-  await setStockQty(business._id, stockId, qty);
+  if (!isValidObjectId(stockId) || !Number.isInteger(units) || units < 0 || units > 10_000_000) return { error: "invalid" };
+  await setStockUnits(business._id, stockId, units);
   revalidatePath("/app/shop/stock");
   return { ok: true };
 }

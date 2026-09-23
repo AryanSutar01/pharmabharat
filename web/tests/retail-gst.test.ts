@@ -4,7 +4,7 @@ import { billLine, billTotals } from "@/lib/retail/gst";
 describe("retail bill line", () => {
   it("works GST backwards out of the MRP", () => {
     // ₹105 MRP at 5% → ₹100 taxable + ₹5 GST, split evenly.
-    expect(billLine({ qty: 2, mrp: 105, gstRate: 5 })).toEqual({
+    expect(billLine({ qty: 2, rate: 105, gstRate: 5 })).toEqual({
       gross: 210,
       discount: 0,
       total: 210,
@@ -15,7 +15,7 @@ describe("retail bill line", () => {
   });
 
   it("taxes the discounted price, not the printed one", () => {
-    const line = billLine({ qty: 1, mrp: 200, gstRate: 12, discountPercent: 10 });
+    const line = billLine({ qty: 1, rate: 200, gstRate: 12, discountPercent: 10 });
     expect(line).toMatchObject({ gross: 200, discount: 20, total: 180 });
     expect(round(line.taxable + line.cgst + line.sgst)).toBe(180);
     expect(line.taxable).toBe(160.71);
@@ -23,19 +23,26 @@ describe("retail bill line", () => {
 
   it("never loses a paisa between CGST and SGST", () => {
     for (const mrp of [9.99, 33.33, 176.5, 1250.75]) {
-      const l = billLine({ qty: 3, mrp, gstRate: 12 });
+      const l = billLine({ qty: 3, rate: mrp, gstRate: 12 });
       expect(round(l.taxable + l.cgst + l.sgst)).toBe(l.total);
     }
   });
 
+  it("prices a cut strip from the per-tablet rate", () => {
+    // 4 tablets at 7.00 (a strip of 15 at 105) → 28.00 inclusive of 5%.
+    const line = billLine({ qty: 4, rate: 7, gstRate: 5 });
+    expect(line).toMatchObject({ gross: 28, total: 28, taxable: 26.67 });
+    expect(round(line.taxable + line.cgst + line.sgst)).toBe(28);
+  });
+
   it("ignores a nonsense discount", () => {
-    expect(billLine({ qty: 1, mrp: 100, gstRate: 5, discountPercent: -5 }).discount).toBe(0);
-    expect(billLine({ qty: 1, mrp: 100, gstRate: 5, discountPercent: 250 }).total).toBe(0);
+    expect(billLine({ qty: 1, rate: 100, gstRate: 5, discountPercent: -5 }).discount).toBe(0);
+    expect(billLine({ qty: 1, rate: 100, gstRate: 5, discountPercent: 250 }).total).toBe(0);
   });
 });
 
 describe("bill totals", () => {
-  const lines = [billLine({ qty: 2, mrp: 105, gstRate: 5 }), billLine({ qty: 1, mrp: 200, gstRate: 12, discountPercent: 10 })];
+  const lines = [billLine({ qty: 2, rate: 105, gstRate: 5 }), billLine({ qty: 1, rate: 200, gstRate: 12, discountPercent: 10 })];
 
   it("adds up and rounds to the rupee", () => {
     const t = billTotals(lines);

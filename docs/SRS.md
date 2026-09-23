@@ -183,7 +183,15 @@ What was built, in this order, each step tested and committed on its own:
 
 Roles: `retail.sell` (the counter) and `retail.manage` (stock, customers, settings). The whole module is retailer-only.
 
-**Known limitation:** stock and billing work in whole packs (a strip or bottle as the catalogue defines it). Selling loose tablets out of a strip is not supported in this version.
+**Loose tablets (cut strips).** A chemist sells 4 tablets out of a strip of 15 all day, so stock is held in the **smallest sellable unit**, not the pack:
+- each batch carries `unitsPerPack` (15 for a strip of 15, **1** for a bottle, tube or injection, which therefore behave exactly as whole packs);
+- it is suggested from the catalogue's pack label when stock is received and can be corrected per batch, and a batch already on the shelf keeps its pack size when topped up, so a count can never silently change meaning;
+- the counter has no modes: each **line** is entered in strips or tablets, so one bill can hold both;
+- a tablet is priced from the strip's MRP, with the paise **rounded up by default** (the shop can choose exact) — that rounding is part of a shop's margin on a cut strip;
+- an open strip needs no special handling: 176 units of a strip of 15 simply reads as "11 strips + 11 loose";
+- stock value, sales velocity, reorder levels and margin all follow the fraction actually sold.
+
+Existing shelves are migrated by `scripts/migrate-shop-units.mts`, which keeps every number identical (`unitsPerPack = 1`) rather than guessing a pack size.
 
 ### 3.11 After launch 🔜
 Plus membership and Razorpay · commission model · pharma company promotions and regional demand analytics · Tally/Marg integration · returns and disputes workflow · delivery tracking · installable PWA with offline support · prescription records (DPDP-compliant) · retailer-side inventory.
@@ -213,8 +221,8 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `tickets` | app | tickets + call-backs with embedded replies; `TKT-` numbers from `counters` |
 | `creditaccounts`, `payments` | app | credit terms per (seller, buyer); receipts with their allocation across invoices |
 | `recalls` | app | recalled/advised batches; held listings point back with `recallId` |
-| `shopstocks`, `shopitems` | app | a retailer's own shelf (batch, cost, supplier) and per-medicine reorder settings |
-| `bills` | app | counter sales: frozen lines, MRP-inclusive GST, loyalty and prescriber |
+| `shopstocks`, `shopitems` | app | a retailer's own shelf (batch, cost, supplier, units + unitsPerPack) and per-medicine reorder settings |
+| `bills` | app | counter sales: frozen lines (strips or loose tablets), MRP-inclusive GST, loyalty and prescriber |
 | `customers` | app | the shop's patients, with consent and erasure state |
 | `loyaltyentries`, `refillnudges` | app | points ledger (FIFO expiry); refills already emailed or called |
 | `shopsettings` | app | per shop: stock cover, loyalty rates, customer retention |

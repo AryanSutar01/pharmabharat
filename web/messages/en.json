@@ -1295,6 +1295,20 @@
     "noPurchaseHistory": "You haven't bought this yet.",
     "wasLower": "was as low as {amount}",
     "bestToday": "Cheapest today",
-    "cheaperThanUsual": "{amount} less per pack"
+    "cheaperThanUsual": "{amount} less per pack",
+    "unitsPerPack": "Tablets per strip",
+    "unitsPerPackHint": "1 for a bottle, tube or injection — anything you can't cut.",
+    "perPackUnits": "{count} per strip",
+    "packsAndLoose": "{packs} + {loose} loose",
+    "openStrip": "{count} loose",
+    "looseUnits": "Loose tablets",
+    "sellAs": "Sell as",
+    "asStrips": "Strips",
+    "asTablets": "Tablets",
+    "perTablet": "{price} per tablet",
+    "looseRounding": "Loose tablet price",
+    "looseRoundingHint": "Dividing a strip's MRP rarely lands on a whole paisa. Most shops round the tablet price up.",
+    "roundUp": "Round up",
+    "roundExact": "Keep exact"
   }
 }

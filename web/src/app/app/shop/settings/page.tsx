@@ -18,6 +18,7 @@ export default async function ShopSettingsPage() {
         <SettingsForm
           values={{
             reorderCoverDays: settings.reorderCoverDays,
+            looseRounding: settings.looseRounding,
             retentionMonths: settings.retentionMonths,
             loyaltyActive: settings.loyalty.active,
             pointsPerHundred: settings.loyalty.pointsPerHundred,

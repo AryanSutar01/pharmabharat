@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/db/mongo";
 import { Order, type OrderDoc } from "@/lib/models/order";
 import { ShopItem, ShopStock, type ShopStockDoc } from "@/lib/models/shop-stock";
+import { inPacks, packsAndLoose, parsePackUnits } from "@/lib/retail/units";
 
 const DAY = 24 * 3600 * 1000;
 /** Batches with less than this left are flagged on the shelf. */
@@ -19,7 +20,12 @@ export type StockRow = {
   batchNo: string;
   expiryDate: string;
   daysToExpiry: number;
-  qty: number;
+  /** On the shelf, in the smallest sellable unit. */
+  units: number;
+  unitsPerPack: number;
+  /** The same quantity as the shop sees it: 11 strips and 11 loose. */
+  packs: number;
+  loose: number;
   cost: number;
   mrp: number;
   gstRate: number;
@@ -38,11 +44,15 @@ function toRow(s: ShopStockDoc, now: number): StockRow {
     batchNo: s.batchNo,
     expiryDate: new Date(s.expiryDate).toISOString(),
     daysToExpiry: Math.ceil((new Date(s.expiryDate).getTime() - now) / DAY),
-    qty: s.qty,
+    units: s.units,
+    unitsPerPack: s.unitsPerPack ?? 1,
+    packs: packsAndLoose(s.units, s.unitsPerPack ?? 1).packs,
+    loose: packsAndLoose(s.units, s.unitsPerPack ?? 1).loose,
     cost: s.cost,
     mrp: s.mrp,
     gstRate: s.gstRate,
-    value: Math.round(s.qty * s.cost * 100) / 100,
+    // Part of a strip is still money on the shelf, so value the fraction.
+    value: Math.round(inPacks(s.units, s.unitsPerPack ?? 1) * s.cost * 100) / 100,
     supplierName: s.supplierName ?? "",
     source: s.source ?? "manual",
   };
@@ -59,12 +69,12 @@ export async function listStock(
 
   if (opts.filter === "expiring") {
     filter.expiryDate = { $gt: now, $lte: new Date(now.getTime() + EXPIRY_LEVELS[0] * DAY) };
-    filter.qty = { $gt: 0 };
+    filter.units = { $gt: 0 };
   } else if (opts.filter === "expired") {
     filter.expiryDate = { $lte: now };
-    filter.qty = { $gt: 0 };
+    filter.units = { $gt: 0 };
   } else if (opts.filter === "out") {
-    filter.qty = { $lte: 0 };
+    filter.units = { $lte: 0 };
   }
   if (opts.q) filter.name = { $regex: opts.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
 
@@ -75,26 +85,28 @@ export async function listStock(
 /** Headline numbers for the shop stock page. */
 export async function stockSummary(businessId: mongoose.Types.ObjectId, now = new Date()) {
   await connectDB();
+  // Money is per pack, so divide the units back into packs before multiplying.
+  const perPack = { $divide: ["$units", { $max: [{ $ifNull: ["$unitsPerPack", 1] }, 1] }] };
   const [agg] = await ShopStock.aggregate<{ batches: number; packs: number; value: number; retail: number }>([
-    { $match: { businessId, qty: { $gt: 0 } } },
+    { $match: { businessId, units: { $gt: 0 } } },
     {
       $group: {
         _id: null,
         batches: { $sum: 1 },
-        packs: { $sum: "$qty" },
-        value: { $sum: { $multiply: ["$qty", "$cost"] } },
-        retail: { $sum: { $multiply: ["$qty", "$mrp"] } },
+        packs: { $sum: perPack },
+        value: { $sum: { $multiply: [perPack, "$cost"] } },
+        retail: { $sum: { $multiply: [perPack, "$mrp"] } },
       },
     },
   ]);
   const soon = new Date(now.getTime() + EXPIRY_LEVELS[0] * DAY);
   const [expiring, expired] = await Promise.all([
-    ShopStock.countDocuments({ businessId, qty: { $gt: 0 }, expiryDate: { $gt: now, $lte: soon } }),
-    ShopStock.countDocuments({ businessId, qty: { $gt: 0 }, expiryDate: { $lte: now } }),
+    ShopStock.countDocuments({ businessId, units: { $gt: 0 }, expiryDate: { $gt: now, $lte: soon } }),
+    ShopStock.countDocuments({ businessId, units: { $gt: 0 }, expiryDate: { $lte: now } }),
   ]);
   return {
     batches: agg?.batches ?? 0,
-    packs: agg?.packs ?? 0,
+    packs: Math.round((agg?.packs ?? 0) * 100) / 100,
     value: Math.round((agg?.value ?? 0) * 100) / 100,
     retail: Math.round((agg?.retail ?? 0) * 100) / 100,
     expiring,
@@ -110,7 +122,10 @@ export type StockInput = {
   batchNo: string;
   expiryDate: Date;
   mfgDate?: Date;
+  /** Packs received — converted to units using `unitsPerPack`. */
   qty: number;
+  /** Units in a pack; 1 (the default) means the pack cannot be split. */
+  unitsPerPack?: number;
   cost: number;
   mrp: number;
   gstRate: number;
@@ -134,11 +149,21 @@ export async function addStock(
   session?: mongoose.ClientSession,
 ) {
   const batchNo = input.batchNo.trim().toUpperCase();
+  // A batch already on the shelf keeps its pack size: topping it up must never
+  // silently redefine how many tablets a strip holds, or the count would lie.
+  const existing = await ShopStock.findOne({ businessId, productId: input.productId, batchNo }, { unitsPerPack: 1 })
+    .session(session ?? null)
+    .lean();
+  const unitsPerPack = Math.max(
+    Math.floor(input.unitsPerPack ?? existing?.unitsPerPack ?? parsePackUnits(input.packSizeLabel) ?? 1),
+    1,
+  );
   await ShopStock.updateOne(
     { businessId, productId: input.productId, batchNo },
     {
-      $inc: { qty: input.qty },
+      $inc: { units: input.qty * unitsPerPack },
       $set: {
+        unitsPerPack,
         name: input.name,
         manufacturer: input.manufacturer,
         packSizeLabel: input.packSizeLabel,
@@ -173,6 +198,8 @@ export async function addStock(
 export async function receiveOrder(order: OrderDoc, userId: string) {
   await connectDB();
   if (await ShopStock.exists({ businessId: order.buyerId, orderId: order._id })) return { added: 0 };
+  // A purchase order is always in whole packs; how many tablets those hold
+  // comes from the catalogue label and can be corrected on the shelf.
   for (const item of order.items) {
     await addStock(
       order.buyerId,
@@ -210,10 +237,10 @@ export async function receiveOrderSafely(orderId: mongoose.Types.ObjectId | stri
   }
 }
 
-/** Corrects the quantity on a batch (breakage, expiry write-off, a miscount). */
-export async function setStockQty(businessId: mongoose.Types.ObjectId, stockId: string, qty: number) {
+/** Corrects the count on a batch, in units (breakage, a write-off, a miscount). */
+export async function setStockUnits(businessId: mongoose.Types.ObjectId, stockId: string, units: number) {
   await connectDB();
-  await ShopStock.updateOne({ _id: stockId, businessId }, { $set: { qty: Math.max(qty, 0) } });
+  await ShopStock.updateOne({ _id: stockId, businessId }, { $set: { units: Math.max(Math.floor(units), 0) } });
 }
 
 export async function removeStock(businessId: mongoose.Types.ObjectId, stockId: string) {

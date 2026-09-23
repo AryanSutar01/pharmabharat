@@ -8,6 +8,7 @@ import { useErrorText } from "@/components/use-error-text";
 import { CUSTOMER_CONDITIONS } from "@/lib/retail/constants";
 import { billLine, billTotals } from "@/lib/retail/gst";
 import { redeemPlan, type LoyaltyRules } from "@/lib/retail/loyalty";
+import { packsAndLoose, type SaleUnit } from "@/lib/retail/units";
 import type { ShelfHit } from "@/lib/retail/billing";
 import type { CustomerHit } from "@/lib/retail/customers";
 import { addCustomer, customerSearch, saveBill, shelfSearch, type CustomerFormState } from "./actions";
@@ -21,6 +22,8 @@ type Line = {
   batches: ShelfHit["batches"];
   stockId: string;
   qty: number;
+  /** Whether the operator is counting strips or loose tablets. */
+  saleUnit: SaleUnit;
   discountPercent: number;
 };
 
@@ -47,7 +50,16 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
 
   const priced = lines.map((l) => {
     const batch = l.batches.find((b) => b.stockId === l.stockId)!;
-    return { line: l, batch, tax: billLine({ qty: l.qty, mrp: batch.mrp, gstRate: batch.gstRate, discountPercent: l.discountPercent }) };
+    const rate = l.saleUnit === "unit" ? batch.unitPrice : batch.mrp;
+    // How many of this unit are actually on the shelf.
+    const available = l.saleUnit === "unit" ? batch.units : Math.floor(batch.units / batch.unitsPerPack);
+    return {
+      line: l,
+      batch,
+      rate,
+      available,
+      tax: billLine({ qty: l.qty, rate, gstRate: batch.gstRate, discountPercent: l.discountPercent }),
+    };
   });
   const gross = billTotals(priced.map((p) => p.tax)).grandTotal;
   const redeem =
@@ -64,7 +76,8 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
       const first = hit.batches[0];
       const existing = prev.find((l) => l.stockId === first.stockId);
       if (existing) {
-        return prev.map((l) => (l === existing ? { ...l, qty: Math.min(l.qty + 1, first.qty) } : l));
+        const max = existing.saleUnit === "unit" ? first.units : Math.floor(first.units / first.unitsPerPack);
+        return prev.map((l) => (l === existing ? { ...l, qty: Math.min(l.qty + 1, max) } : l));
       }
       return [
         ...prev,
@@ -77,6 +90,7 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
           batches: hit.batches,
           stockId: first.stockId,
           qty: 1,
+          saleUnit: "pack",
           discountPercent: 0,
         },
       ];
@@ -90,7 +104,12 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
     setError(null);
     startSave(async () => {
       const res = await saveBill({
-        lines: lines.map((l) => ({ stockId: l.stockId, qty: l.qty, discountPercent: l.discountPercent })),
+        lines: lines.map((l) => ({
+          stockId: l.stockId,
+          qty: l.qty,
+          saleUnit: l.saleUnit,
+          discountPercent: l.discountPercent,
+        })),
         customerId: customer?.id,
         redeemPoints: redeem.points || undefined,
         payment: { mode },
@@ -117,13 +136,14 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
             <p className="px-4 py-12 text-center text-sm text-muted">{t("billEmpty")}</p>
           ) : (
             <ul className="divide-y divide-line">
-              {priced.map(({ line, batch, tax }) => (
+              {priced.map(({ line, batch, rate, available, tax }) => (
                 <li key={line.key} className="space-y-2 px-4 py-3 sm:px-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-medium">{line.name}</p>
                       <p className="text-xs text-muted">
                         {line.packSizeLabel} · {t("mrp")} {inr(batch.mrp)} · {t("gst")} {batch.gstRate}%
+                        {batch.unitsPerPack > 1 ? ` · ${t("perTablet", { price: inr(batch.unitPrice) })}` : ""}
                       </p>
                     </div>
                     <button
@@ -144,7 +164,10 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
                       >
                         {line.batches.map((b) => (
                           <option key={b.stockId} value={b.stockId}>
-                            {b.batchNo} · {monthYear(b.expiryDate)} · {b.qty}
+                            {b.batchNo} · {monthYear(b.expiryDate)} ·{" "}
+                            {b.unitsPerPack > 1
+                              ? t("packsAndLoose", { packs: b.packs, loose: b.loose })
+                              : t("packsShort") + " " + b.packs}
                           </option>
                         ))}
                       </Select>
@@ -154,12 +177,34 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
                       <Input
                         type="number"
                         min={1}
-                        max={batch.qty}
+                        max={available}
                         value={line.qty}
-                        onChange={(e) => patch(line.key, { qty: Math.min(Math.max(Number(e.target.value) || 1, 1), batch.qty) })}
+                        onChange={(e) => patch(line.key, { qty: Math.min(Math.max(Number(e.target.value) || 1, 1), available) })}
                         className="mt-1 h-9 w-20 text-sm"
                       />
                     </label>
+
+                    {/* A strip can be cut; a bottle cannot, so the choice only appears when it exists. */}
+                    {batch.unitsPerPack > 1 ? (
+                      <span className="text-xs text-muted">
+                        <span className="mb-1 block">{t("sellAs")}</span>
+                        <span className="inline-flex rounded-lg border border-line bg-white p-0.5">
+                          {(["pack", "unit"] as const).map((u) => (
+                            <button
+                              key={u}
+                              type="button"
+                              onClick={() => patch(line.key, { saleUnit: u, qty: 1 })}
+                              className={cn(
+                                "rounded-md px-2.5 py-1 text-xs font-medium",
+                                u === line.saleUnit ? "bg-brand-50 text-brand-800" : "text-muted",
+                              )}
+                            >
+                              {u === "pack" ? t("asStrips") : t("asTablets")}
+                            </button>
+                          ))}
+                        </span>
+                      </span>
+                    ) : null}
                     <label className="text-xs text-muted">
                       {t("discountPercent")}
                       <Input
@@ -175,7 +220,9 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
                       />
                     </label>
                     <span className="ml-auto text-right">
-                      <span className="block text-xs text-muted">{t("lineTotal")}</span>
+                      <span className="block text-xs text-muted">
+                        {line.qty} × {inr(rate)}
+                      </span>
                       <b className="tabular-nums">{inr(tax.total)}</b>
                     </span>
                   </div>
@@ -339,7 +386,14 @@ function ShelfSearch({ onPick }: { onPick: (hit: ShelfHit) => void }) {
                   <b className="block text-sm tabular-nums">
                     {format.number(h.batches[0].mrp, { style: "currency", currency: "INR", maximumFractionDigits: 2 })}
                   </b>
-                  <span className="text-muted">{t("inStock", { count: h.totalQty })}</span>
+                  <span className="text-muted">
+                    {h.divisible
+                      ? t("packsAndLoose", {
+                          packs: packsAndLoose(h.totalUnits, h.batches[0].unitsPerPack).packs,
+                          loose: packsAndLoose(h.totalUnits, h.batches[0].unitsPerPack).loose,
+                        })
+                      : t("inStock", { count: h.totalUnits })}
+                  </span>
                 </span>
               </button>
             </li>

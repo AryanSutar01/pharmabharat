@@ -72,7 +72,8 @@ export default async function ShopAlertsPage({ searchParams }: PageProps<"/app/s
                     <span className="min-w-0">
                       <span className="block text-sm font-medium">{r.name}</span>
                       <span className="block text-xs text-muted">
-                        {t("batch")} {r.batchNo} · {day(r.expiryDate)} · {r.qty} {t("packsShort")}
+                        {t("batch")} {r.batchNo} · {day(r.expiryDate)} · {r.packs} {t("packsShort")}
+                        {r.loose ? ` + ${r.loose}` : ""}
                       </span>
                     </span>
                     <span className="shrink-0 text-sm tabular-nums text-red-600">{inr(r.value)}</span>
@@ -95,7 +96,8 @@ export default async function ShopAlertsPage({ searchParams }: PageProps<"/app/s
                       <span className="min-w-0">
                         <span className="block text-sm font-medium">{r.name}</span>
                         <span className="block text-xs text-muted">
-                          {t("batch")} {r.batchNo} · {day(r.expiryDate)} · {r.qty} {t("packsShort")}
+                          {t("batch")} {r.batchNo} · {day(r.expiryDate)} · {r.packs} {t("packsShort")}
+                          {r.loose ? ` + ${r.loose}` : ""}
                         </span>
                       </span>
                       <span className="shrink-0 text-right">

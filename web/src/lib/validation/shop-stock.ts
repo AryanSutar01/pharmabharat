@@ -10,6 +10,8 @@ export const shopStockSchema = z
     batchNo: z.string().trim().toUpperCase().min(1, "required").max(30, "invalid"),
     expiryDate: z.coerce.date({ error: "invalid_date" }),
     qty: z.coerce.number().int("invalid").min(0, "invalid").max(1_000_000, "invalid"),
+    /** Tablets in a strip. 1 means the pack cannot be split (a bottle, a tube). */
+    unitsPerPack: z.coerce.number().int("invalid").min(1, "invalid").max(1000, "invalid").default(1),
     /** Purchase rate per pack, excluding GST. */
     cost: money,
     mrp: money.refine((v) => v > 0, "invalid"),

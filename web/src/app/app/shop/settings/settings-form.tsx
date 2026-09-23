@@ -2,12 +2,13 @@
 
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Alert, Button, Field, Input } from "@/components/ui";
+import { Alert, Button, Field, Input, Select } from "@/components/ui";
 import { useErrorText } from "@/components/use-error-text";
 import { saveShopSettings, type SettingsState } from "./actions";
 
 export type SettingsValues = {
   reorderCoverDays: number;
+  looseRounding: "up" | "exact";
   retentionMonths: number;
   loyaltyActive: boolean;
   pointsPerHundred: number;
@@ -31,6 +32,12 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
         <h2 className="text-sm font-semibold">{t("stockSettings")}</h2>
         <Field label={t("coverDays")} hint={t("coverDaysHint")} error={err(state.errors?.reorderCoverDays)}>
           <Input name="reorderCoverDays" type="number" min="1" max="120" defaultValue={values.reorderCoverDays} inputMode="numeric" />
+        </Field>
+        <Field label={t("looseRounding")} hint={t("looseRoundingHint")} error={err(state.errors?.looseRounding)}>
+          <Select name="looseRounding" defaultValue={values.looseRounding}>
+            <option value="up">{t("roundUp")}</option>
+            <option value="exact">{t("roundExact")}</option>
+          </Select>
         </Field>
       </section>
 

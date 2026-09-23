@@ -1295,6 +1295,20 @@
     "noPurchaseHistory": "आपने यह अभी तक नहीं खरीदा।",
     "wasLower": "{amount} तक भी मिला था",
     "bestToday": "आज सबसे सस्ता",
-    "cheaperThanUsual": "प्रति पैक {amount} कम"
+    "cheaperThanUsual": "प्रति पैक {amount} कम",
+    "unitsPerPack": "प्रति स्ट्रिप गोलियाँ",
+    "unitsPerPackHint": "बोतल, ट्यूब या इंजेक्शन के लिए 1 — जो काटा न जा सके।",
+    "perPackUnits": "{count} प्रति स्ट्रिप",
+    "packsAndLoose": "{packs} + {loose} खुली",
+    "openStrip": "{count} खुली",
+    "looseUnits": "खुली गोलियाँ",
+    "sellAs": "कैसे बेचें",
+    "asStrips": "स्ट्रिप",
+    "asTablets": "गोलियाँ",
+    "perTablet": "{price} प्रति गोली",
+    "looseRounding": "खुली गोली का भाव",
+    "looseRoundingHint": "स्ट्रिप का MRP बाँटने पर पूरा पैसा कम ही बनता है। ज़्यादातर दुकानें भाव ऊपर कर लेती हैं।",
+    "roundUp": "ऊपर करें",
+    "roundExact": "सटीक रखें"
   }
 }

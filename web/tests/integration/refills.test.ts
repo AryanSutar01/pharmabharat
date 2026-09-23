@@ -129,7 +129,7 @@ describe("refill reminders (integration, database: pharmabharat_test)", () => {
   });
 
   it("flags a repeat medicine that is not on the shelf", async () => {
-    await ShopStock.updateOne({ _id: vitStock }, { $set: { qty: 0 } });
+    await ShopStock.updateOne({ _id: vitStock }, { $set: { units: 0 } });
     const rows = await dueRefills(shop._id);
     expect(rows.find((r) => r.customerId === String(ravi))!.inStock).toBe(0);
     expect((await runRefillReminders(shop._id)).outOfStock).toBe(1);

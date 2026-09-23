@@ -5,6 +5,8 @@ export const SHOP_DEFAULTS = {
   reorderCoverDays: 15,
   /** Inactive customers' contact details are purged after this long (DPDP). */
   retentionMonths: 36,
+  /** Loose tablets: round the per-tablet price up to the paisa, or keep it exact. */
+  looseRounding: "up",
   /** Loyalty: points earned per rupee spent, and what a point is worth. */
   pointsPerHundred: 1,
   pointValue: 1,
@@ -18,6 +20,7 @@ const shopSettingsSchema = new Schema(
     businessId: { type: Schema.Types.ObjectId, ref: "Business", required: true, unique: true },
     reorderCoverDays: { type: Number, default: SHOP_DEFAULTS.reorderCoverDays, min: 1, max: 120 },
     retentionMonths: { type: Number, default: SHOP_DEFAULTS.retentionMonths, min: 6, max: 120 },
+    looseRounding: { type: String, enum: ["up", "exact"], default: SHOP_DEFAULTS.looseRounding },
     loyalty: {
       active: { type: Boolean, default: false },
       pointsPerHundred: { type: Number, default: SHOP_DEFAULTS.pointsPerHundred, min: 0, max: 100 },
@@ -42,6 +45,7 @@ export async function shopSettings(businessId: mongoose.Types.ObjectId) {
   return {
     reorderCoverDays: doc?.reorderCoverDays ?? SHOP_DEFAULTS.reorderCoverDays,
     retentionMonths: doc?.retentionMonths ?? SHOP_DEFAULTS.retentionMonths,
+    looseRounding: (doc?.looseRounding ?? SHOP_DEFAULTS.looseRounding) as "up" | "exact",
     loyalty: {
       active: doc?.loyalty?.active ?? false,
       pointsPerHundred: doc?.loyalty?.pointsPerHundred ?? SHOP_DEFAULTS.pointsPerHundred,

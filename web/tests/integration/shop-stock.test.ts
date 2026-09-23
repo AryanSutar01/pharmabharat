@@ -8,7 +8,7 @@ import { Order, type OrderDoc } from "@/lib/models/order";
 import { Product } from "@/lib/models/product";
 import { ShopItem, ShopStock } from "@/lib/models/shop-stock";
 import { placeOrders, transitionOrder } from "@/lib/orders/service";
-import { addStock, listStock, receiveOrder, setStockQty, stockSummary } from "@/lib/retail/stock";
+import { addStock, listStock, receiveOrder, setStockUnits, stockSummary } from "@/lib/retail/stock";
 
 const future = new Date(Date.now() + 400 * 24 * 3600 * 1000);
 const BUYER_USER = "shop-buyer";
@@ -80,7 +80,9 @@ describe("shop stock (integration, database: pharmabharat_test)", () => {
     expect(await receiveOrder(order, SELLER_USER)).toMatchObject({ added: 1 });
     const batch = await ShopStock.findOne({ businessId: shop._id, batchNo: "SB-01" }).lean();
     expect(batch).toMatchObject({
-      qty: 12,
+      // 12 strips of 10, read from the catalogue's "strip of 10" pack label.
+      units: 120,
+      unitsPerPack: 10,
       cost: 80, // what the shop paid, excluding GST
       mrp: 105,
       source: "order",
@@ -94,7 +96,7 @@ describe("shop stock (integration, database: pharmabharat_test)", () => {
 
   it("does not double-count if the order is received again", async () => {
     expect(await receiveOrder(order, SELLER_USER)).toMatchObject({ added: 0 });
-    expect((await ShopStock.findOne({ businessId: shop._id, batchNo: "SB-01" }).lean())!.qty).toBe(12);
+    expect((await ShopStock.findOne({ businessId: shop._id, batchNo: "SB-01" }).lean())!.units).toBe(120);
   });
 
   it("tops up an existing batch and keeps the latest prices", async () => {
@@ -113,7 +115,16 @@ describe("shop stock (integration, database: pharmabharat_test)", () => {
       "shop-staff",
     );
     const batch = await ShopStock.findOne({ businessId: shop._id, batchNo: "SB-01" }).lean();
-    expect(batch).toMatchObject({ qty: 20, cost: 82, mrp: 110 });
+    // 8 more strips of the same batch: its pack size is kept, so +80 tablets.
+    expect(batch).toMatchObject({ units: 200, unitsPerPack: 10, cost: 82, mrp: 110 });
+  });
+
+  it("shows a cut strip as strips plus loose", async () => {
+    const batch = await ShopStock.findOne({ businessId: shop._id, batchNo: "SB-01" }).lean();
+    await setStockUnits(shop._id, String(batch!._id), 176); // someone sold 24 tablets
+    const row = (await listStock(shop._id)).find((r) => r.batchNo === "SB-01")!;
+    expect(row).toMatchObject({ units: 176, packs: 17, loose: 6 });
+    await setStockUnits(shop._id, String(batch!._id), 200);
   });
 
   it("values the shelf at cost and at MRP, and counts what is expiring", async () => {
@@ -141,7 +152,7 @@ describe("shop stock (integration, database: pharmabharat_test)", () => {
 
   it("lets the shop correct a count, including down to zero", async () => {
     const batch = await ShopStock.findOne({ businessId: shop._id, batchNo: "SB-OLD" }).lean();
-    await setStockQty(shop._id, String(batch!._id), 0);
+    await setStockUnits(shop._id, String(batch!._id), 0);
     expect((await listStock(shop._id, { filter: "out" })).map((r) => r.batchNo)).toEqual(["SB-OLD"]);
     expect((await stockSummary(shop._id)).batches).toBe(1);
   });

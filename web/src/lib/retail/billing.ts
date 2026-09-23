@@ -10,6 +10,7 @@ import { ShopItem, ShopStock } from "@/lib/models/shop-stock";
 import { financialYear, round2 } from "@/lib/orders/gst";
 import { billLine, billTotals } from "@/lib/retail/gst";
 import { pointsExpiryDate, pointsForSpend, redeemPlan } from "@/lib/retail/loyalty";
+import { packsAndLoose, rateFor, unitCost, unitsSold, type SaleUnit } from "@/lib/retail/units";
 
 /** Don't sell what expires this month — the customer would be handed a dud. */
 const MIN_SHELF_LIFE_MS = 30 * 24 * 3600 * 1000;
@@ -34,11 +35,20 @@ export type ShelfHit = {
     stockId: string;
     batchNo: string;
     expiryDate: string;
-    qty: number;
+    /** On the shelf, in the smallest sellable unit. */
+    units: number;
+    unitsPerPack: number;
+    packs: number;
+    loose: number;
     mrp: number;
+    /** Price of one tablet cut from this strip. */
+    unitPrice: number;
     gstRate: number;
   }[];
-  totalQty: number;
+  /** Everything of this medicine on the shelf, in units. */
+  totalUnits: number;
+  /** True when at least one batch can be sold loose. */
+  divisible: boolean;
 };
 
 /**
@@ -50,15 +60,28 @@ export async function searchShelf(businessId: mongoose.Types.ObjectId, q: string
   if (term.length < 2) return [];
   await connectDB();
   const usable = new Date(Date.now() + MIN_SHELF_LIFE_MS);
+  const { looseRounding } = await shopSettings(businessId);
 
   const rows = await ShopStock.find(
     {
       businessId,
-      qty: { $gt: 0 },
+      units: { $gt: 0 },
       expiryDate: { $gt: usable },
       name: { $regex: term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" },
     },
-    { productId: 1, name: 1, manufacturer: 1, packSizeLabel: 1, schedule: 1, batchNo: 1, expiryDate: 1, qty: 1, mrp: 1, gstRate: 1 },
+    {
+      productId: 1,
+      name: 1,
+      manufacturer: 1,
+      packSizeLabel: 1,
+      schedule: 1,
+      batchNo: 1,
+      expiryDate: 1,
+      units: 1,
+      unitsPerPack: 1,
+      mrp: 1,
+      gstRate: 1,
+    },
   )
     .sort({ expiryDate: 1 })
     .limit(limit * 4)
@@ -76,24 +99,31 @@ export async function searchShelf(businessId: mongoose.Types.ObjectId, q: string
         packSizeLabel: r.packSizeLabel ?? "",
         schedule: r.schedule ?? "",
         batches: [],
-        totalQty: 0,
+        totalUnits: 0,
+        divisible: false,
       } satisfies ShelfHit);
+    const per = r.unitsPerPack ?? 1;
     hit.batches.push({
       stockId: String(r._id),
       batchNo: r.batchNo,
       expiryDate: new Date(r.expiryDate).toISOString(),
-      qty: r.qty,
+      units: r.units,
+      unitsPerPack: per,
+      packs: packsAndLoose(r.units, per).packs,
+      loose: packsAndLoose(r.units, per).loose,
       mrp: r.mrp,
+      unitPrice: rateFor({ mrp: r.mrp, saleUnit: "unit", unitsPerPack: per, rounding: looseRounding }),
       gstRate: r.gstRate,
     });
-    hit.totalQty += r.qty;
+    hit.totalUnits += r.units;
+    hit.divisible = hit.divisible || per > 1;
     byProduct.set(key, hit);
   }
   return [...byProduct.values()].slice(0, limit);
 }
 
 export type BillInput = {
-  lines: { stockId: string; qty: number; discountPercent?: number }[];
+  lines: { stockId: string; qty: number; saleUnit?: SaleUnit; discountPercent?: number }[];
   customerId?: string;
   customer?: { name?: string; phone?: string };
   payment?: { mode: BillPaymentMode; received?: number };
@@ -119,12 +149,20 @@ export async function createBill(
   const byId = new Map(batches.map((b) => [String(b._id), b]));
   const now = new Date();
 
+  const { loyalty: rules, looseRounding } = await shopSettings(businessId);
+
   const lines = input.lines.map((l) => {
     const batch = byId.get(l.stockId);
     if (!batch) throw new BillingError("not_found", l.stockId);
     if (new Date(batch.expiryDate) <= now) throw new BillingError("expired", batch.name);
-    if (l.qty < 1 || l.qty > batch.qty) throw new BillingError("out_of_stock", batch.name);
-    const tax = billLine({ qty: l.qty, mrp: batch.mrp, gstRate: batch.gstRate, discountPercent: l.discountPercent });
+
+    const per = batch.unitsPerPack ?? 1;
+    const saleUnit: SaleUnit = l.saleUnit === "unit" && per > 1 ? "unit" : "pack";
+    const units = unitsSold(l.qty, saleUnit, per);
+    if (units < 1 || units > batch.units) throw new BillingError("out_of_stock", batch.name);
+
+    const rate = rateFor({ mrp: batch.mrp, saleUnit, unitsPerPack: per, rounding: looseRounding });
+    const tax = billLine({ qty: l.qty, rate, gstRate: batch.gstRate, discountPercent: l.discountPercent });
     return {
       stockId: batch._id,
       productId: batch.productId,
@@ -135,6 +173,10 @@ export async function createBill(
       hsn: batch.hsn,
       schedule: batch.schedule,
       qty: l.qty,
+      saleUnit,
+      unitsPerPack: per,
+      units,
+      rate,
       mrp: batch.mrp,
       cost: batch.cost,
       gstRate: batch.gstRate,
@@ -143,7 +185,8 @@ export async function createBill(
     };
   });
 
-  const costTotal = round2(lines.reduce((a, l) => a + l.cost * l.qty, 0));
+  // Cost is per pack, so a cut strip only costs what its tablets cost.
+  const costTotal = round2(lines.reduce((a, l) => a + unitCost(l.cost, l.unitsPerPack) * l.units, 0));
   const customer = input.customerId
     ? await Customer.findOne(
         { _id: input.customerId, businessId },
@@ -152,7 +195,6 @@ export async function createBill(
     : null;
 
   // Loyalty: redeem first (it comes off what is payable), then earn on what is paid.
-  const { loyalty: rules } = await shopSettings(businessId);
   const gross = billTotals(lines).grandTotal;
   const redeem =
     customer && input.redeemPoints
@@ -168,8 +210,8 @@ export async function createBill(
       for (const l of lines) {
         // Conditional decrement: fails if another counter sold it meanwhile.
         const res = await ShopStock.updateOne(
-          { _id: l.stockId, businessId, qty: { $gte: l.qty } },
-          { $inc: { qty: -l.qty } },
+          { _id: l.stockId, businessId, units: { $gte: l.units } },
+          { $inc: { units: -l.units } },
           { session },
         );
         if (res.modifiedCount !== 1) throw new BillingError("out_of_stock", l.name);

@@ -3,6 +3,7 @@ import { z } from "zod";
 export const shopSettingsSchema = z.object({
   reorderCoverDays: z.coerce.number().int().min(1, "invalid").max(120, "invalid"),
   retentionMonths: z.coerce.number().int().min(6, "invalid").max(120, "invalid"),
+  looseRounding: z.enum(["up", "exact"]).default("up"),
   loyaltyActive: z.coerce.boolean(),
   pointsPerHundred: z.coerce.number().min(0, "invalid").max(100, "invalid"),
   pointValue: z.coerce.number().min(0, "invalid").max(100, "invalid"),

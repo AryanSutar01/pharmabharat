@@ -7,6 +7,7 @@ import { ShopItem, ShopStock } from "@/lib/models/shop-stock";
 import { shopSettings } from "@/lib/models/shop-settings";
 import { round2 } from "@/lib/orders/gst";
 import { notify } from "@/lib/notifications";
+import { inPacks, packsAndLoose } from "@/lib/retail/units";
 
 const DAY = 24 * 3600 * 1000;
 /** Warning levels for stock nearing expiry, in days. */
@@ -31,7 +32,9 @@ export type ExpiryRow = {
   batchNo: string;
   expiryDate: string;
   daysLeft: number;
-  qty: number;
+  units: number;
+  packs: number;
+  loose: number;
   /** Money tied up in this batch, at what the shop paid. */
   value: number;
   bucket: ShopExpiryLevel | "expired";
@@ -42,7 +45,7 @@ export async function expiringStock(businessId: mongoose.Types.ObjectId, now = n
   await connectDB();
   const rows = await ShopStock.find({
     businessId,
-    qty: { $gt: 0 },
+    units: { $gt: 0 },
     expiryDate: { $lte: new Date(now.getTime() + SHOP_EXPIRY_LEVELS[0] * DAY) },
   })
     .sort({ expiryDate: 1 })
@@ -58,8 +61,10 @@ export async function expiringStock(businessId: mongoose.Types.ObjectId, now = n
       batchNo: r.batchNo,
       expiryDate: new Date(r.expiryDate).toISOString(),
       daysLeft,
-      qty: r.qty,
-      value: round2(r.qty * r.cost),
+      units: r.units,
+      packs: packsAndLoose(r.units, r.unitsPerPack ?? 1).packs,
+      loose: packsAndLoose(r.units, r.unitsPerPack ?? 1).loose,
+      value: round2(inPacks(r.units, r.unitsPerPack ?? 1) * r.cost),
       bucket: daysLeft <= 0 ? ("expired" as const) : ([...SHOP_EXPIRY_LEVELS].reverse().find((l) => daysLeft <= l) ?? 90),
     };
   });
@@ -90,11 +95,25 @@ export async function lowStock(businessId: mongoose.Types.ObjectId, limit = 200)
     .lean();
   if (!items.length) return [];
 
-  const onShelf = await ShopStock.aggregate<{ _id: mongoose.Types.ObjectId; qty: number }>([
-    { $match: { businessId, productId: { $in: items.map((i) => i.productId) }, qty: { $gt: 0 }, expiryDate: { $gt: new Date() } } },
-    { $group: { _id: "$productId", qty: { $sum: "$qty" } } },
+  // Reorder levels are in packs - that is how the shop buys - so bring the
+  // shelf back to packs, counting a cut strip as the fraction it is.
+  const onShelf = await ShopStock.aggregate<{ _id: mongoose.Types.ObjectId; packs: number }>([
+    {
+      $match: {
+        businessId,
+        productId: { $in: items.map((i) => i.productId) },
+        units: { $gt: 0 },
+        expiryDate: { $gt: new Date() },
+      },
+    },
+    {
+      $group: {
+        _id: "$productId",
+        packs: { $sum: { $divide: ["$units", { $max: [{ $ifNull: ["$unitsPerPack", 1] }, 1] }] } },
+      },
+    },
   ]);
-  const qtyById = new Map(onShelf.map((r) => [String(r._id), r.qty]));
+  const qtyById = new Map(onShelf.map((r) => [String(r._id), Math.floor(r.packs * 100) / 100]));
 
   return items
     .map((i) => {
@@ -127,10 +146,18 @@ export async function computeReorderLevels(businessId: mongoose.Types.ObjectId, 
   const { reorderCoverDays } = await shopSettings(businessId);
   const since = new Date(now.getTime() - VELOCITY_WINDOW_DAYS * DAY);
 
+  // Lines are recorded in units; a day's sales are expressed in packs so the
+  // reorder level is something the shop can actually order.
   const sold = await Bill.aggregate<{ _id: mongoose.Types.ObjectId; packs: number; last: Date }>([
     { $match: { businessId, status: "final", createdAt: { $gte: since } } },
     { $unwind: "$lines" },
-    { $group: { _id: "$lines.productId", packs: { $sum: "$lines.qty" }, last: { $max: "$createdAt" } } },
+    {
+      $group: {
+        _id: "$lines.productId",
+        packs: { $sum: { $divide: ["$lines.units", { $max: [{ $ifNull: ["$lines.unitsPerPack", 1] }, 1] }] } },
+        last: { $max: "$createdAt" },
+      },
+    },
   ]);
   const soldById = new Map(sold.map((s) => [String(s._id), s]));
 
@@ -167,7 +194,7 @@ export async function runShopAlerts(businessId: mongoose.Types.ObjectId, now = n
   await connectDB();
   const batches = await ShopStock.find({
     businessId,
-    qty: { $gt: 0 },
+    units: { $gt: 0 },
     expiryDate: { $gt: now, $lte: new Date(now.getTime() + SHOP_EXPIRY_LEVELS[0] * DAY) },
   })
     .limit(1000)
@@ -177,7 +204,7 @@ export async function runShopAlerts(businessId: mongoose.Types.ObjectId, now = n
   for (const b of batches) {
     const daysLeft = Math.ceil((new Date(b.expiryDate).getTime() - now.getTime()) / DAY);
     const level = dueExpiryLevel(daysLeft, b.expiryAlertLevel);
-    if (level) due.push({ id: b._id, level, daysLeft, value: b.qty * b.cost });
+    if (level) due.push({ id: b._id, level, daysLeft, value: inPacks(b.units, b.unitsPerPack ?? 1) * b.cost });
   }
 
   if (due.length) {

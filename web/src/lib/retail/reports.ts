@@ -94,8 +94,21 @@ export async function shopReport(businessId: mongoose.Types.ObjectId, now = new 
         _id: "$lines.productId",
         name: { $last: "$lines.name" },
         sales: { $sum: "$lines.total" },
-        margin: { $sum: { $subtract: ["$lines.total", { $multiply: ["$lines.cost", "$lines.qty"] }] } },
-        packs: { $sum: "$lines.qty" },
+        margin: {
+          $sum: {
+            $subtract: [
+              "$lines.total",
+              // Cost is per pack, so a cut strip only costs what its tablets cost.
+              {
+                $multiply: [
+                  "$lines.cost",
+                  { $divide: ["$lines.units", { $max: [{ $ifNull: ["$lines.unitsPerPack", 1] }, 1] }] },
+                ],
+              },
+            ],
+          },
+        },
+        packs: { $sum: { $divide: ["$lines.units", { $max: [{ $ifNull: ["$lines.unitsPerPack", 1] }, 1] }] } },
       },
     },
     { $sort: { sales: -1 } },
@@ -106,7 +119,7 @@ export async function shopReport(businessId: mongoose.Types.ObjectId, now = new 
   const topSellers: Ranked[] = movers.slice(0, 8).map((m) => ({
     id: String(m._id),
     label: m.name,
-    sublabel: `${m.packs}`,
+    sublabel: `${Math.round(m.packs * 10) / 10}`,
     value: round2(m.sales),
   }));
   const topMargin: Ranked[] = [...movers]
@@ -115,14 +128,15 @@ export async function shopReport(businessId: mongoose.Types.ObjectId, now = new 
     .map((m) => ({ id: String(m._id), label: m.name, value: round2(m.margin) }));
 
   // Dead stock: on the shelf, in date, but nothing sold in the window.
+  const perPack = { $divide: ["$units", { $max: [{ $ifNull: ["$unitsPerPack", 1] }, 1] }] };
   const shelf = await ShopStock.aggregate<{ _id: mongoose.Types.ObjectId; name: string; qty: number; value: number }>([
-    { $match: { businessId, qty: { $gt: 0 }, expiryDate: { $gt: now } } },
+    { $match: { businessId, units: { $gt: 0 }, expiryDate: { $gt: now } } },
     {
       $group: {
         _id: "$productId",
         name: { $last: "$name" },
-        qty: { $sum: "$qty" },
-        value: { $sum: { $multiply: ["$qty", "$cost"] } },
+        qty: { $sum: perPack },
+        value: { $sum: { $multiply: [perPack, "$cost"] } },
       },
     },
     { $sort: { value: -1 } },
@@ -141,7 +155,7 @@ export async function shopReport(businessId: mongoose.Types.ObjectId, now = new 
     .map((s) => ({
       productId: String(s._id),
       name: s.name,
-      qty: s.qty,
+      qty: Math.round(s.qty * 10) / 10,
       value: round2(s.value),
       lastSoldAt: null as string | null,
     }));
@@ -169,8 +183,8 @@ export async function shopReport(businessId: mongoose.Types.ObjectId, now = new 
 
   // What expired on the shelf during the window, at cost.
   const [loss] = await ShopStock.aggregate<{ count: number; value: number }>([
-    { $match: { businessId, qty: { $gt: 0 }, expiryDate: { $gte: since, $lt: now } } },
-    { $group: { _id: null, count: { $sum: 1 }, value: { $sum: { $multiply: ["$qty", "$cost"] } } } },
+    { $match: { businessId, units: { $gt: 0 }, expiryDate: { $gte: since, $lt: now } } },
+    { $group: { _id: null, count: { $sum: 1 }, value: { $sum: { $multiply: [perPack, "$cost"] } } } },
   ]);
 
   // Output GST by rate, for the shop's monthly filing.

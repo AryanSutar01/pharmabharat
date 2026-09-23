@@ -3,7 +3,8 @@
 //
 // Retail differs from the B2B invoice in two ways:
 // - The MRP printed on the pack is **inclusive of GST**, so tax is worked
-//   backwards out of it: taxable = gross / (1 + rate/100).
+//   backwards out of it: taxable = gross / (1 + rate/100). A tablet cut from a
+//   strip is priced from that same MRP, so the same rule holds.
 // - The customer is always in the shop's own state, so it is always CGST + SGST.
 //
 // A discount is given on the MRP, and the tax follows the discounted price —
@@ -13,10 +14,13 @@ import { round2 } from "@/lib/orders/gst";
 
 export type BillLineInput = {
   qty: number;
-  /** Price per pack as printed on the pack, including GST. */
-  mrp: number;
+  /**
+   * Price of one of whatever was sold, including GST: the strip's MRP for a
+   * whole strip, or the per-tablet price for a cut one (see lib/retail/units).
+   */
+  rate: number;
   gstRate: number;
-  /** Percentage off the MRP for this line (0–100). */
+  /** Percentage off the printed price for this line (0–100). */
   discountPercent?: number;
 };
 
@@ -44,7 +48,7 @@ export type BillTotals = {
 };
 
 export function billLine(line: BillLineInput): BillLineTax {
-  const gross = round2(line.mrp * line.qty);
+  const gross = round2(line.rate * line.qty);
   const percent = Math.min(Math.max(line.discountPercent ?? 0, 0), 100);
   const discount = round2((gross * percent) / 100);
   const total = round2(gross - discount);

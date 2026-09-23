@@ -20,10 +20,17 @@ const billLineSchema = new Schema(
     expiryDate: { type: Date, required: true },
     hsn: String,
     schedule: String,
+    /** How many of `saleUnit` were handed over: 2 strips, or 4 tablets. */
     qty: { type: Number, required: true, min: 1 },
+    saleUnit: { type: String, enum: ["pack", "unit"], default: "pack" },
+    unitsPerPack: { type: Number, default: 1, min: 1 },
+    /** What came off the shelf, always in the smallest sellable unit. */
+    units: { type: Number, required: true, min: 1 },
+    /** Charged per `saleUnit`: the strip MRP, or the per-tablet price. */
+    rate: { type: Number, required: true, min: 0 },
     /** Printed MRP per pack — GST is inside it (see lib/retail/gst.ts). */
     mrp: { type: Number, required: true, min: 0 },
-    /** What the shop paid, copied so margin reports don't need the shelf row. */
+    /** What the shop paid per pack, copied so margin reports don't need the shelf row. */
     cost: { type: Number, default: 0 },
     gstRate: { type: Number, enum: GST_RATES, required: true },
     discountPercent: { type: Number, default: 0, min: 0, max: 100 },

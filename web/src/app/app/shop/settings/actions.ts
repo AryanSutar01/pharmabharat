@@ -26,6 +26,7 @@ export async function saveShopSettings(_: SettingsState, formData: FormData): Pr
       $set: {
         reorderCoverDays: v.reorderCoverDays,
         retentionMonths: v.retentionMonths,
+        looseRounding: v.looseRounding,
         "loyalty.active": v.loyaltyActive,
         "loyalty.pointsPerHundred": v.pointsPerHundred,
         "loyalty.pointValue": v.pointValue,

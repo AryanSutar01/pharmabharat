@@ -5,10 +5,15 @@ export const STOCK_SOURCES = ["order", "manual", "csv"] as const;
 export type StockSource = (typeof STOCK_SOURCES)[number];
 
 /**
- * One batch on a medical shop's own shelf. Quantities are whole packs, as the
- * catalogue defines the pack (a strip, a bottle…); loose tablets are out of scope.
- * `cost` is what the shop paid per pack excluding GST; `mrp` is what it sells at
- * (MRP includes GST — see lib/retail/gst.ts).
+ * One batch on a medical shop's own shelf.
+ *
+ * Quantity is held in the **smallest sellable unit** — a tablet, a capsule —
+ * because a chemist cuts strips all day. `unitsPerPack` says how many of those
+ * make one pack; it is 1 for anything that cannot be split (a syrup bottle, an
+ * injection), and such a batch behaves exactly as a whole pack.
+ *
+ * `cost` and `mrp` stay **per pack**: that is what the invoice and the foil say.
+ * Per-unit money is derived (see lib/retail/units.ts).
  */
 const shopStockSchema = new Schema(
   {
@@ -23,7 +28,10 @@ const shopStockSchema = new Schema(
     expiryDate: { type: Date, required: true },
     mfgDate: Date,
 
-    qty: { type: Number, required: true, min: 0, default: 0 },
+    /** On the shelf, in the smallest sellable unit. */
+    units: { type: Number, required: true, min: 0, default: 0 },
+    /** Units in one pack: 15 for a strip of 15, 1 for a bottle. */
+    unitsPerPack: { type: Number, required: true, min: 1, default: 1 },
     /** Purchase rate per pack, excluding GST. Drives the margin reports. */
     cost: { type: Number, required: true, min: 0 },
     mrp: { type: Number, required: true, min: 0 },

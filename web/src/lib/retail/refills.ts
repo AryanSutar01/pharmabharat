@@ -30,7 +30,7 @@ export type RefillRow = {
   dueAt: string;
   dueOn: string;
   daysLate: number;
-  /** Packs of that medicine on the shelf right now. */
+  /** Units of that medicine on the shelf right now (0 means none). */
   inStock: number;
   emailedAt: string | null;
   contactedAt: string | null;
@@ -76,8 +76,15 @@ export async function dueRefills(businessId: mongoose.Types.ObjectId, now = new 
   const [customers, stock, nudges] = await Promise.all([
     Customer.find({ _id: { $in: customerIds }, businessId, status: "active" }).lean(),
     ShopStock.aggregate<{ _id: mongoose.Types.ObjectId; qty: number }>([
-      { $match: { businessId, productId: { $in: productIds.map((id) => new mongoose.Types.ObjectId(id)) }, qty: { $gt: 0 }, expiryDate: { $gt: now } } },
-      { $group: { _id: "$productId", qty: { $sum: "$qty" } } },
+      {
+        $match: {
+          businessId,
+          productId: { $in: productIds.map((id) => new mongoose.Types.ObjectId(id)) },
+          units: { $gt: 0 },
+          expiryDate: { $gt: now },
+        },
+      },
+      { $group: { _id: "$productId", qty: { $sum: "$units" } } },
     ]),
     RefillNudge.find({ businessId, customerId: { $in: customerIds } }).lean(),
   ]);

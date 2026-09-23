@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
 import { useErrorText } from "@/components/use-error-text";
 import { GST_RATES } from "@/lib/catalog/constants";
-import { addShopStock, deleteShopStock, updateShopStockQty, type StockFormState } from "./actions";
+import { addShopStock, deleteShopStock, updateShopStockUnits, type StockFormState } from "./actions";
+import { packsAndLoose, parsePackUnits } from "@/lib/retail/units";
 
 type PickedProduct = { id: string; name: string; manufacturer: string; packSizeLabel: string; mrp?: number };
 
@@ -60,6 +61,16 @@ export function AddStockForm() {
         </Field>
         <Field label={t("qtyPacks")} hint={t("qtyPacksHint")} error={e("qty")}>
           <Input name="qty" type="number" min="0" step="1" required inputMode="numeric" defaultValue={v.qty ?? "1"} />
+        </Field>
+        <Field label={t("unitsPerPack")} hint={t("unitsPerPackHint")} error={e("unitsPerPack")}>
+          <Input
+            name="unitsPerPack"
+            type="number"
+            min="1"
+            step="1"
+            inputMode="numeric"
+            defaultValue={v.unitsPerPack ?? String(parsePackUnits(picked.packSizeLabel) ?? 1)}
+          />
         </Field>
         <Field label={t("mrp")} error={e("mrp")}>
           <Input name="mrp" type="number" min="0" step="0.01" required inputMode="decimal" defaultValue={v.mrp ?? picked.mrp} />
@@ -147,28 +158,58 @@ function ProductPicker({ onPick }: { onPick: (p: PickedProduct) => void }) {
   );
 }
 
-/** Correct a count on the shelf, or drop a batch that was never really there. */
-export function StockRowControls({ id, qty }: { id: string; qty: number }) {
+/**
+ * Correct a count on the shelf, or drop a batch that was never really there.
+ * The shop counts in strips, so that is what it types; a cut strip is shown
+ * separately and edited in tablets.
+ */
+export function StockRowControls({ id, units, unitsPerPack }: { id: string; units: number; unitsPerPack: number }) {
   const t = useTranslations("shop");
-  const [value, setValue] = useState(String(qty));
+  const split = packsAndLoose(units, unitsPerPack);
+  const [packs, setPacks] = useState(String(split.packs));
+  const [loose, setLoose] = useState(String(split.loose));
   const [pending, start] = useTransition();
+
+  const commit = (nextPacks: number, nextLoose: number) => {
+    const total = nextPacks * unitsPerPack + nextLoose;
+    if (total !== units) start(async () => void (await updateShopStockUnits(id, total)));
+  };
 
   return (
     <div className="flex items-center gap-2">
       <input
         aria-label={t("qtyPacks")}
         inputMode="numeric"
-        value={value}
+        value={packs}
         disabled={pending}
-        onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))}
+        onChange={(e) => setPacks(e.target.value.replace(/\D/g, ""))}
         onBlur={() => {
-          const n = Number(value);
-          if (Number.isInteger(n) && n >= 0 && n !== qty) start(async () => void (await updateShopStockQty(id, n)));
-          else setValue(String(qty));
+          const n = Number(packs);
+          if (Number.isInteger(n) && n >= 0) commit(n, Number(loose) || 0);
+          else setPacks(String(split.packs));
         }}
         onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-        className="h-9 w-16 rounded-md border border-line bg-white px-2 text-right text-base tabular-nums sm:text-sm"
+        className="h-9 w-14 rounded-md border border-line bg-white px-2 text-right text-base tabular-nums sm:text-sm"
       />
+      {unitsPerPack > 1 ? (
+        <>
+          <span className="text-xs text-muted">+</span>
+          <input
+            aria-label={t("looseUnits")}
+            inputMode="numeric"
+            value={loose}
+            disabled={pending}
+            onChange={(e) => setLoose(e.target.value.replace(/\D/g, ""))}
+            onBlur={() => {
+              const n = Number(loose);
+              if (Number.isInteger(n) && n >= 0 && n < unitsPerPack) commit(Number(packs) || 0, n);
+              else setLoose(String(split.loose));
+            }}
+            onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+            className="h-9 w-12 rounded-md border border-line bg-white px-2 text-right text-base tabular-nums sm:text-sm"
+          />
+        </>
+      ) : null}
       <button
         type="button"
         disabled={pending}

@@ -97,6 +97,7 @@ export default async function ShopStockPage({ searchParams }: PageProps<"/app/sh
                     <p className="mt-0.5 text-xs text-muted">
                       {t("batch")} {r.batchNo} · {t("exp")} {monthYear(r.expiryDate)} · {t("mrp")} {inr(r.mrp)} ·{" "}
                       {t("cost")} {inr(r.cost)}
+                      {r.unitsPerPack > 1 ? ` · ${t("perPackUnits", { count: r.unitsPerPack })}` : ""}
                       {r.supplierName ? ` · ${r.supplierName}` : ""}
                     </p>
                     <div className="mt-1 flex flex-wrap gap-1">
@@ -105,11 +106,12 @@ export default async function ShopStockPage({ searchParams }: PageProps<"/app/sh
                       ) : r.daysToExpiry <= 90 ? (
                         <Badge tone="warning">{t("expiresInDays", { days: r.daysToExpiry })}</Badge>
                       ) : null}
-                      {r.qty === 0 ? <Badge tone="neutral">{t("outOfStock")}</Badge> : null}
+                      {r.units === 0 ? <Badge tone="neutral">{t("outOfStock")}</Badge> : null}
+                      {r.loose > 0 ? <Badge tone="info">{t("openStrip", { count: r.loose })}</Badge> : null}
                       {r.source === "order" ? <Badge tone="info">{t("fromOrder")}</Badge> : null}
                     </div>
                   </div>
-                  <StockRowControls id={r.id} qty={r.qty} />
+                  <StockRowControls id={r.id} units={r.units} unitsPerPack={r.unitsPerPack} />
                 </li>
               ))}
             </ul>
