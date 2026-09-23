@@ -145,7 +145,10 @@ export async function createBill(
 
   const costTotal = round2(lines.reduce((a, l) => a + l.cost * l.qty, 0));
   const customer = input.customerId
-    ? await Customer.findOne({ _id: input.customerId, businessId }, { name: 1, phone: 1, loyaltyPoints: 1 }).lean()
+    ? await Customer.findOne(
+        { _id: input.customerId, businessId },
+        { name: 1, phone: 1, loyaltyPoints: 1, firstVisitAt: 1 },
+      ).lean()
     : null;
 
   // Loyalty: redeem first (it comes off what is payable), then earn on what is paid.
@@ -208,8 +211,9 @@ export async function createBill(
           { _id: customer._id },
           {
             $inc: { visits: 1, totalSpend: totals.grandTotal, loyaltyPoints: earned - redeem.points },
-            $set: { lastVisitAt: now },
-            $setOnInsert: { firstVisitAt: now },
+            // $setOnInsert never fires here (the customer already exists), so the
+            // first visit has to be filled in explicitly.
+            $set: { lastVisitAt: now, firstVisitAt: customer.firstVisitAt ?? now },
           },
           { session },
         );
