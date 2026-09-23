@@ -3,10 +3,13 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/db/mongo";
 import { Bill, type BillDoc, type BillPaymentMode } from "@/lib/models/bill";
 import { Customer } from "@/lib/models/customer";
+import { LoyaltyEntry } from "@/lib/models/loyalty";
 import { nextSequence } from "@/lib/models/order";
+import { shopSettings } from "@/lib/models/shop-settings";
 import { ShopItem, ShopStock } from "@/lib/models/shop-stock";
 import { financialYear, round2 } from "@/lib/orders/gst";
 import { billLine, billTotals } from "@/lib/retail/gst";
+import { pointsExpiryDate, pointsForSpend, redeemPlan } from "@/lib/retail/loyalty";
 
 /** Don't sell what expires this month — the customer would be handed a dud. */
 const MIN_SHELF_LIFE_MS = 30 * 24 * 3600 * 1000;
@@ -94,7 +97,8 @@ export type BillInput = {
   customerId?: string;
   customer?: { name?: string; phone?: string };
   payment?: { mode: BillPaymentMode; received?: number };
-  redeemValue?: number;
+  /** Loyalty points the customer wants to spend on this bill. */
+  redeemPoints?: number;
   prescription?: { doctorName?: string; registrationNo?: string; date?: Date; patientName?: string };
 };
 
@@ -139,11 +143,20 @@ export async function createBill(
     };
   });
 
-  const totals = billTotals(lines, input.redeemValue ?? 0);
   const costTotal = round2(lines.reduce((a, l) => a + l.cost * l.qty, 0));
   const customer = input.customerId
-    ? await Customer.findOne({ _id: input.customerId, businessId }, { name: 1, phone: 1 }).lean()
+    ? await Customer.findOne({ _id: input.customerId, businessId }, { name: 1, phone: 1, loyaltyPoints: 1 }).lean()
     : null;
+
+  // Loyalty: redeem first (it comes off what is payable), then earn on what is paid.
+  const { loyalty: rules } = await shopSettings(businessId);
+  const gross = billTotals(lines).grandTotal;
+  const redeem =
+    customer && input.redeemPoints
+      ? redeemPlan({ balance: customer.loyaltyPoints ?? 0, billTotal: gross, wantPoints: input.redeemPoints, rules })
+      : { points: 0, value: 0 };
+  const totals = billTotals(lines, redeem.value);
+  const earned = customer ? pointsForSpend(totals.grandTotal, rules) : 0;
 
   const session = await mongoose.startSession();
   let bill: BillDoc | null = null;
@@ -172,7 +185,7 @@ export async function createBill(
             totals,
             costTotal,
             payment: { mode: input.payment?.mode ?? "cash", received: input.payment?.received },
-            loyalty: { earned: 0, redeemed: 0, value: totals.redeemed },
+            loyalty: { earned, redeemed: redeem.points, value: totals.redeemed },
             prescription: input.prescription,
             createdBy: user.id,
             createdByName: user.name,
@@ -194,12 +207,36 @@ export async function createBill(
         await Customer.updateOne(
           { _id: customer._id },
           {
-            $inc: { visits: 1, totalSpend: totals.grandTotal },
+            $inc: { visits: 1, totalSpend: totals.grandTotal, loyaltyPoints: earned - redeem.points },
             $set: { lastVisitAt: now },
             $setOnInsert: { firstVisitAt: now },
           },
           { session },
         );
+        const entries = [];
+        if (redeem.points > 0) {
+          entries.push({
+            businessId,
+            customerId: customer._id,
+            billId: bill._id,
+            kind: "redeemed" as const,
+            points: -redeem.points,
+            value: redeem.value,
+            createdBy: user.id,
+          });
+        }
+        if (earned > 0) {
+          entries.push({
+            businessId,
+            customerId: customer._id,
+            billId: bill._id,
+            kind: "earned" as const,
+            points: earned,
+            expiresAt: pointsExpiryDate(rules, now),
+            createdBy: user.id,
+          });
+        }
+        if (entries.length) await LoyaltyEntry.create(entries, { session, ordered: true });
       }
     });
   } finally {

@@ -190,7 +190,8 @@
     "bills": "Bills",
     "customers": "Customers",
     "shopAlerts": "Stock alerts",
-    "refills": "Refills due"
+    "refills": "Refills due",
+    "shopSettings": "Shop settings"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -1194,6 +1195,30 @@
     "called": "called {date}",
     "call": "Call",
     "markCalled": "Mark called",
-    "marking": "Saving…"
+    "marking": "Saving…",
+    "settingsTitle": "Shop settings",
+    "settingsSubtitle": "How your stock alerts, loyalty scheme and customer records behave.",
+    "settingsSaved": "Settings saved.",
+    "stockSettings": "Stock",
+    "coverDays": "Days of cover",
+    "coverDaysHint": "Reorder levels are set to cover this many days of typical sales. 15 is a good default.",
+    "loyaltyTitle": "Loyalty points",
+    "loyaltyActive": "Run a loyalty scheme",
+    "pointsPerHundred": "Points per ₹100 spent",
+    "pointsPerHundredHint": "Part-hundreds don't earn.",
+    "pointValue": "Rupees per point",
+    "pointValueHint": "What one point takes off a bill.",
+    "minRedeem": "Minimum to redeem",
+    "minRedeemHint": "Points can only be used once the balance reaches this.",
+    "pointExpiry": "Points last (months)",
+    "pointExpiryHint": "Unused points lapse after this, oldest first.",
+    "loyaltyExample": "A ₹{spend} bill earns {points} points, worth ₹{value} off a later bill.",
+    "privacyTitle": "Customer records",
+    "retention": "Keep inactive customers (months)",
+    "retentionHint": "After this long without a visit, a customer's contact details are erased automatically. Their bills stay.",
+    "pointsBalance": "{points} points",
+    "usePoints": "Use {points} points ({value} off)",
+    "pointsUsed": "Points used ({points})",
+    "pointsEarned": "Points earned"
   }
 }

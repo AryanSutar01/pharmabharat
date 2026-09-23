@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Card, PageHeader } from "@/components/ui";
+import { shopSettings } from "@/lib/models/shop-settings";
 import { dayTotals } from "@/lib/retail/billing";
 import { requireShop } from "@/lib/retail/guard";
 import { BillingCounter } from "./billing-counter";
@@ -17,7 +18,7 @@ export default async function BillingPage() {
   const ist = new Date(now.getTime() + 5.5 * 3600 * 1000);
   const from = new Date(Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()) - 5.5 * 3600 * 1000);
   const to = new Date(from.getTime() + 24 * 3600 * 1000 - 1);
-  const today = await dayTotals(business._id, from, to);
+  const [today, settings] = await Promise.all([dayTotals(business._id, from, to), shopSettings(business._id)]);
   const inr = (v: number) => format.number(v, { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 
   return (
@@ -47,7 +48,7 @@ export default async function BillingPage() {
         </Card>
       </div>
 
-      <BillingCounter />
+      <BillingCounter loyalty={settings.loyalty} />
     </>
   );
 }

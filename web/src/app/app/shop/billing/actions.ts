@@ -23,6 +23,7 @@ const billSchema = z.object({
     .min(1)
     .max(60),
   customerId: objectId.optional(),
+  redeemPoints: z.number().int().min(0).max(1_000_000).optional(),
   payment: z.object({ mode: z.enum(["cash", "upi", "card"]), received: z.number().min(0).max(10_000_000).optional() }),
   prescription: z
     .object({

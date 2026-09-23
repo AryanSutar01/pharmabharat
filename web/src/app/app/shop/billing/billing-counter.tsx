@@ -7,6 +7,7 @@ import { Alert, Badge, Button, Card, CardHeader, Field, Input, Select, cn } from
 import { useErrorText } from "@/components/use-error-text";
 import { CUSTOMER_CONDITIONS } from "@/lib/retail/constants";
 import { billLine, billTotals } from "@/lib/retail/gst";
+import { redeemPlan, type LoyaltyRules } from "@/lib/retail/loyalty";
 import type { ShelfHit } from "@/lib/retail/billing";
 import type { CustomerHit } from "@/lib/retail/customers";
 import { addCustomer, customerSearch, saveBill, shelfSearch, type CustomerFormState } from "./actions";
@@ -27,7 +28,7 @@ const PAYMENT_MODES = ["cash", "upi", "card"] as const;
 /** Schedule H and H1 medicines need the prescriber recorded. */
 const RX_SCHEDULES = ["h", "h1", "x"];
 
-export function BillingCounter() {
+export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
   const t = useTranslations("shop");
   const err = useErrorText();
   const format = useFormatter();
@@ -37,6 +38,7 @@ export function BillingCounter() {
   const [customer, setCustomer] = useState<CustomerHit | null>(null);
   const [mode, setMode] = useState<(typeof PAYMENT_MODES)[number]>("cash");
   const [rx, setRx] = useState({ doctorName: "", registrationNo: "", patientName: "" });
+  const [usePoints, setUsePoints] = useState(true);
   const [error, setError] = useState<{ code: string; detail?: string } | null>(null);
   const [saving, startSave] = useTransition();
 
@@ -47,7 +49,12 @@ export function BillingCounter() {
     const batch = l.batches.find((b) => b.stockId === l.stockId)!;
     return { line: l, batch, tax: billLine({ qty: l.qty, mrp: batch.mrp, gstRate: batch.gstRate, discountPercent: l.discountPercent }) };
   });
-  const totals = billTotals(priced.map((p) => p.tax));
+  const gross = billTotals(priced.map((p) => p.tax)).grandTotal;
+  const redeem =
+    customer && usePoints
+      ? redeemPlan({ balance: customer.points, billTotal: gross, rules: loyalty })
+      : { points: 0, value: 0 };
+  const totals = billTotals(priced.map((p) => p.tax), redeem.value);
   const needsRx = lines.some((l) => RX_SCHEDULES.includes((l.schedule ?? "").toLowerCase()));
 
   function addProduct(hit: ShelfHit) {
@@ -85,6 +92,7 @@ export function BillingCounter() {
       const res = await saveBill({
         lines: lines.map((l) => ({ stockId: l.stockId, qty: l.qty, discountPercent: l.discountPercent })),
         customerId: customer?.id,
+        redeemPoints: redeem.points || undefined,
         payment: { mode },
         prescription: needsRx ? rx : undefined,
       });
@@ -225,11 +233,23 @@ export function BillingCounter() {
                 </button>
               ))}
             </div>
+            {customer && loyalty.active && customer.points >= loyalty.minRedeemPoints ? (
+              <label className="flex items-start gap-2 rounded-lg bg-brand-50 p-2.5 text-xs">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 size-4"
+                  checked={usePoints}
+                  onChange={(e) => setUsePoints(e.target.checked)}
+                />
+                <span>{t("usePoints", { points: customer.points, value: inr(redeem.value) })}</span>
+              </label>
+            ) : null}
             <dl className="space-y-1 border-t border-line pt-3">
               <Row label={t("subtotal")} value={inr(totals.gross)} />
               {totals.discount ? <Row label={t("discount")} value={`− ${inr(totals.discount)}`} /> : null}
               <Row label={t("taxable")} value={inr(totals.taxable)} />
               <Row label={`${t("cgst")} + ${t("sgst")}`} value={inr(totals.tax)} />
+              {redeem.points ? <Row label={t("pointsUsed", { points: redeem.points })} value={`− ${inr(redeem.value)}`} /> : null}
               {totals.roundOff ? <Row label={t("roundOff")} value={inr(totals.roundOff)} /> : null}
               <div className="flex justify-between border-t border-line pt-2 text-base font-semibold">
                 <dt>{t("payable")}</dt>
@@ -358,6 +378,7 @@ function CustomerBox({ customer, onChange }: { customer: CustomerHit | null; onC
         <div className="min-w-0">
           <p className="font-medium">{customer.name}</p>
           <p className="text-xs text-muted">{customer.phone || t("noPhone")}</p>
+          {customer.points > 0 ? <p className="text-xs text-brand-700">{t("pointsBalance", { points: customer.points })}</p> : null}
           <div className="mt-1 flex flex-wrap gap-1">
             {customer.conditions.map((c) => (
               <Badge key={c} tone="info">

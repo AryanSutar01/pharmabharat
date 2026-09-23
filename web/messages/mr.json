@@ -190,7 +190,8 @@
     "bills": "बिले",
     "customers": "ग्राहक",
     "shopAlerts": "साठा सूचना",
-    "refills": "रिफिल बाकी"
+    "refills": "रिफिल बाकी",
+    "shopSettings": "दुकान सेटिंग"
   },
   "onboarding": {
     "title": "तुमचा व्यवसाय सेट करा",
@@ -1194,6 +1195,30 @@
     "called": "{date} रोजी फोन",
     "call": "फोन",
     "markCalled": "फोन केला",
-    "marking": "जतन करत आहे…"
+    "marking": "जतन करत आहे…",
+    "settingsTitle": "दुकान सेटिंग",
+    "settingsSubtitle": "साठा सूचना, लॉयल्टी योजना आणि ग्राहक नोंदी कशा चालाव्यात.",
+    "settingsSaved": "सेटिंग जतन केली.",
+    "stockSettings": "साठा",
+    "coverDays": "किती दिवसांचा साठा",
+    "coverDaysHint": "पुनर्भरण पातळी इतक्या दिवसांच्या नेहमीच्या विक्रीसाठी ठरते. 15 योग्य आहे.",
+    "loyaltyTitle": "लॉयल्टी पॉइंट्स",
+    "loyaltyActive": "लॉयल्टी योजना चालवा",
+    "pointsPerHundred": "प्रति ₹100 वर पॉइंट्स",
+    "pointsPerHundredHint": "अपूर्ण शंभरावर पॉइंट मिळत नाहीत.",
+    "pointValue": "प्रति पॉइंट रुपये",
+    "pointValueHint": "एक पॉइंट बिलातून किती कमी करतो.",
+    "minRedeem": "वापरण्यासाठी किमान",
+    "minRedeemHint": "एवढी शिल्लक झाल्यावरच पॉइंट वापरता येतात.",
+    "pointExpiry": "पॉइंट्सची मुदत (महिने)",
+    "pointExpiryHint": "न वापरलेले पॉइंट यानंतर संपतात, जुने आधी.",
+    "loyaltyExample": "₹{spend} च्या बिलावर {points} पॉइंट्स मिळतात, पुढील बिलात ₹{value} सवलत.",
+    "privacyTitle": "ग्राहक नोंदी",
+    "retention": "निष्क्रिय ग्राहक ठेवा (महिने)",
+    "retentionHint": "इतका काळ न आल्यास ग्राहकाचे संपर्क तपशील आपोआप पुसले जातात. त्यांची बिले राहतात.",
+    "pointsBalance": "{points} पॉइंट्स",
+    "usePoints": "{points} पॉइंट्स वापरा ({value} सवलत)",
+    "pointsUsed": "पॉइंट्स वापरले ({points})",
+    "pointsEarned": "पॉइंट्स मिळाले"
   }
 }

@@ -190,7 +190,8 @@
     "bills": "बिल",
     "customers": "ग्राहक",
     "shopAlerts": "स्टॉक अलर्ट",
-    "refills": "रिफिल बाकी"
+    "refills": "रिफिल बाकी",
+    "shopSettings": "दुकान सेटिंग"
   },
   "onboarding": {
     "title": "अपना व्यवसाय सेट करें",
@@ -1194,6 +1195,30 @@
     "called": "{date} को फ़ोन",
     "call": "फ़ोन",
     "markCalled": "फ़ोन किया",
-    "marking": "सहेजा जा रहा है…"
+    "marking": "सहेजा जा रहा है…",
+    "settingsTitle": "दुकान सेटिंग",
+    "settingsSubtitle": "स्टॉक अलर्ट, लॉयल्टी योजना और ग्राहक रिकॉर्ड कैसे काम करें।",
+    "settingsSaved": "सेटिंग सहेज ली गई।",
+    "stockSettings": "स्टॉक",
+    "coverDays": "कितने दिनों का स्टॉक",
+    "coverDaysHint": "रीऑर्डर स्तर इतने दिनों की सामान्य बिक्री के लिए तय होता है। 15 ठीक रहता है।",
+    "loyaltyTitle": "लॉयल्टी पॉइंट",
+    "loyaltyActive": "लॉयल्टी योजना चलाएँ",
+    "pointsPerHundred": "प्रति ₹100 पर पॉइंट",
+    "pointsPerHundredHint": "अधूरे सौ पर पॉइंट नहीं मिलते।",
+    "pointValue": "प्रति पॉइंट रुपये",
+    "pointValueHint": "एक पॉइंट बिल से कितना कम करता है।",
+    "minRedeem": "उपयोग के लिए न्यूनतम",
+    "minRedeemHint": "बैलेंस इतना होने पर ही पॉइंट इस्तेमाल हो सकते हैं।",
+    "pointExpiry": "पॉइंट की अवधि (महीने)",
+    "pointExpiryHint": "बिना इस्तेमाल के पॉइंट इसके बाद समाप्त हो जाते हैं, पुराने पहले।",
+    "loyaltyExample": "₹{spend} के बिल पर {points} पॉइंट मिलते हैं, जो आगे के बिल में ₹{value} की छूट देते हैं।",
+    "privacyTitle": "ग्राहक रिकॉर्ड",
+    "retention": "निष्क्रिय ग्राहक रखें (महीने)",
+    "retentionHint": "इतने समय तक न आने पर ग्राहक का संपर्क विवरण अपने आप मिटा दिया जाता है। उनके बिल बने रहते हैं।",
+    "pointsBalance": "{points} पॉइंट",
+    "usePoints": "{points} पॉइंट लगाएँ ({value} की छूट)",
+    "pointsUsed": "पॉइंट लगाए ({points})",
+    "pointsEarned": "पॉइंट मिले"
   }
 }

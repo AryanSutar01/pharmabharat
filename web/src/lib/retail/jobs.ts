@@ -2,6 +2,7 @@ import "server-only";
 import { connectDB } from "@/lib/db/mongo";
 import { computeReorderLevels, runShopAlerts, shopIds } from "@/lib/retail/alerts";
 import { purgeInactiveCustomers } from "@/lib/retail/customers";
+import { expireLoyaltyPoints } from "@/lib/retail/loyalty-service";
 import { runRefillReminders } from "@/lib/retail/refills";
 
 /**
@@ -23,6 +24,7 @@ export async function runShopHousekeeping(now = new Date()) {
       expiring += alerts.expiring;
       low += alerts.low;
       refills += (await runRefillReminders(id, now)).emailed;
+      await expireLoyaltyPoints(id, now);
       purged += await purgeInactiveCustomers(id, now);
     } catch (err) {
       console.error("shop housekeeping failed", String(id), err);
