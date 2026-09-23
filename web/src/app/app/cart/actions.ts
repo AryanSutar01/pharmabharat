@@ -10,6 +10,7 @@ import { connectDB } from "@/lib/db/mongo";
 import { Cart } from "@/lib/models/cart";
 import { Listing } from "@/lib/models/listing";
 import { requireBuyer } from "@/lib/orders/cart";
+import { applySavings } from "@/lib/orders/optimise-service";
 import { notifyOrdersPlaced } from "@/lib/orders/notify";
 import { CheckoutError, placeOrders } from "@/lib/orders/service";
 import { PAYMENT_MODES } from "@/lib/orders/status";
@@ -82,4 +83,13 @@ export async function checkout(_: CartActionResult, formData: FormData): Promise
   }
   revalidatePath("/app", "layout");
   redirect(`/app/orders?placed=${groupId}`);
+}
+
+/** Swaps every cart line to the cheapest verified seller that can fulfil it. */
+export async function applyCheapest(): Promise<CartActionResult & { applied?: number; saved?: number }> {
+  const { business, session } = await requireBuyer();
+  const { applied, saved } = await applySavings(business._id, session.user.id);
+  if (!applied) return { error: "not_found" };
+  revalidatePath("/app", "layout");
+  return { ok: true, applied, saved };
 }

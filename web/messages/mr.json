@@ -619,7 +619,12 @@
     "quickAdding": "टाकत आहे…",
     "quickAdded": "{count, plural, one {# वस्तू} other {# वस्तू}} कार्टमध्ये टाकल्या. {skipped, plural, =0 {} one {# ओळ वगळली.} other {# ओळी वगळल्या.}}",
     "buyAgain": "पुन्हा खरेदी करा",
-    "quickOrder": "क्विक ऑर्डर"
+    "quickOrder": "क्विक ऑर्डर",
+    "savingsTitle": "या कार्टवर {amount} वाचवा",
+    "savingsHint": "{count, plural, one {# वस्तू} other {# वस्तू}} इतरत्र स्वस्त आहेत — ऑर्डर {sellers, plural, one {# विक्रेत्याकडून} other {# विक्रेत्यांकडून}} येईल.",
+    "savingsMore": "आणि आणखी {count}",
+    "savingsApply": "सर्वात स्वस्त विक्रेत्यांकडे वळा",
+    "savingsApplying": "बदलत आहे…"
   },
   "orders": {
     "title": "ऑर्डर",

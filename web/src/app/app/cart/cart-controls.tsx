@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Alert, Button, Field, Select, Textarea } from "@/components/ui";
 import { useErrorText } from "@/components/use-error-text";
 import { PAYMENT_MODES } from "@/lib/orders/status";
-import { checkout, setCartQty, type CartActionResult } from "./actions";
+import { applyCheapest, checkout, setCartQty, type CartActionResult } from "./actions";
 
 export function CartQty({ listingId, qty }: { listingId: string; qty: number }) {
   const t = useTranslations("cart");
@@ -68,5 +68,15 @@ export function CheckoutForm({ orderCount, blocked }: { orderCount: number; bloc
       </Button>
       <p className="text-center text-xs text-muted">{t("stockReserved")}</p>
     </form>
+  );
+}
+
+/** "Switch to the cheapest sellers" button under the savings card. */
+export function ApplyCheapest({ label, busyLabel }: { label: string; busyLabel: string }) {
+  const [pending, start] = useTransition();
+  return (
+    <Button variant="secondary" disabled={pending} onClick={() => start(async () => void (await applyCheapest()))}>
+      {pending ? busyLabel : label}
+    </Button>
   );
 }

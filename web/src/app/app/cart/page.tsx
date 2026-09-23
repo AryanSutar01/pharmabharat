@@ -3,8 +3,9 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { Badge, Card, CardHeader, PageHeader, buttonClass } from "@/components/ui";
 import { stateName } from "@/lib/india";
 import { getCartView, requireBuyer, type CartLine } from "@/lib/orders/cart";
+import { cartSavings } from "@/lib/orders/optimise-service";
 import { round2 } from "@/lib/orders/gst";
-import { CartQty, CheckoutForm } from "./cart-controls";
+import { ApplyCheapest, CartQty, CheckoutForm } from "./cart-controls";
 
 export const metadata = { title: "Cart" };
 
@@ -13,6 +14,7 @@ export default async function CartPage() {
   const t = await getTranslations();
   const format = await getFormatter();
   const { groups, hasIssues } = await getCartView(business, session.user.id);
+  const savings = await cartSavings(business._id, session.user.id);
   const inr = (v: number) => format.number(v, { style: "currency", currency: "INR", maximumFractionDigits: 2 });
   const monthYear = (d: string) => format.dateTime(new Date(d), { month: "short", year: "numeric" });
 
@@ -63,6 +65,33 @@ export default async function CartPage() {
       />
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-5">
+          {savings ? (
+            <Card className="border-brand-200 bg-brand-50/60">
+              <CardHeader
+                title={t("cart.savingsTitle", { amount: inr(savings.totalSaving) })}
+                description={t("cart.savingsHint", { count: savings.swaps.length, sellers: savings.sellersAfter })}
+              />
+              <ul className="space-y-1 px-4 pb-3 text-sm sm:px-5">
+                {savings.swaps.slice(0, 5).map((s) => (
+                  <li key={s.from} className="flex flex-wrap justify-between gap-2">
+                    <span className="min-w-0">
+                      {s.productName} · {s.sellerName}
+                    </span>
+                    <span className="tabular-nums text-muted">
+                      {inr(s.oldPrice)} → <b className="text-ink">{inr(s.newPrice)}</b> · −{inr(s.saving)}
+                    </span>
+                  </li>
+                ))}
+                {savings.swaps.length > 5 ? (
+                  <li className="text-muted">{t("cart.savingsMore", { count: savings.swaps.length - 5 })}</li>
+                ) : null}
+              </ul>
+              <div className="border-t border-brand-200 px-4 py-3 sm:px-5">
+                <ApplyCheapest label={t("cart.savingsApply")} busyLabel={t("cart.savingsApplying")} />
+              </div>
+            </Card>
+          ) : null}
+
           {groups.map((g) => (
             <Card key={g.sellerId}>
               <CardHeader

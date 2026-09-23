@@ -619,7 +619,12 @@
     "quickAdding": "Adding…",
     "quickAdded": "{count, plural, one {# item} other {# items}} added to your cart. {skipped, plural, =0 {} one {# line was skipped.} other {# lines were skipped.}}",
     "buyAgain": "Buy again",
-    "quickOrder": "Quick order"
+    "quickOrder": "Quick order",
+    "savingsTitle": "Save {amount} on this cart",
+    "savingsHint": "{count, plural, one {# item is} other {# items are}} cheaper elsewhere — the order would come from {sellers, plural, one {# seller} other {# sellers}}.",
+    "savingsMore": "and {count} more",
+    "savingsApply": "Switch to the cheapest sellers",
+    "savingsApplying": "Switching…"
   },
   "orders": {
     "title": "Orders",
