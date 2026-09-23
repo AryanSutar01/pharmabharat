@@ -48,6 +48,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             { href: "/admin/users", label: t("admin.usersTab") },
             { href: "/admin/listings", label: t("admin.listingsTab") },
             { href: "/admin/reports", label: t("admin.reportsTab"), badge: reported },
+            { href: "/admin/recalls", label: t("admin.recallsTab") },
             { href: "/admin/conditions", label: t("admin.conditionsTab") },
             { href: "/admin/banners", label: t("admin.bannersTab") },
           ]}

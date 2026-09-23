@@ -376,7 +376,33 @@
     "noBanners": "अभी कोई बैनर नहीं।",
     "saved": "सहेजा गया",
     "inactive": "बंद",
-    "documentsHint": "बाईं ओर के विवरण से मिलान करने के लिए कोई भी दस्तावेज़ खोलें।"
+    "documentsHint": "बाईं ओर के विवरण से मिलान करने के लिए कोई भी दस्तावेज़ खोलें।",
+    "recallsTab": "रिकॉल",
+    "recallsHelp": "किसी बैच को बाज़ार से हटाएँ: मिलती-जुलती लिस्टिंग रोक दी जाती हैं और स्टॉक रखने या खरीदने वालों को सूचित किया जाता है।",
+    "recallsList": "जारी किए गए रिकॉल",
+    "recallsEmpty": "अभी तक कोई रिकॉल जारी नहीं हुआ।",
+    "recallIssue": "रिकॉल जारी करें",
+    "recallIssueHint": "CDSCO अलर्ट, NSQ रिपोर्ट और निर्माता द्वारा वापसी के लिए।",
+    "recallProduct": "उत्पाद का नाम",
+    "recallProductHint": "जैसा पैक पर छपा है; मिलान में छोटे-बड़े अक्षर का फ़र्क़ नहीं पड़ता।",
+    "recallManufacturer": "निर्माता",
+    "recallBatch": "बैच नंबर",
+    "recallBatchHint": "सटीक बैच नंबर — इसी से लिस्टिंग मिलाई जाती हैं।",
+    "recallSeverity": "प्रकार",
+    "recallSeverityLabel": {
+      "recall": "रिकॉल",
+      "advisory": "परामर्श"
+    },
+    "recallReason": "कारण",
+    "recallReference": "संदर्भ",
+    "recallReferenceHint": "CDSCO नोटिस नंबर या लिंक।",
+    "recallWarning": "रिकॉल जारी करते ही सभी मिलती लिस्टिंग रुक जाएँगी और प्रभावित व्यवसायों को ईमेल जाएगा।",
+    "recallSending": "भेजा जा रहा है…",
+    "recallSent": "रिकॉल जारी: {sellers} विक्रेताओं की {listings} लिस्टिंग रोकी गईं; {orders} ऑर्डर से {buyers} खरीदारों को सूचित किया गया।",
+    "recallStats": "{listings} लिस्टिंग रोकी · {sellers} विक्रेता · {orders} ऑर्डर · {buyers} खरीदार सूचित",
+    "recallWithdraw": "रिकॉल वापस लें",
+    "recallWithdrawing": "वापस लिया जा रहा है…",
+    "recallWithdrawn": "वापस लिया गया"
   },
   "denied": {
     "title": "आपको इस पेज की पहुँच नहीं है",
@@ -495,7 +521,8 @@
     "removeFile": "फ़ाइल हटाएँ",
     "filesHint": "अधिकतम 5 फ़ाइलें · JPG, PNG या WebP (इनवॉइस PDF भी हो सकता है) · हर फ़ाइल 5 MB तक।",
     "photosNeeded": "फ़ोटो चाहिए",
-    "required": "आवश्यक"
+    "required": "आवश्यक",
+    "recalled": "रिकॉल किया बैच"
   },
   "dosageForm": {
     "tablet": "टैबलेट",
@@ -623,7 +650,12 @@
       "cancelled": "रद्द"
     },
     "dueOn": "देय तिथि",
-    "paidSoFar": "अब तक भुगतान"
+    "paidSoFar": "अब तक भुगतान",
+    "recallTitle": "इस ऑर्डर का एक बैच रिकॉल किया गया है",
+    "recallAction": {
+      "seller": "इस बैच की आपकी लिस्टिंग रोक दी गई हैं। निर्माता की वापसी प्रक्रिया अपनाएँ।",
+      "buyer": "बचा हुआ स्टॉक अलग रखें और वापसी के लिए विक्रेता से संपर्क करें।"
+    }
   },
   "ledger": {
     "title": "खाता (बही)",

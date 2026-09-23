@@ -51,6 +51,8 @@ const listingSchema = new Schema(
       by: String,
       at: Date,
     },
+    // Set when an admin recalls this batch; cleared if the recall is withdrawn.
+    recallId: { type: Schema.Types.ObjectId, ref: "Recall", default: null },
     // Last near-expiry warning sent for this batch (90 / 60 / 30 days); see lib/alerts/expiry.ts.
     expiryAlertLevel: { type: Number, enum: [90, 60, 30, null], default: null },
     // Denormalised for filtering/sorting without a join.
@@ -62,6 +64,7 @@ const listingSchema = new Schema(
 listingSchema.index({ productId: 1, status: 1, price: 1 });
 listingSchema.index({ sellerId: 1, productId: 1, batchNo: 1 }, { unique: true });
 listingSchema.index({ sellerId: 1, expiryDate: 1 });
+listingSchema.index({ batchNo: 1 });
 
 export type ListingDoc = InferSchemaType<typeof listingSchema> & { _id: mongoose.Types.ObjectId };
 

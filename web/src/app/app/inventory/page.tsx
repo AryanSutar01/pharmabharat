@@ -44,7 +44,8 @@ export default async function InventoryPage({ searchParams }: PageProps<"/app/in
     else if (days <= 90) out.push({ tone: "warning", label: t("inventory.expiringSoon") });
     if (l.stock === 0) out.push({ tone: "danger", label: t("inventory.outOfStock") });
     if (!(l.files ?? []).some((f) => f.kind === "box")) out.push({ tone: "warning", label: t("inventory.photosNeeded") });
-    if (l.moderation?.held) {
+    if (l.recallId) out.push({ tone: "danger", label: t("inventory.recalled") });
+    else if (l.moderation?.held) {
       out.push({ tone: "danger", label: `${t("admin.held")}${l.moderation.reason ? `: ${l.moderation.reason}` : ""}` });
     } else if (l.status === "paused") out.push({ tone: "neutral", label: t("inventory.paused") });
     return out;

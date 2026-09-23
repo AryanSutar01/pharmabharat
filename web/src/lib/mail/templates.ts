@@ -236,6 +236,45 @@ type TicketLike = {
   replies: { text: string }[];
 };
 
+export function recallEmail(opts: {
+  businessName: string;
+  audience: "seller" | "buyer";
+  productName: string;
+  manufacturer?: string;
+  batchNo: string;
+  severity: "recall" | "advisory";
+  reason: string;
+  reference?: string;
+}) {
+  const word = opts.severity === "advisory" ? "Safety advisory" : "Batch recall";
+  const subject = `${word}: ${opts.productName} batch ${opts.batchNo}`;
+  const action =
+    opts.audience === "seller"
+      ? "Your listings for this batch have been put on hold. Quarantine the stock and follow the manufacturer's return process."
+      : "Our records show you bought this batch. Please quarantine any remaining stock and contact your seller about a return.";
+  const url = `${env().BETTER_AUTH_URL}${opts.audience === "seller" ? "/app/inventory" : "/app/orders?filter=all"}`;
+  return {
+    subject,
+    html: layout({
+      heading: word,
+      body:
+        p(`Dear ${esc(opts.businessName)},`) +
+        p(
+          `<b>${esc(opts.productName)}</b>${opts.manufacturer ? ` (${esc(opts.manufacturer)})` : ""}, batch <b>${esc(opts.batchNo)}</b>, has been withdrawn from the market.`,
+        ) +
+        p(`<b>Reason:</b> ${esc(opts.reason)}`) +
+        (opts.reference ? p(`<b>Reference:</b> ${esc(opts.reference)}`) : "") +
+        p(action),
+      cta: { label: opts.audience === "seller" ? "Open inventory" : "View orders", url },
+    }),
+    text: `${subject}
+Reason: ${opts.reason}
+${opts.reference ?? ""}
+${action}
+${url}`,
+  };
+}
+
 export function newTicketStaffEmail(t: TicketLike) {
   const url = `${env().BETTER_AUTH_URL}/support-desk/tickets/${t._id}`;
   const isCallback = t.kind === "callback";

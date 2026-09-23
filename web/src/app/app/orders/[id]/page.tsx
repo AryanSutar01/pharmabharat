@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isValidObjectId } from "mongoose";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Badge, Card, CardHeader, PageHeader, buttonClass, cn } from "@/components/ui";
+import { Alert, Badge, Card, CardHeader, PageHeader, buttonClass, cn } from "@/components/ui";
 import { connectDB } from "@/lib/db/mongo";
 import { stateName } from "@/lib/india";
 import { Order } from "@/lib/models/order";
 import { STATUS_TONE, availableActions, hasInvoice, type OrderStatus } from "@/lib/orders/status";
 import { can } from "@/lib/permissions";
+import { recallsForBatches } from "@/lib/recalls/service";
 import { requireBusiness } from "@/lib/session";
 import { ChatButton } from "@/components/chat-button";
 import { OrderActions } from "./order-actions";
@@ -34,6 +35,7 @@ export default async function OrderPage({ params }: PageProps<"/app/orders/[id]"
   const actions = allowed ? availableActions(status, side, order.payment?.status === "paid") : [];
   const other = side === "seller" ? order.buyer : order.seller;
   const totals = order.totals!;
+  const recalls = await recallsForBatches(order.items.map((i) => i.batchNo));
 
   return (
     <>
@@ -52,6 +54,25 @@ export default async function OrderPage({ params }: PageProps<"/app/orders/[id]"
           </div>
         }
       />
+
+      {recalls.length ? (
+        <div className="mb-5">
+          <Alert tone="danger" title={t("orders.recallTitle")}>
+            <ul className="mt-1 space-y-1">
+              {recalls.map((r) => (
+                <li key={String(r._id)}>
+                  <b>
+                    {r.productName} · {r.batchNo}
+                  </b>{" "}
+                  — {r.reason}
+                  {r.reference ? ` (${r.reference})` : ""}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2">{t(`orders.recallAction.${side}`)}</p>
+          </Alert>
+        </div>
+      ) : null}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="space-y-5">

@@ -376,7 +376,33 @@
     "noBanners": "No banners yet.",
     "saved": "Saved",
     "inactive": "Off",
-    "documentsHint": "Open any document to compare it with the details on the left."
+    "documentsHint": "Open any document to compare it with the details on the left.",
+    "recallsTab": "Recalls",
+    "recallsHelp": "Pull a batch from the market: matching listings are held and everyone who stocks or bought it is told.",
+    "recallsList": "Issued recalls",
+    "recallsEmpty": "No recalls issued yet.",
+    "recallIssue": "Issue a recall",
+    "recallIssueHint": "Used for CDSCO alerts, NSQ reports and manufacturer withdrawals.",
+    "recallProduct": "Product name",
+    "recallProductHint": "As printed on the pack; matching is not case sensitive.",
+    "recallManufacturer": "Manufacturer",
+    "recallBatch": "Batch number",
+    "recallBatchHint": "Exact batch number — this is what listings are matched on.",
+    "recallSeverity": "Type",
+    "recallSeverityLabel": {
+      "recall": "Recall",
+      "advisory": "Advisory"
+    },
+    "recallReason": "Reason",
+    "recallReference": "Reference",
+    "recallReferenceHint": "CDSCO notice number or link.",
+    "recallWarning": "Issuing a recall immediately holds every matching listing and emails the affected businesses.",
+    "recallSending": "Broadcasting…",
+    "recallSent": "Recall issued: {listings} listing(s) held across {sellers} seller(s); {buyers} buyer(s) notified from {orders} order(s).",
+    "recallStats": "{listings} listing(s) held · {sellers} seller(s) · {orders} order(s) · {buyers} buyer(s) notified",
+    "recallWithdraw": "Withdraw recall",
+    "recallWithdrawing": "Withdrawing…",
+    "recallWithdrawn": "Withdrawn"
   },
   "denied": {
     "title": "You don't have access to this page",
@@ -495,7 +521,8 @@
     "removeFile": "Remove file",
     "filesHint": "Up to 5 files · JPG, PNG or WebP (invoice may also be PDF) · max 5 MB each.",
     "photosNeeded": "Photos needed",
-    "required": "required"
+    "required": "required",
+    "recalled": "Recalled batch"
   },
   "dosageForm": {
     "tablet": "Tablet",
@@ -623,7 +650,12 @@
       "cancelled": "Cancelled"
     },
     "dueOn": "Due on",
-    "paidSoFar": "Paid so far"
+    "paidSoFar": "Paid so far",
+    "recallTitle": "A batch in this order has been recalled",
+    "recallAction": {
+      "seller": "Your listings for this batch are on hold. Follow the manufacturer's return process.",
+      "buyer": "Quarantine any remaining stock and contact the seller about a return."
+    }
   },
   "ledger": {
     "title": "Ledger",
