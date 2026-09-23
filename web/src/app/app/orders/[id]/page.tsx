@@ -180,6 +180,12 @@ export default async function OrderPage({ params }: PageProps<"/app/orders/[id]"
             </Card>
           ) : null}
 
+          {side === "buyer" && can(role, "orders.place") ? (
+            <Link href={`/app/cart/quick?reorder=${order._id}`} className={buttonClass("secondary", "w-full")}>
+              {t("cart.buyAgain")}
+            </Link>
+          ) : null}
+
           {can(role, "chat.use") ? (
             <ChatButton
               businessId={String(side === "seller" ? order.buyerId : order.sellerId)}

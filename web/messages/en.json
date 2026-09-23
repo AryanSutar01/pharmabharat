@@ -594,7 +594,30 @@
     "placeOrder": "Place order",
     "placing": "Placing order…",
     "fixIssues": "Fix the highlighted items to continue",
-    "stockReserved": "Stock is reserved as soon as you place the order."
+    "stockReserved": "Stock is reserved as soon as you place the order.",
+    "quickTitle": "Quick order",
+    "quickSubtitle": "Paste your purchase list and we'll find the cheapest verified seller for each item.",
+    "quickPaste": "Your list",
+    "quickPasteHint": "One product per line, with the quantity: \"Dolo 650 Tablet, 10\". CSV and tab-separated lists work too.",
+    "quickMatch": "Match products",
+    "quickMatching": "Matching…",
+    "quickResult": "{count, plural, one {# line} other {# lines}}",
+    "quickResultHint": "Check the quantities, then add everything to your cart.",
+    "quickFromOrder": "Same products as your earlier order, at today's best price.",
+    "quickStatus": {
+      "ok": "Available",
+      "adjusted": "Quantity adjusted",
+      "no_product": "Not in catalogue",
+      "no_offer": "No seller right now"
+    },
+    "quickStock": "{count} in stock",
+    "quickMatchedFrom": "from \"{text}\"",
+    "quickTotal": "{count, plural, one {# item} other {# items}} ·",
+    "quickAddAll": "Add all to cart",
+    "quickAdding": "Adding…",
+    "quickAdded": "{count, plural, one {# item} other {# items}} added to your cart. {skipped, plural, =0 {} one {# line was skipped.} other {# lines were skipped.}}",
+    "buyAgain": "Buy again",
+    "quickOrder": "Quick order"
   },
   "orders": {
     "title": "Orders",

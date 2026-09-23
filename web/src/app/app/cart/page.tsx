@@ -22,9 +22,14 @@ export default async function CartPage() {
         <PageHeader title={t("cart.title")} />
         <Card className="px-4 py-12 text-center">
           <p className="text-sm text-muted">{t("cart.empty")}</p>
-          <Link href="/app/catalog" className={buttonClass("primary", "mt-4")}>
-            {t("cart.browse")}
-          </Link>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <Link href="/app/catalog" className={buttonClass("primary")}>
+              {t("cart.browse")}
+            </Link>
+            <Link href="/app/cart/quick" className={buttonClass("secondary")}>
+              {t("cart.quickOrder")}
+            </Link>
+          </div>
         </Card>
       </>
     );
@@ -47,7 +52,15 @@ export default async function CartPage() {
 
   return (
     <>
-      <PageHeader title={t("cart.title")} description={t("cart.subtitle")} />
+      <PageHeader
+        title={t("cart.title")}
+        description={t("cart.subtitle")}
+        action={
+          <Link href="/app/cart/quick" className="text-sm text-brand-700 hover:underline">
+            {t("cart.quickOrder")} →
+          </Link>
+        }
+      />
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-5">
           {groups.map((g) => (

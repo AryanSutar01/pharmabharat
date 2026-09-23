@@ -594,7 +594,30 @@
     "placeOrder": "ऑर्डर दें",
     "placing": "ऑर्डर दिया जा रहा है…",
     "fixIssues": "आगे बढ़ने के लिए चिह्नित आइटम ठीक करें",
-    "stockReserved": "ऑर्डर देते ही स्टॉक आरक्षित हो जाता है।"
+    "stockReserved": "ऑर्डर देते ही स्टॉक आरक्षित हो जाता है।",
+    "quickTitle": "क्विक ऑर्डर",
+    "quickSubtitle": "अपनी खरीद सूची चिपकाएँ — हर दवा के लिए सबसे सस्ता सत्यापित विक्रेता हम ढूँढ देंगे।",
+    "quickPaste": "आपकी सूची",
+    "quickPasteHint": "हर पंक्ति में एक दवा और मात्रा: \"Dolo 650 Tablet, 10\"। CSV और टैब वाली सूची भी चलती है।",
+    "quickMatch": "दवाएँ मिलाएँ",
+    "quickMatching": "मिलाया जा रहा है…",
+    "quickResult": "{count, plural, one {# पंक्ति} other {# पंक्तियाँ}}",
+    "quickResultHint": "मात्रा जाँच लें, फिर सब कार्ट में डालें।",
+    "quickFromOrder": "आपके पिछले ऑर्डर की वही दवाएँ, आज के सबसे अच्छे भाव पर।",
+    "quickStatus": {
+      "ok": "उपलब्ध",
+      "adjusted": "मात्रा बदली गई",
+      "no_product": "सूची में नहीं",
+      "no_offer": "अभी कोई विक्रेता नहीं"
+    },
+    "quickStock": "{count} स्टॉक में",
+    "quickMatchedFrom": "\"{text}\" से",
+    "quickTotal": "{count, plural, one {# वस्तु} other {# वस्तुएँ}} ·",
+    "quickAddAll": "सब कार्ट में डालें",
+    "quickAdding": "डाला जा रहा है…",
+    "quickAdded": "{count, plural, one {# वस्तु} other {# वस्तुएँ}} कार्ट में जोड़ी गईं। {skipped, plural, =0 {} one {# पंक्ति छोड़ी गई।} other {# पंक्तियाँ छोड़ी गईं।}}",
+    "buyAgain": "फिर से खरीदें",
+    "quickOrder": "क्विक ऑर्डर"
   },
   "orders": {
     "title": "ऑर्डर",

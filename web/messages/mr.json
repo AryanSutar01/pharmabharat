@@ -594,7 +594,30 @@
     "placeOrder": "ऑर्डर द्या",
     "placing": "ऑर्डर देत आहे…",
     "fixIssues": "पुढे जाण्यासाठी चिन्हांकित वस्तू दुरुस्त करा",
-    "stockReserved": "ऑर्डर देताच स्टॉक राखीव होतो."
+    "stockReserved": "ऑर्डर देताच स्टॉक राखीव होतो.",
+    "quickTitle": "क्विक ऑर्डर",
+    "quickSubtitle": "तुमची खरेदी यादी पेस्ट करा — प्रत्येक औषधासाठी सर्वात स्वस्त पडताळलेला विक्रेता आम्ही शोधतो.",
+    "quickPaste": "तुमची यादी",
+    "quickPasteHint": "प्रत्येक ओळीत एक औषध आणि नग: \"Dolo 650 Tablet, 10\". CSV आणि टॅब असलेली यादीही चालते.",
+    "quickMatch": "औषधे जुळवा",
+    "quickMatching": "जुळवत आहे…",
+    "quickResult": "{count, plural, one {# ओळ} other {# ओळी}}",
+    "quickResultHint": "नग तपासा आणि सर्व कार्टमध्ये टाका.",
+    "quickFromOrder": "तुमच्या मागील ऑर्डरमधील तीच औषधे, आजच्या सर्वोत्तम दरात.",
+    "quickStatus": {
+      "ok": "उपलब्ध",
+      "adjusted": "नग बदलले",
+      "no_product": "यादीत नाही",
+      "no_offer": "सध्या विक्रेता नाही"
+    },
+    "quickStock": "{count} साठ्यात",
+    "quickMatchedFrom": "\"{text}\" वरून",
+    "quickTotal": "{count, plural, one {# वस्तू} other {# वस्तू}} ·",
+    "quickAddAll": "सर्व कार्टमध्ये टाका",
+    "quickAdding": "टाकत आहे…",
+    "quickAdded": "{count, plural, one {# वस्तू} other {# वस्तू}} कार्टमध्ये टाकल्या. {skipped, plural, =0 {} one {# ओळ वगळली.} other {# ओळी वगळल्या.}}",
+    "buyAgain": "पुन्हा खरेदी करा",
+    "quickOrder": "क्विक ऑर्डर"
   },
   "orders": {
     "title": "ऑर्डर",
