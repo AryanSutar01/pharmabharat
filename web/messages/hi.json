@@ -193,7 +193,8 @@
     "refills": "रिफिल बाकी",
     "shopSettings": "दुकान सेटिंग",
     "register": "शेड्यूल H रजिस्टर",
-    "shopReports": "दुकान रिपोर्ट"
+    "shopReports": "दुकान रिपोर्ट",
+    "suppliers": "सप्लायर"
   },
   "onboarding": {
     "title": "अपना व्यवसाय सेट करें",
@@ -1273,6 +1274,27 @@
     "gstSummary": "वसूला गया GST",
     "gstSummaryHint": "दर के अनुसार आउटपुट टैक्स, फाइलिंग के लिए। खुदरा में हमेशा CGST + SGST।",
     "gstRate": "दर",
-    "totalTax": "कुल कर"
+    "totalTax": "कुल कर",
+    "suppliersTitle": "सप्लायर",
+    "suppliersSubtitle": "आप किससे खरीदते हैं, किसका कितना बकाया है, और किससे दिक्कत हुई।",
+    "yourSuppliers": "आपके सप्लायर",
+    "yourSuppliersHint": "आपने जितना खर्च किया उसके अनुसार।",
+    "noSuppliers": "अभी कोई खरीद नहीं।",
+    "ordersCount": "{count, plural, one {# ऑर्डर} other {# ऑर्डर}}",
+    "lastOrder": "आख़िरी {date}",
+    "purchased": "खरीदा",
+    "creditTermsShort": "{days} दिन उधार",
+    "limit": "सीमा {amount}",
+    "youOwe": "{amount} बकाया",
+    "overdueAmount": "{amount} मियाद पार",
+    "recalledBatches": "{count, plural, one {# रिकॉल बैच} other {# रिकॉल बैच}}",
+    "shortDated": "{count, plural, one {# कम एक्सपायरी डिलीवरी} other {# कम एक्सपायरी डिलीवरी}}",
+    "noQualityIssues": "इनसे कोई रिकॉल या कम एक्सपायरी वाला स्टॉक नहीं आया।",
+    "priceCompare": "भाव तुलना",
+    "priceCompareHint": "हर सप्लायर ने आपसे क्या लिया, और आज बाज़ार क्या माँग रहा है।",
+    "noPurchaseHistory": "आपने यह अभी तक नहीं खरीदा।",
+    "wasLower": "{amount} तक भी मिला था",
+    "bestToday": "आज सबसे सस्ता",
+    "cheaperThanUsual": "प्रति पैक {amount} कम"
   }
 }

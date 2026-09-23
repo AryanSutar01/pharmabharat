@@ -193,7 +193,8 @@
     "refills": "रिफिल बाकी",
     "shopSettings": "दुकान सेटिंग",
     "register": "शेड्यूल H रजिस्टर",
-    "shopReports": "दुकान अहवाल"
+    "shopReports": "दुकान अहवाल",
+    "suppliers": "पुरवठादार"
   },
   "onboarding": {
     "title": "तुमचा व्यवसाय सेट करा",
@@ -1273,6 +1274,27 @@
     "gstSummary": "जमा केलेला GST",
     "gstSummaryHint": "दरानुसार आउटपुट कर, विवरणासाठी. किरकोळीत नेहमी CGST + SGST.",
     "gstRate": "दर",
-    "totalTax": "एकूण कर"
+    "totalTax": "एकूण कर",
+    "suppliersTitle": "पुरवठादार",
+    "suppliersSubtitle": "तुम्ही कोणाकडून घेता, कोणाचे किती देणे आहे, आणि कोणाकडून त्रास झाला.",
+    "yourSuppliers": "तुमचे पुरवठादार",
+    "yourSuppliersHint": "तुम्ही केलेल्या खर्चानुसार.",
+    "noSuppliers": "अद्याप खरेदी नाही.",
+    "ordersCount": "{count, plural, one {# ऑर्डर} other {# ऑर्डर}}",
+    "lastOrder": "शेवटची {date}",
+    "purchased": "खरेदी",
+    "creditTermsShort": "{days} दिवस उधार",
+    "limit": "मर्यादा {amount}",
+    "youOwe": "{amount} थकबाकी",
+    "overdueAmount": "{amount} मुदत उलटली",
+    "recalledBatches": "{count, plural, one {# रिकॉल बॅच} other {# रिकॉल बॅचेस}}",
+    "shortDated": "{count, plural, one {# कमी मुदतीची डिलिव्हरी} other {# कमी मुदतीच्या डिलिव्हरी}}",
+    "noQualityIssues": "यांच्याकडून रिकॉल किंवा कमी मुदतीचा साठा आलेला नाही.",
+    "priceCompare": "दर तुलना",
+    "priceCompareHint": "प्रत्येक पुरवठादाराने काय आकारले, आणि आज बाजारभाव काय आहे.",
+    "noPurchaseHistory": "तुम्ही हे अद्याप घेतलेले नाही.",
+    "wasLower": "{amount} पर्यंतही मिळाले होते",
+    "bestToday": "आज सर्वात स्वस्त",
+    "cheaperThanUsual": "प्रति पॅक {amount} कमी"
   }
 }

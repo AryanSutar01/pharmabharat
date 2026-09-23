@@ -129,14 +129,17 @@ export async function accountRows(businessId: mongoose.Types.ObjectId, side: "se
   const ids = rows.map((r) => r._id);
   const [parties, accounts, lastPayments] = await Promise.all([
     Business.find({ _id: { $in: ids } }, { legalName: 1, tradeName: 1, address: 1 }).lean(),
-    side === "seller" ? CreditAccount.find({ sellerId: businessId, buyerId: { $in: ids } }).lean() : [],
+    // Terms belong to the (seller, buyer) pair, and both sides may read them.
+    side === "seller"
+      ? CreditAccount.find({ sellerId: businessId, buyerId: { $in: ids } }).lean()
+      : CreditAccount.find({ buyerId: businessId, sellerId: { $in: ids } }).lean(),
     Payment.aggregate<{ _id: mongoose.Types.ObjectId; last: Date }>([
       { $match: { [mine]: businessId, [theirs]: { $in: ids } } },
       { $group: { _id: `$${theirs}`, last: { $max: "$receivedAt" } } },
     ]),
   ]);
   const byId = new Map(parties.map((p) => [String(p._id), p]));
-  const termsById = new Map(accounts.map((a) => [String(a.buyerId), a]));
+  const termsById = new Map(accounts.map((a) => [String(side === "seller" ? a.buyerId : a.sellerId), a]));
   const lastById = new Map(lastPayments.map((p) => [String(p._id), p.last]));
 
   return rows.map((r) => {

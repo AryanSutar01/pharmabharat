@@ -193,7 +193,8 @@
     "refills": "Refills due",
     "shopSettings": "Shop settings",
     "register": "Schedule H register",
-    "shopReports": "Shop reports"
+    "shopReports": "Shop reports",
+    "suppliers": "Suppliers"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -1273,6 +1274,27 @@
     "gstSummary": "GST collected",
     "gstSummaryHint": "Output tax by rate, for your filing. Retail is always CGST + SGST.",
     "gstRate": "Rate",
-    "totalTax": "Total tax"
+    "totalTax": "Total tax",
+    "suppliersTitle": "Suppliers",
+    "suppliersSubtitle": "Who you buy from, what you owe them, and who has caused trouble.",
+    "yourSuppliers": "Your suppliers",
+    "yourSuppliersHint": "By what you have spent with them.",
+    "noSuppliers": "No purchases yet.",
+    "ordersCount": "{count, plural, one {# order} other {# orders}}",
+    "lastOrder": "last {date}",
+    "purchased": "purchased",
+    "creditTermsShort": "{days} days credit",
+    "limit": "limit {amount}",
+    "youOwe": "{amount} outstanding",
+    "overdueAmount": "{amount} overdue",
+    "recalledBatches": "{count, plural, one {# recalled batch} other {# recalled batches}}",
+    "shortDated": "{count, plural, one {# short-dated delivery} other {# short-dated deliveries}}",
+    "noQualityIssues": "No recalls or short-dated stock from them.",
+    "priceCompare": "Price comparison",
+    "priceCompareHint": "What each supplier charged you, and what the market asks today.",
+    "noPurchaseHistory": "You haven't bought this yet.",
+    "wasLower": "was as low as {amount}",
+    "bestToday": "Cheapest today",
+    "cheaperThanUsual": "{amount} less per pack"
   }
 }
