@@ -12,6 +12,9 @@ export const NOTIFICATION_KINDS = [
   "payment_due",
   "batch_recall",
   "licence_expiring",
+  "shop_expiry",
+  "shop_low_stock",
+  "shop_refills",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 

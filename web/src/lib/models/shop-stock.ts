@@ -31,6 +31,9 @@ const shopStockSchema = new Schema(
     hsn: { type: String, trim: true },
     schedule: { type: String, trim: true },
 
+    /** Last expiry warning sent for this batch (90 / 60 / 30 days). */
+    expiryAlertLevel: { type: Number, enum: [90, 60, 30, null], default: null },
+
     source: { type: String, enum: STOCK_SOURCES, default: "manual" },
     /** Where it came from: a PharmaBharat order, or a supplier typed by hand. */
     supplierId: { type: Schema.Types.ObjectId, ref: "Business" },

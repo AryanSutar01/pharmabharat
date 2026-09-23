@@ -188,7 +188,8 @@
     "sectionShop": "तुमचे दुकान",
     "billing": "बिलिंग",
     "bills": "बिले",
-    "customers": "ग्राहक"
+    "customers": "ग्राहक",
+    "shopAlerts": "साठा सूचना"
   },
   "onboarding": {
     "title": "तुमचा व्यवसाय सेट करा",
@@ -633,7 +634,8 @@
     "savingsHint": "{count, plural, one {# वस्तू} other {# वस्तू}} इतरत्र स्वस्त आहेत — ऑर्डर {sellers, plural, one {# विक्रेत्याकडून} other {# विक्रेत्यांकडून}} येईल.",
     "savingsMore": "आणि आणखी {count}",
     "savingsApply": "सर्वात स्वस्त विक्रेत्यांकडे वळा",
-    "savingsApplying": "बदलत आहे…"
+    "savingsApplying": "बदलत आहे…",
+    "quickFromLowStock": "तुमची कमी साठ्याची यादी, आजच्या सर्वोत्तम दरात."
   },
   "orders": {
     "title": "ऑर्डर",
@@ -769,7 +771,10 @@
       "payment_recorded": "{seller} यांनी तुमच्या खात्यावर {amount, number, ::currency/INR} चा भरणा नोंदवला",
       "payment_due": "{party} यांचे बिल {orderNo} ({amount, number, ::currency/INR}) {days, plural, one {# दिवसापासून} other {# दिवसांपासून}} थकीत आहे",
       "batch_recall": "रिकॉल: {product} बॅच {batchNo} — विक्री थांबवा आणि तुमचा साठा तपासा",
-      "licence_expiring": "{days, plural, =0 {तुमचा {form} परवाना संपला — व्यवहार थांबवले आहेत} one {तुमचा {form} परवाना # दिवसात संपत आहे} other {तुमचा {form} परवाना # दिवसांत संपत आहे}}"
+      "licence_expiring": "{days, plural, =0 {तुमचा {form} परवाना संपला — व्यवहार थांबवले आहेत} one {तुमचा {form} परवाना # दिवसात संपत आहे} other {तुमचा {form} परवाना # दिवसांत संपत आहे}}",
+      "shop_expiry": "{days} दिवसांत {count, plural, one {# बॅचची} other {# बॅचेसची}} मुदत संपते ({value, number, ::currency/INR} चा साठा)",
+      "shop_low_stock": "{count, plural, one {{name} कमी होत आहे} other {{name} व आणखी # कमी होत आहेत}}",
+      "shop_refills": "{count, plural, one {# ग्राहकाची} other {# ग्राहकांची}} रिफिल बाकी आहे"
     }
   },
   "alerts": {
@@ -1148,6 +1153,27 @@
     "averageBill": "बिले सरासरी",
     "perVisit": "सरासरी बिल",
     "lastVisit": "शेवटची भेट",
-    "since": "{date} पासून"
+    "since": "{date} पासून",
+    "alertsTitle": "साठा सूचना",
+    "alertsSubtitle": "काय संपणार आहे, आणि काय कमी पडणार आहे.",
+    "valueAtRisk": "धोक्यातील मूल्य",
+    "expiringWithin": "{days} दिवसांत मुदत संपते",
+    "expiryTab": "मुदत",
+    "lowStockTab": "कमी साठा ({count})",
+    "expiredTitle": "{count, plural, one {# संपलेली बॅच} other {# संपलेल्या बॅचेस}}",
+    "expiredHint": "या शेल्फवरून काढा आणि निर्लेखन केल्यावर नग शून्य करा.",
+    "batchesWorth": "{count, plural, one {# बॅच} other {# बॅचेस}}, खरेदी दराने {value}",
+    "daysLeft": "{days} दिवस उरले",
+    "packsShort": "पॅक",
+    "noExpiring": "पुढील 90 दिवसांत काहीही संपत नाही.",
+    "lowStockTitle": "कमी होत आहे",
+    "lowStockHint": "पुनर्भरणाची पातळी औषध किती वेगाने विकते यावरून ठरते. बदलण्यासाठी तुमचा आकडा लिहा.",
+    "noLowStock": "काहीही कमी नाही.",
+    "onShelf": "शेल्फवर {count}",
+    "daysOfCover": "दररोज {rate} या दराने सुमारे {days} दिवस पुरेल",
+    "noRecentSales": "अलीकडे विक्री नाही",
+    "suggestOrder": "मागवा",
+    "reorderLevel": "किमान",
+    "orderThese": "हे मागवा"
   }
 }

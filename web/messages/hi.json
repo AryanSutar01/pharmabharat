@@ -188,7 +188,8 @@
     "sectionShop": "आपकी दुकान",
     "billing": "बिलिंग",
     "bills": "बिल",
-    "customers": "ग्राहक"
+    "customers": "ग्राहक",
+    "shopAlerts": "स्टॉक अलर्ट"
   },
   "onboarding": {
     "title": "अपना व्यवसाय सेट करें",
@@ -633,7 +634,8 @@
     "savingsHint": "{count, plural, one {# वस्तु} other {# वस्तुएँ}} कहीं और सस्ती हैं — ऑर्डर {sellers, plural, one {# विक्रेता} other {# विक्रेताओं}} से आएगा।",
     "savingsMore": "और {count} अन्य",
     "savingsApply": "सबसे सस्ते विक्रेताओं पर जाएँ",
-    "savingsApplying": "बदला जा रहा है…"
+    "savingsApplying": "बदला जा रहा है…",
+    "quickFromLowStock": "आपकी कम स्टॉक सूची, आज के सबसे अच्छे भाव पर।"
   },
   "orders": {
     "title": "ऑर्डर",
@@ -769,7 +771,10 @@
       "payment_recorded": "{seller} ने आपके खाते में {amount, number, ::currency/INR} का भुगतान दर्ज किया",
       "payment_due": "{party} का बिल {orderNo} ({amount, number, ::currency/INR}) {days, plural, one {# दिन} other {# दिन}} से बकाया है",
       "batch_recall": "रिकॉल: {product} बैच {batchNo} — बिक्री रोकें और अपना स्टॉक जाँचें",
-      "licence_expiring": "{days, plural, =0 {आपका {form} लाइसेंस समाप्त हो गया — व्यापार रोक दिया गया है} one {आपका {form} लाइसेंस # दिन में समाप्त हो रहा है} other {आपका {form} लाइसेंस # दिन में समाप्त हो रहा है}}"
+      "licence_expiring": "{days, plural, =0 {आपका {form} लाइसेंस समाप्त हो गया — व्यापार रोक दिया गया है} one {आपका {form} लाइसेंस # दिन में समाप्त हो रहा है} other {आपका {form} लाइसेंस # दिन में समाप्त हो रहा है}}",
+      "shop_expiry": "{days} दिनों में {count, plural, one {# बैच} other {# बैच}} समाप्त हो रहे हैं ({value, number, ::currency/INR} का स्टॉक)",
+      "shop_low_stock": "{count, plural, one {{name} कम हो रहा है} other {{name} और # अन्य कम हो रहे हैं}}",
+      "shop_refills": "{count, plural, one {# ग्राहक की} other {# ग्राहकों की}} रिफिल बाकी है"
     }
   },
   "alerts": {
@@ -1148,6 +1153,27 @@
     "averageBill": "बिल औसतन",
     "perVisit": "औसत बिल",
     "lastVisit": "पिछली बार",
-    "since": "{date} से"
+    "since": "{date} से",
+    "alertsTitle": "स्टॉक अलर्ट",
+    "alertsSubtitle": "क्या समाप्त होने वाला है, और क्या ख़त्म होने वाला है।",
+    "valueAtRisk": "जोखिम में मूल्य",
+    "expiringWithin": "{days} दिनों में समाप्त",
+    "expiryTab": "एक्सपायरी",
+    "lowStockTab": "कम स्टॉक ({count})",
+    "expiredTitle": "{count, plural, one {# समाप्त बैच} other {# समाप्त बैच}}",
+    "expiredHint": "इन्हें शेल्फ़ से हटाएँ और बट्टे खाते में डालने पर मात्रा शून्य कर दें।",
+    "batchesWorth": "{count, plural, one {# बैच} other {# बैच}}, खरीद भाव पर {value}",
+    "daysLeft": "{days} दिन बाकी",
+    "packsShort": "पैक",
+    "noExpiring": "अगले 90 दिनों में कुछ समाप्त नहीं हो रहा।",
+    "lowStockTitle": "कम हो रहा है",
+    "lowStockHint": "रीऑर्डर स्तर इस पर आधारित है कि दवा कितनी तेज़ी से बिकती है। बदलने के लिए अपना आंकड़ा लिखें।",
+    "noLowStock": "कुछ भी कम नहीं है।",
+    "onShelf": "शेल्फ़ पर {count}",
+    "daysOfCover": "{rate} प्रतिदिन की दर से लगभग {days} दिन बाकी",
+    "noRecentSales": "हाल में बिक्री नहीं",
+    "suggestOrder": "मँगाएँ",
+    "reorderLevel": "न्यूनतम",
+    "orderThese": "ये मँगाएँ"
   }
 }

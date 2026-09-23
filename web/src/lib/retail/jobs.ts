@@ -1,23 +1,29 @@
 import "server-only";
 import { connectDB } from "@/lib/db/mongo";
-import { Business } from "@/lib/models/business";
+import { computeReorderLevels, runShopAlerts, shopIds } from "@/lib/retail/alerts";
 import { purgeInactiveCustomers } from "@/lib/retail/customers";
 
 /**
- * Daily housekeeping for every shop: DPDP retention. Customers who stopped
- * coming longer ago than the shop's retention window lose their contact
- * details; the bills stay, anonymised.
+ * Daily housekeeping for every shop: reorder levels from how fast things sell,
+ * expiry and low-stock alerts, and the DPDP retention purge. One shop failing
+ * must not stop the rest.
  */
 export async function runShopHousekeeping(now = new Date()) {
   await connectDB();
-  const shops = await Business.find({ type: "retailer", "kyc.status": "approved" }, { _id: 1 }).limit(500).lean();
+  const shops = await shopIds();
   let purged = 0;
-  for (const shop of shops) {
+  let expiring = 0;
+  let low = 0;
+  for (const id of shops) {
     try {
-      purged += await purgeInactiveCustomers(shop._id, now);
+      await computeReorderLevels(id, now);
+      const alerts = await runShopAlerts(id, now);
+      expiring += alerts.expiring;
+      low += alerts.low;
+      purged += await purgeInactiveCustomers(id, now);
     } catch (err) {
-      console.error("customer purge failed", String(shop._id), err);
+      console.error("shop housekeeping failed", String(id), err);
     }
   }
-  return { shops: shops.length, purged };
+  return { shops: shops.length, expiring, low, purged };
 }

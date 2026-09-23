@@ -188,7 +188,8 @@
     "sectionShop": "Your shop",
     "billing": "Billing",
     "bills": "Bills",
-    "customers": "Customers"
+    "customers": "Customers",
+    "shopAlerts": "Stock alerts"
   },
   "onboarding": {
     "title": "Set up your business",
@@ -633,7 +634,8 @@
     "savingsHint": "{count, plural, one {# item is} other {# items are}} cheaper elsewhere — the order would come from {sellers, plural, one {# seller} other {# sellers}}.",
     "savingsMore": "and {count} more",
     "savingsApply": "Switch to the cheapest sellers",
-    "savingsApplying": "Switching…"
+    "savingsApplying": "Switching…",
+    "quickFromLowStock": "Your low-stock list, at today's best price."
   },
   "orders": {
     "title": "Orders",
@@ -769,7 +771,10 @@
       "payment_recorded": "{seller} recorded a payment of {amount, number, ::currency/INR} on your account",
       "payment_due": "Invoice {orderNo} for {party} ({amount, number, ::currency/INR}) is {days, plural, one {# day} other {# days}} overdue",
       "batch_recall": "Recall: {product} batch {batchNo} — stop selling and check your stock",
-      "licence_expiring": "{days, plural, =0 {Your {form} licence has expired — trading is paused} one {Your {form} licence expires in # day} other {Your {form} licence expires in # days}}"
+      "licence_expiring": "{days, plural, =0 {Your {form} licence has expired — trading is paused} one {Your {form} licence expires in # day} other {Your {form} licence expires in # days}}",
+      "shop_expiry": "{count, plural, one {# batch expires} other {# batches expire}} within {days} days ({value, number, ::currency/INR} of stock)",
+      "shop_low_stock": "{count, plural, one {{name} is running low} other {{name} and # others are running low}}",
+      "shop_refills": "{count, plural, one {# customer is} other {# customers are}} due for a refill"
     }
   },
   "alerts": {
@@ -1148,6 +1153,27 @@
     "averageBill": "bills on average",
     "perVisit": "Average bill",
     "lastVisit": "last visit",
-    "since": "since {date}"
+    "since": "since {date}",
+    "alertsTitle": "Stock alerts",
+    "alertsSubtitle": "What is about to expire, and what is about to run out.",
+    "valueAtRisk": "Value at risk",
+    "expiringWithin": "Expiring in {days} days",
+    "expiryTab": "Expiry",
+    "lowStockTab": "Low stock ({count})",
+    "expiredTitle": "{count, plural, one {# expired batch} other {# expired batches}}",
+    "expiredHint": "Pull these off the shelf and set the quantity to zero once written off.",
+    "batchesWorth": "{count, plural, one {# batch} other {# batches}}, {value} at cost",
+    "daysLeft": "{days} days left",
+    "packsShort": "packs",
+    "noExpiring": "Nothing expiring in the next 90 days.",
+    "lowStockTitle": "Running low",
+    "lowStockHint": "Reorder levels come from how fast each medicine actually sells. Type your own to override.",
+    "noLowStock": "Nothing is running low.",
+    "onShelf": "{count} on the shelf",
+    "daysOfCover": "about {days} days left at {rate} a day",
+    "noRecentSales": "no recent sales",
+    "suggestOrder": "Order",
+    "reorderLevel": "Minimum",
+    "orderThese": "Order these"
   }
 }

@@ -45,6 +45,7 @@ export const getNav = cache(async () => {
     ...(shop ? [{ href: "/app/shop/stock", label: t("nav.shopStock"), icon: "shop" as const }] : []),
     ...(counter ? [{ href: "/app/shop/bills", label: t("nav.bills"), icon: "orders" as const }] : []),
     ...(shop ? [{ href: "/app/shop/customers", label: t("nav.customers"), icon: "team" as const }] : []),
+    ...(shop ? [{ href: "/app/shop/alerts", label: t("nav.shopAlerts"), icon: "alert" as const }] : []),
     ...(canChat ? [{ href: "/app/chat", label: t("nav.chat"), icon: "chat" as const, mobile: !seller, badge: unreadChats }] : []),
     { href: "/app/notifications", label: t("nav.notifications"), icon: "bell", badge: unread },
     { href: "/app/alerts", label: t("nav.alerts"), icon: "alert" },
