@@ -143,7 +143,16 @@ Status: ✅ done · 🚧 in progress · ⏳ planned (v1) · 🔜 after launch (v
   - fluid width, checked at 375px wide.
 - Tests: `tests/integration/analytics.test.ts` checks every dashboard figure against real orders placed through checkout, including cancelled-order exclusion and savings.
 
-### 3.9 After launch 🔜
+### 3.9 Trade tools beyond the brief ✅
+Built after the SRS scope was complete, for the way these businesses actually trade.
+- FR-28 **Credit ledger ("khata")** — a running account per buyer–seller pair. The seller sets a credit limit and credit days; accepting an order freezes those terms on the invoice and sets its due date. Receipts are recorded against the account (cash / UPI / bank / cheque / adjustment) and settle the **oldest invoice first**, anything extra stays on account. `/app/ledger` shows receivable and payable accounts, and a statement with a running balance. Checkout refuses a credit order that would cross the limit. The daily cron emails one overdue reminder per buyer–seller pair, at most weekly. "Mark payment received" on an order goes through the same ledger, so order and statement can never disagree.
+- FR-29 **Batch recall broadcast** — an admin issues a recall or advisory for a batch (`/admin/recalls`). Every matching listing is held (the seller cannot resume it), and the sellers holding that batch plus the buyers who already received it get an in-app notice and an email. Order pages show a banner for any recalled batch. Withdrawing the recall releases the hold and leaves the listing paused.
+- FR-30 **Quick order & buy again** — paste a purchase list (CSV, tab-separated, "Dolo 650 x 10", serial numbers) at `/app/cart/quick`; names are matched to the catalogue (exact, case-insensitive, then "starts with") and each line is filled from the cheapest verified seller who can actually fulfil it, respecting minimum order quantity and stock. "Buy again" on a past order pre-fills the same page at today's prices.
+- FR-31 **Licence-expiry enforcement** — the daily cron warns 60 / 30 / 7 days before the earliest drug licence expires (one email per level) and suspends the business the day it lapses, with the reason on the KYC record; renewing resets the ladder. Catalogue "best price" and seller counts ignore unverified or suspended sellers.
+- FR-32 **Cheapest-combination cart** — the cart compares every line against other verified sellers and offers to switch the whole cart in one click, showing the saving and how many deliveries the order would come from. Ties go to a seller already in the cart, so the order does not fragment for nothing.
+- Tests: pure maths (allocation, licence levels, list parsing, swap choice) as unit tests; ledger, recalls, reorder, licence and optimiser flows as integration tests against a throwaway database.
+
+### 3.10 After launch 🔜
 Plus membership and Razorpay · commission model · pharma company promotions and regional demand analytics · Tally/Marg integration · returns and disputes workflow · delivery tracking · installable PWA with offline support · prescription records (DPDP-compliant) · retailer-side inventory.
 
 ## 4. Non-functional requirements
@@ -169,3 +178,5 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `pricealerts`, `notifications` | app | per-user price subscriptions; in-app notifications (TTL 90 days) |
 | `conversations`, `messages` | app | direct (pairKey) + community (slug) threads; read markers; message reports |
 | `tickets` | app | tickets + call-backs with embedded replies; `TKT-` numbers from `counters` |
+| `creditaccounts`, `payments` | app | credit terms per (seller, buyer); receipts with their allocation across invoices |
+| `recalls` | app | recalled/advised batches; held listings point back with `recallId` |
