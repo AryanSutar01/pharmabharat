@@ -249,7 +249,9 @@
     "dashboardSubtitle": "Here's what's happening with {business}.",
     "verified": "Verified business",
     "nextStepsTitle": "Coming next",
-    "nextSteps": "Catalog, ordering, chat and analytics are being rolled out over the next few days."
+    "nextSteps": "Catalog, ordering, chat and analytics are being rolled out over the next few days.",
+    "licenceExpiring": "Drug licence {form} expires in {days, plural, one {# day} other {# days}}. Trading pauses when it lapses.",
+    "licenceUpdate": "Update licence"
   },
   "team": {
     "title": "Team",
@@ -753,7 +755,7 @@
       "payment_recorded": "{seller} recorded a payment of {amount, number, ::currency/INR} on your account",
       "payment_due": "Invoice {orderNo} for {party} ({amount, number, ::currency/INR}) is {days, plural, one {# day} other {# days}} overdue",
       "batch_recall": "Recall: {product} batch {batchNo} — stop selling and check your stock",
-      "licence_expiring": "Your {form} licence expires in {days, plural, one {# day} other {# days}}"
+      "licence_expiring": "{days, plural, =0 {Your {form} licence has expired — trading is paused} one {Your {form} licence expires in # day} other {Your {form} licence expires in # days}}"
     }
   },
   "alerts": {

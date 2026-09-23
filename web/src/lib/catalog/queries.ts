@@ -99,6 +99,17 @@ export async function offerSummaries(productIds: mongoose.Types.ObjectId[]) {
   if (!productIds.length) return new Map<string, OfferSummary>();
   const rows = await Listing.aggregate<{ _id: mongoose.Types.ObjectId; bestPrice: number; mrp: number; sellers: number }>([
     { $match: { productId: { $in: productIds }, ...sellableFilter() } },
+    // Only verified sellers count towards "best price" and the seller count.
+    {
+      $lookup: {
+        from: Business.collection.name,
+        localField: "sellerId",
+        foreignField: "_id",
+        as: "seller",
+        pipeline: [{ $match: { "kyc.status": "approved" } }, { $project: { _id: 1 } }],
+      },
+    },
+    { $match: { "seller.0": { $exists: true } } },
     { $sort: { price: 1 } },
     {
       $group: {

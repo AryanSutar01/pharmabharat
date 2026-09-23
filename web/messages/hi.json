@@ -249,7 +249,9 @@
     "dashboardSubtitle": "{business} में क्या चल रहा है, यहाँ देखें।",
     "verified": "सत्यापित व्यवसाय",
     "nextStepsTitle": "आगे आ रहा है",
-    "nextSteps": "कैटलॉग, ऑर्डर, चैट और एनालिटिक्स अगले कुछ दिनों में शुरू किए जा रहे हैं।"
+    "nextSteps": "कैटलॉग, ऑर्डर, चैट और एनालिटिक्स अगले कुछ दिनों में शुरू किए जा रहे हैं।",
+    "licenceExpiring": "ड्रग लाइसेंस {form} {days, plural, one {# दिन} other {# दिन}} में समाप्त हो रहा है। समाप्त होते ही व्यापार रुक जाएगा।",
+    "licenceUpdate": "लाइसेंस अपडेट करें"
   },
   "team": {
     "title": "टीम",
@@ -753,7 +755,7 @@
       "payment_recorded": "{seller} ने आपके खाते में {amount, number, ::currency/INR} का भुगतान दर्ज किया",
       "payment_due": "{party} का बिल {orderNo} ({amount, number, ::currency/INR}) {days, plural, one {# दिन} other {# दिन}} से बकाया है",
       "batch_recall": "रिकॉल: {product} बैच {batchNo} — बिक्री रोकें और अपना स्टॉक जाँचें",
-      "licence_expiring": "आपका {form} लाइसेंस {days, plural, one {# दिन} other {# दिन}} में समाप्त हो रहा है"
+      "licence_expiring": "{days, plural, =0 {आपका {form} लाइसेंस समाप्त हो गया — व्यापार रोक दिया गया है} one {आपका {form} लाइसेंस # दिन में समाप्त हो रहा है} other {आपका {form} लाइसेंस # दिन में समाप्त हो रहा है}}"
     }
   },
   "alerts": {

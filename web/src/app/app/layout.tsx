@@ -5,7 +5,8 @@ import { BottomNav, NavIcon, SideNav } from "@/components/app-nav";
 import { BusinessSwitcher } from "@/components/business-switcher";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
-import { Logo } from "@/components/ui";
+import { Alert, Logo } from "@/components/ui";
+import { licenceStatus } from "@/lib/compliance/rules";
 import { getNav } from "@/lib/nav";
 import { requireBusiness } from "@/lib/session";
 
@@ -14,6 +15,8 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const t = await getTranslations();
 
   const { items, bottom, buyer, inCart, unread } = await getNav();
+  // Trading stops when the drug licence lapses, so warn well before that.
+  const licence = licenceStatus(business.drugLicenses);
 
   const businessName = business.tradeName || business.legalName;
   const options = memberships.map((m) => ({
@@ -77,7 +80,18 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
             {/* Language and sign-out live on the More page on phones, keeping this bar uncluttered. */}
           </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 sm:px-6 lg:pb-10 lg:pt-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 sm:px-6 lg:pb-10 lg:pt-8">
+          {licence.status === "expiring" && licence.licence ? (
+            <div className="mb-5">
+              <Alert tone="warning" title={t("app.licenceExpiring", { form: licence.licence.form, days: licence.daysLeft })}>
+                <Link href="/app/business" className="font-medium underline">
+                  {t("app.licenceUpdate")}
+                </Link>
+              </Alert>
+            </div>
+          ) : null}
+          {children}
+        </main>
       </div>
 
       <BottomNav items={bottom} />

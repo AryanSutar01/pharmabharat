@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { runExpiryAlerts } from "@/lib/alerts/expiry";
+import { runLicenceChecks } from "@/lib/compliance/service";
 import { env } from "@/lib/env";
 import { runPaymentReminders } from "@/lib/ledger/reminders";
 
@@ -24,5 +25,6 @@ export async function GET(req: Request) {
   const started = Date.now();
   const expiry = await runExpiryAlerts();
   const payments = await runPaymentReminders();
-  return NextResponse.json({ ok: true, expiry, payments, ms: Date.now() - started });
+  const licences = await runLicenceChecks();
+  return NextResponse.json({ ok: true, expiry, payments, licences, ms: Date.now() - started });
 }

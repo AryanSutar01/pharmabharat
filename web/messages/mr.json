@@ -249,7 +249,9 @@
     "dashboardSubtitle": "{business} मध्ये काय चालले आहे ते येथे पहा.",
     "verified": "सत्यापित व्यवसाय",
     "nextStepsTitle": "पुढे येत आहे",
-    "nextSteps": "कॅटलॉग, ऑर्डर, चॅट आणि ॲनालिटिक्स पुढील काही दिवसांत सुरू होत आहेत."
+    "nextSteps": "कॅटलॉग, ऑर्डर, चॅट आणि ॲनालिटिक्स पुढील काही दिवसांत सुरू होत आहेत.",
+    "licenceExpiring": "ड्रग परवाना {form} {days, plural, one {# दिवसात} other {# दिवसांत}} संपत आहे. मुदत संपताच व्यवहार थांबतील.",
+    "licenceUpdate": "परवाना अद्ययावत करा"
   },
   "team": {
     "title": "टीम",
@@ -753,7 +755,7 @@
       "payment_recorded": "{seller} यांनी तुमच्या खात्यावर {amount, number, ::currency/INR} चा भरणा नोंदवला",
       "payment_due": "{party} यांचे बिल {orderNo} ({amount, number, ::currency/INR}) {days, plural, one {# दिवसापासून} other {# दिवसांपासून}} थकीत आहे",
       "batch_recall": "रिकॉल: {product} बॅच {batchNo} — विक्री थांबवा आणि तुमचा साठा तपासा",
-      "licence_expiring": "तुमचा {form} परवाना {days, plural, one {# दिवसात} other {# दिवसांत}} संपत आहे"
+      "licence_expiring": "{days, plural, =0 {तुमचा {form} परवाना संपला — व्यवहार थांबवले आहेत} one {तुमचा {form} परवाना # दिवसात संपत आहे} other {तुमचा {form} परवाना # दिवसांत संपत आहे}}"
     }
   },
   "alerts": {

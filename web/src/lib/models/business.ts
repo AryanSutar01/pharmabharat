@@ -90,6 +90,13 @@ const businessSchema = new Schema(
       remarks: String,
     },
 
+    // Licence-expiry enforcement (see lib/compliance).
+    compliance: {
+      /** Last warning level sent (60 / 30 / 7 days); reset when the licence is renewed. */
+      licenceWarnLevel: { type: Number, enum: [60, 30, 7, null], default: null },
+      suspendedAt: Date,
+    },
+
     ownerUserId: { type: String, required: true, index: true },
   },
   { timestamps: true },

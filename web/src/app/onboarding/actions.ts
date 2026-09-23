@@ -99,7 +99,8 @@ export async function saveBusinessProfile(_: FormState, formData: FormData): Pro
   const clash = await Business.exists({ gstin: data.gstin, _id: { $ne: business._id } });
   if (clash) return { errors: { gstin: "gstin_taken" }, values };
 
-  await Business.updateOne({ _id: business._id }, { $set: data });
+  // A renewed licence starts the warning ladder again (see lib/compliance).
+  await Business.updateOne({ _id: business._id }, { $set: { ...data, "compliance.licenceWarnLevel": null } });
   revalidatePath("/onboarding");
   return { ok: true };
 }

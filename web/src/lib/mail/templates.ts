@@ -236,6 +236,39 @@ type TicketLike = {
   replies: { text: string }[];
 };
 
+export function licenceEmail(opts: {
+  businessName: string;
+  form: string;
+  number: string;
+  validTill: Date;
+  /** 0 means it has already expired and the account is suspended. */
+  daysLeft: number;
+}) {
+  const expired = opts.daysLeft <= 0;
+  const date = opts.validTill.toLocaleDateString("en-IN");
+  const subject = expired
+    ? `Trading paused: drug licence ${opts.form} expired`
+    : `Your drug licence ${opts.form} expires in ${opts.daysLeft} day(s)`;
+  return {
+    subject,
+    html: layout({
+      heading: expired ? "Your licence has expired" : "Licence renewal due",
+      body:
+        p(`Dear ${esc(opts.businessName)},`) +
+        p(`Drug licence <b>${esc(opts.form)} ${esc(opts.number)}</b> was valid till <b>${esc(date)}</b>.`) +
+        p(
+          expired
+            ? "Trading on PharmaBharat has been paused. Upload the renewed licence and submit your profile for verification to resume."
+            : "Please upload the renewed licence before it expires, otherwise trading will be paused automatically.",
+        ),
+      cta: { label: "Update licence", url: `${env().BETTER_AUTH_URL}/app/business` },
+    }),
+    text: `${subject}
+Licence ${opts.form} ${opts.number} valid till ${date}
+${env().BETTER_AUTH_URL}/app/business`,
+  };
+}
+
 export function recallEmail(opts: {
   businessName: string;
   audience: "seller" | "buyer";
