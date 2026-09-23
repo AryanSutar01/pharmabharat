@@ -19,6 +19,7 @@ export const getNav = cache(async () => {
 
   const seller = isSellerType(business.type) && can(role, "inventory.manage");
   const shop = business.type === "retailer" && can(role, "retail.manage");
+  const counter = business.type === "retailer" && can(role, "retail.sell");
   const buyer = business.type !== "company" && can(role, "orders.place");
   const canChat = can(role, "chat.use");
   const staff = ["support", "admin"].includes(session.user.platformRole as string);
@@ -40,7 +41,9 @@ export const getNav = cache(async () => {
     ...(buyer ? [{ href: "/app/cart", label: t("nav.cart"), icon: "cart" as const, badge: inCart }] : []),
     { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true },
     ...(can(role, "billing.view") ? [{ href: "/app/ledger", label: t("nav.ledger"), icon: "ledger" as const }] : []),
+    ...(counter ? [{ href: "/app/shop/billing", label: t("nav.billing"), icon: "billing" as const, mobile: true }] : []),
     ...(shop ? [{ href: "/app/shop/stock", label: t("nav.shopStock"), icon: "shop" as const }] : []),
+    ...(counter ? [{ href: "/app/shop/bills", label: t("nav.bills"), icon: "orders" as const }] : []),
     ...(canChat ? [{ href: "/app/chat", label: t("nav.chat"), icon: "chat" as const, mobile: !seller, badge: unreadChats }] : []),
     { href: "/app/notifications", label: t("nav.notifications"), icon: "bell", badge: unread },
     { href: "/app/alerts", label: t("nav.alerts"), icon: "alert" },

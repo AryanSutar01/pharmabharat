@@ -30,6 +30,7 @@ const ICONS = {
   team: "M7 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM2.5 16c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4M13.5 9a2 2 0 1 0 0-4M13 12c2.2 0 4.5 1.3 4.5 4",
   business: "M3 17V7l7-3 7 3v10M7 17v-5h6v5M3 17h14",
   admin: "M10 2.5 16 5v5c0 3.5-2.6 6.4-6 7.5-3.4-1.1-6-4-6-7.5V5z",
+  billing: "M6 2.5h8v15l-2-1.5-2 1.5-2-1.5-2 1.5zM8.5 6h3M8.5 9h3M8.5 12h2",
   shop: "M3 8.5 4.5 4h11L17 8.5M3 8.5h14M3 8.5v7.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5M7.5 8.5a2.5 2.5 0 0 0 5 0",
   ledger: "M4 4.5A1.5 1.5 0 0 1 5.5 3H16v14H5.5A1.5 1.5 0 0 1 4 15.5zM7 7h5M7 10h5M7 13h3",
 } as const;
@@ -94,7 +95,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
   const visible = items.filter((i) => i.mobile);
   return (
-    <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white lg:hidden">
+    <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white lg:hidden print:hidden">
       <ul className="grid" style={{ gridTemplateColumns: `repeat(${visible.length}, minmax(0, 1fr))` }}>
         {visible.map((item) => {
           const active = isActive(pathname, item.href);

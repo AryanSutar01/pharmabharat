@@ -27,7 +27,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
 
   return (
     <div className="flex min-h-full flex-1">
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-white lg:flex">
+      <aside className="sticky top-0 hidden h-dvh w-64 print:!hidden shrink-0 flex-col border-r border-line bg-white lg:flex">
         <div className="px-5 py-4">
           <Link href="/app">
             <Logo />
@@ -53,7 +53,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-white/95 px-4 py-2.5 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-white/95 px-4 py-2.5 backdrop-blur lg:hidden print:hidden">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">{businessName}</p>
             <p className="text-xs text-muted">{t(`role.${role}`)}</p>
@@ -80,7 +80,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
             {/* Language and sign-out live on the More page on phones, keeping this bar uncluttered. */}
           </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 sm:px-6 lg:pb-10 lg:pt-8">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 sm:px-6 lg:pb-10 lg:pt-8 print:p-0">
           {licence.status === "expiring" && licence.licence ? (
             <div className="mb-5">
               <Alert tone="warning" title={t("app.licenceExpiring", { form: licence.licence.form, days: licence.daysLeft })}>
