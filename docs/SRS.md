@@ -154,7 +154,7 @@ Built after the SRS scope was complete, for the way these businesses actually tr
 - FR-32 **Cheapest-combination cart** — the cart compares every line against other verified sellers and offers to switch the whole cart in one click, showing the saving and how many deliveries the order would come from. Ties go to a seller already in the cart, so the order does not fragment for nothing.
 - Tests: pure maths (allocation, licence levels, list parsing, swap choice) as unit tests; ledger, recalls, reorder, licence and optimiser flows as integration tests against a throwaway database.
 
-### 3.10 Retailer shop module 🔨
+### 3.10 Retailer shop module ✅
 The medical shop is the busiest user in this ecosystem, so the retailer gets a working shop-management system beside the marketplace. Decisions taken with the client:
 
 | Question | Decision |
@@ -170,7 +170,18 @@ The medical shop is the busiest user in this ecosystem, so the retailer gets a w
 | Supplier comparison | Price history for the same medicine, credit terms and outstanding, and quality problems (recalled batches, short-dated deliveries). |
 | Privacy (DPDP) | Consent captured when a customer is added, deletion that **anonymises bills** rather than destroying accounting records, and a retention window after which inactive customers' contact details are purged. |
 
-Build order (each step tested and committed on its own): shop stock → billing → customers → expiry and low-stock alerts → refill reminders and restock → loyalty → prescriptions and H1 register → shop analytics → supplier comparison.
+What was built, in this order, each step tested and committed on its own:
+- FR-33 **Shop stock** — the shop's own shelf: batches with purchase cost, MRP, expiry and supplier. Marking a purchase order delivered puts its batches on the shelf at what was actually paid (idempotent), plus manual entry with catalogue search. Shelf value at cost and at MRP; expiring / expired / out-of-stock filters.
+- FR-34 **Billing counter** (`/app/shop/billing`) — type-ahead over the shop's own stock, batches offered **first-expiry-first**, and stock with under a month of life kept off the counter. MRP-inclusive GST worked backwards, per-line discounts, cash/UPI/card. The bill and the stock decrement happen in one transaction, so a bill can never exist for medicine that wasn't there and a partly fulfillable bill changes nothing. Bill numbers run per shop per financial year. Printable receipt with the shop's licence, batch, expiry, HSN, tax split and amount in words.
+- FR-35 **Customers** — the shop's own records (patients never sign in): consent captured and dated, a separate tick for reminders, purchase history, and "what they buy" with the typical gap between purchases. Deletion erases personal details here **and on old bills** while the bills survive for accounting; a nightly purge does the same for customers who stopped coming longer ago than the shop's retention window.
+- FR-36 **Expiry and low-stock alerts** (`/app/shop/alerts`) — 90 / 60 / 30-day buckets plus already-expired, with the money tied up in each. Reorder levels are computed nightly from how fast each medicine actually sells (15 days of cover by default) and can be overridden per medicine. The low-stock list feeds the marketplace quick order in one click.
+- FR-37 **Refill reminders** (`/app/shop/refills`) — who is due for a repeat medicine, learned from the gaps between their own purchases. Customers who agreed get one email per cycle; everyone else lands on a call-list with a "called" tick. Repeat medicines that aren't on the shelf are flagged and roll into the same reorder list.
+- FR-38 **Loyalty** — points per rupee with the earn rate, point value, minimum redemption and expiry set by the shop. Earning and redeeming happen inside the bill transaction; redemption comes off what is payable, never off the taxable value, so the GST is unaffected. Points lapse oldest-first (FIFO).
+- FR-39 **Schedule H register** (`/app/shop/register`) — every prescription-only medicine dispensed, with prescriber, registration number, patient, batch and quantity, filterable by month and schedule, exportable as CSV, and with a warning listing sales where the prescriber was never recorded.
+- FR-40 **Shop reports** (`/app/shop/reports`) — sales, margin and profit; best sellers and most profitable lines; dead stock with the money tied up; new vs returning vs lapsed customers; value lost to expiry; and output GST by rate for the monthly filing. 30 / 90 / 365 days against the period before.
+- FR-41 **Supplier comparison** (`/app/shop/suppliers`) — spend per supplier, the credit terms they give and what is outstanding or overdue, their quality record (batches later recalled, deliveries with under six months of life), and what each one charged for a medicine against today's best marketplace price.
+
+Roles: `retail.sell` (the counter) and `retail.manage` (stock, customers, settings). The whole module is retailer-only.
 
 **Known limitation:** stock and billing work in whole packs (a strip or bottle as the catalogue defines it). Selling loose tablets out of a strip is not supported in this version.
 
@@ -202,3 +213,8 @@ Plus membership and Razorpay · commission model · pharma company promotions an
 | `tickets` | app | tickets + call-backs with embedded replies; `TKT-` numbers from `counters` |
 | `creditaccounts`, `payments` | app | credit terms per (seller, buyer); receipts with their allocation across invoices |
 | `recalls` | app | recalled/advised batches; held listings point back with `recallId` |
+| `shopstocks`, `shopitems` | app | a retailer's own shelf (batch, cost, supplier) and per-medicine reorder settings |
+| `bills` | app | counter sales: frozen lines, MRP-inclusive GST, loyalty and prescriber |
+| `customers` | app | the shop's patients, with consent and erasure state |
+| `loyaltyentries`, `refillnudges` | app | points ledger (FIFO expiry); refills already emailed or called |
+| `shopsettings` | app | per shop: stock cover, loyalty rates, customer retention |
