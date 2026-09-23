@@ -79,8 +79,15 @@ const orderSchema = new Schema(
 
     payment: {
       mode: { type: String, enum: PAYMENT_MODES, required: true },
-      status: { type: String, enum: ["unpaid", "paid"], default: "unpaid" },
+      status: { type: String, enum: ["unpaid", "partial", "paid"], default: "unpaid" },
+      // Running total of receipts allocated to this order (see lib/ledger).
+      paidAmount: { type: Number, default: 0 },
       paidAt: Date,
+      /** Credit terms frozen at order time; due = invoice date + creditDays. */
+      creditDays: { type: Number, default: 0 },
+      dueAt: Date,
+      /** Last overdue reminder sent (keeps the daily job from nagging). */
+      reminderAt: Date,
     },
     // Assigned when the seller accepts: sequential per seller per financial year.
     invoice: { number: String, date: Date },

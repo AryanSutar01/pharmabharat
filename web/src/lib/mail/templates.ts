@@ -141,6 +141,38 @@ export function orderStatusEmail(o: OrderSummary & { status: string; note?: stri
 
 // ------------------------------------------------------------------ alerts
 
+export function paymentReminderEmail(opts: {
+  buyerName: string;
+  sellerName: string;
+  invoices: { orderNo: string; invoiceNo?: string; amount: number; dueAt: Date; daysOverdue: number }[];
+  total: number;
+}) {
+  const subject = `Payment reminder from ${opts.sellerName} — ${inr(opts.total)} overdue`;
+  const rows = opts.invoices
+    .map(
+      (i) =>
+        `<tr><td style="padding:6px 0">${esc(i.invoiceNo || i.orderNo)}</td><td style="padding:6px 0">${i.dueAt.toLocaleDateString("en-IN")}</td><td style="padding:6px 0;color:#b42318">${i.daysOverdue}d</td><td style="padding:6px 0;text-align:right">${inr(i.amount)}</td></tr>`,
+    )
+    .join("");
+  return {
+    subject,
+    html: layout({
+      heading: "Payment reminder",
+      body:
+        p(`Dear ${esc(opts.buyerName)}, the following invoices from <b>${esc(opts.sellerName)}</b> are past their due date.`) +
+        `<table role="presentation" width="100%" style="font-size:14px;border-collapse:collapse">
+<tr style="color:#5b6b66;text-align:left"><th style="padding:6px 0">Invoice</th><th style="padding:6px 0">Due</th><th style="padding:6px 0">Late</th><th style="padding:6px 0;text-align:right">Amount</th></tr>
+${rows}
+<tr><td colspan="3" style="padding:10px 0;border-top:1px solid #e3e8e6;font-weight:700">Total overdue</td><td style="padding:10px 0;border-top:1px solid #e3e8e6;text-align:right;font-weight:700">${inr(opts.total)}</td></tr></table>` +
+        p("Please settle directly with the seller. This is a reminder, not a demand notice."),
+      cta: { label: "View statement", url: `${env().BETTER_AUTH_URL}/app/ledger?side=buyer` },
+    }),
+    text: `${subject}\n${opts.invoices
+      .map((i) => `${i.invoiceNo || i.orderNo} due ${i.dueAt.toLocaleDateString("en-IN")} — ${inr(i.amount)}`)
+      .join("\n")}`,
+  };
+}
+
 export function priceAlertEmail(opts: { productName: string; from: number; to: number; change: number; link: string }) {
   const url = `${env().BETTER_AUTH_URL}${opts.link}`;
   const dropped = opts.to < opts.from;

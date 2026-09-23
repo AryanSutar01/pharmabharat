@@ -8,15 +8,18 @@ import { Cart } from "@/lib/models/cart";
 import { Listing } from "@/lib/models/listing";
 import { Order, nextSequence, type OrderDoc } from "@/lib/models/order";
 import { Product } from "@/lib/models/product";
-import { computeTotals, financialYear, lineTax } from "@/lib/orders/gst";
+import { checkCreditForOrder, dueDateFor, recordPayment } from "@/lib/ledger/service";
+import { computeTotals, financialYear, lineTax, round2 } from "@/lib/orders/gst";
 import { TRANSITIONS, type OrderAction, type PaymentMode } from "@/lib/orders/status";
 
 const MIN_SHELF_LIFE_MS = 30 * 24 * 3600 * 1000;
 
 export class CheckoutError extends Error {
   constructor(
-    public code: "cart_empty" | "cart_changed" | "out_of_stock" | "own_listing",
+    public code: "cart_empty" | "cart_changed" | "out_of_stock" | "own_listing" | "credit_limit",
     public listingId?: string,
+    /** For credit_limit: which seller refused and what is still available. */
+    public detail?: { seller: string; available: number },
   ) {
     super(code);
   }
@@ -77,6 +80,27 @@ export async function placeOrders(opts: {
     if (item.qty > l.stock) throw new CheckoutError("out_of_stock", String(l._id));
     const key = String(l.sellerId);
     bySeller.set(key, [...(bySeller.get(key) ?? []), { listingId: l._id, qty: item.qty }]);
+  }
+
+  // Credit limits are per seller: check each group before reserving any stock.
+  if (opts.paymentMode === "credit") {
+    for (const [sellerId, lines] of bySeller) {
+      const seller = sellerById.get(sellerId)!;
+      const interState = (seller.address?.stateCode ?? "") !== (buyer.address?.stateCode ?? "");
+      const total = computeTotals(
+        lines.map(({ listingId, qty }) => {
+          const l = listingById.get(String(listingId))!;
+          return lineTax({ price: l.price, qty, gstRate: l.gstRate, hsn: l.hsn }, interState);
+        }),
+      ).grandTotal;
+      const check = await checkCreditForOrder(seller._id, buyer._id, total);
+      if (!check.allowed) {
+        throw new CheckoutError("credit_limit", undefined, {
+          seller: seller.tradeName || seller.legalName,
+          available: Math.max(check.available ?? 0, 0),
+        });
+      }
+    }
   }
 
   const groupId = randomUUID();
@@ -174,12 +198,21 @@ export async function transitionOrder(opts: {
     await session.withTransaction(async () => {
       const set: Record<string, unknown> = { status: t.to };
       if (opts.action === "accept") {
-        const current = await Order.findById(opts.orderId, { sellerId: 1, status: 1 }).session(session).lean();
+        const current = await Order.findById(opts.orderId, { sellerId: 1, buyerId: 1, status: 1, payment: 1 }).session(session).lean();
         if (!current || !t.from.includes(current.status)) return;
         const fy = financialYear(now);
         const seq = await nextSequence(`inv:${current.sellerId}:${fy}`, session);
         set["invoice.number"] = `INV/${fy}/${String(seq).padStart(6, "0")}`;
         set["invoice.date"] = now;
+        // Payment becomes due from the invoice date, using this buyer's credit terms.
+        const terms = await dueDateFor({
+          sellerId: current.sellerId,
+          buyerId: current.buyerId,
+          mode: current.payment?.mode ?? "credit",
+          from: now,
+        });
+        set["payment.creditDays"] = terms.creditDays;
+        set["payment.dueAt"] = terms.dueAt;
       }
       updated = await Order.findOneAndUpdate(
         { _id: opts.orderId, status: { $in: t.from } },
@@ -198,12 +231,25 @@ export async function transitionOrder(opts: {
   return updated as OrderDoc | null;
 }
 
-/** Seller confirms payment was received (no gateway in v1: cash / credit settled offline). */
-export async function markOrderPaid(orderId: string) {
+/**
+ * Seller confirms the remaining amount was received (no gateway in v1).
+ * Goes through the ledger so the statement and the order stay in step.
+ */
+export async function markOrderPaid(orderId: string, user: { id: string; name: string }) {
   await connectDB();
-  return Order.findOneAndUpdate(
-    { _id: orderId, "payment.status": "unpaid", status: { $in: ["dispatched", "delivered"] } },
-    { $set: { "payment.status": "paid", "payment.paidAt": new Date() } },
-    { returnDocument: "after" },
-  ).lean();
+  const order = await Order.findOne({ _id: orderId, status: { $in: ["dispatched", "delivered"] } }).lean();
+  if (!order || order.payment?.status === "paid") return null;
+  const owing = round2((order.totals?.grandTotal ?? 0) - (order.payment?.paidAmount ?? 0));
+  if (owing <= 0) return null;
+  const seller = await Business.findById(order.sellerId).lean();
+  if (!seller) return null;
+  await recordPayment({
+    seller,
+    buyerId: order.buyerId,
+    amount: owing,
+    method: order.payment?.mode === "cod" ? "cash" : "bank",
+    note: `Order ${order.orderNo}`,
+    user,
+  });
+  return Order.findById(orderId).lean();
 }

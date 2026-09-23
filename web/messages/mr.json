@@ -111,7 +111,12 @@
     "invalid_order_no": "ऑर्डर नंबर असा असतो: PB-2609-000123",
     "box_photo_required": "बॉक्स/बॅचचा किमान एक फोटो जोडा",
     "too_many_files": "तुम्ही जास्तीत जास्त 5 फाइल जोडू शकता",
-    "photo_must_be_image": "फोटो इमेज असावेत (फक्त इनव्हॉइस PDF असू शकते)"
+    "photo_must_be_image": "फोटो इमेज असावेत (फक्त इनव्हॉइस PDF असू शकते)",
+    "invalid_amount": "योग्य रक्कम भरा.",
+    "no_open_invoices": "या खरेदीदाराचे कोणतेही थकित बिल नाही.",
+    "invalid_id": "खाते सापडले नाही.",
+    "server_error": "काहीतरी चुकले. पुन्हा प्रयत्न करा.",
+    "credit_limit": "ही ऑर्डर विक्रेत्याकडील तुमची उधार मर्यादा ओलांडते. थकित बिले भरा किंवा कॅश ऑन डिलिव्हरी निवडा."
   },
   "landing": {
     "tagline": "भारताचा B2B फार्मा मार्केटप्लेस",
@@ -158,6 +163,7 @@
     "home": "होम",
     "catalog": "कॅटलॉग",
     "orders": "ऑर्डर",
+    "ledger": "खातेवही",
     "chat": "चॅट",
     "team": "टीम",
     "business": "व्यवसाय प्रोफाइल",
@@ -590,7 +596,7 @@
     "invoiceNo": "इनव्हॉइस {number}",
     "downloadInvoice": "इनव्हॉइस डाउनलोड करा (PDF)",
     "invoiceAfterAccept": "डिस्ट्रिब्युटरने ऑर्डर स्वीकारल्यावर इनव्हॉइस तयार होते.",
-    "payment": "पेमेंट",
+    "payment": "भरणा",
     "paid": "पेमेंट झाले",
     "unpaid": "पेमेंट बाकी",
     "actions": "कृती",
@@ -615,7 +621,65 @@
       "delivered": "डिलिव्हर",
       "rejected": "नाकारली",
       "cancelled": "रद्द"
-    }
+    },
+    "dueOn": "देय तारीख",
+    "paidSoFar": "आतापर्यंत भरणा"
+  },
+  "ledger": {
+    "title": "खातेवही",
+    "description": {
+      "seller": "तुमच्या खरेदीदारांकडून येणे, बिलानुसार.",
+      "buyer": "तुमच्या पुरवठादारांना देणे, बिलानुसार."
+    },
+    "side": {
+      "seller": "येणे",
+      "buyer": "देणे"
+    },
+    "outstanding": {
+      "seller": "एकूण येणे",
+      "buyer": "एकूण देणे"
+    },
+    "overdue": "मुदत उलटलेली",
+    "empty": "सध्या कोणतीही थकबाकी नाही.",
+    "invoiceCount": "{count, plural, one {# थकित बिल} other {# थकित बिले}}",
+    "lastPayment": "शेवटचे भरणा {date}",
+    "overdueBy": "{amount} — {days, plural, one {# दिवसापासून} other {# दिवसांपासून}} थकीत",
+    "withinTerms": "मुदतीत",
+    "statement": "तपशील",
+    "statementHint": "बिले आणि भरणा, जुन्यापासून.",
+    "noEntries": "अद्याप नोंद नाही.",
+    "due": "देय {date}",
+    "balance": "शिल्लक {amount}",
+    "recordPayment": "भरणा नोंदवा",
+    "recordPaymentHint": "या खरेदीदाराकडून मिळालेली रक्कम, साइटबाहेर.",
+    "paymentSaved": "भरणा नोंदवला.",
+    "amount": "मिळालेली रक्कम",
+    "amountHint": "थकबाकी: {amount}",
+    "method": "पद्धत",
+    "methodLabel": {
+      "cash": "रोख",
+      "upi": "UPI",
+      "bank": "बँक ट्रान्सफर",
+      "cheque": "धनादेश",
+      "adjustment": "समायोजन"
+    },
+    "reference": "संदर्भ",
+    "referenceHint": "UTR, धनादेश क्रमांक इत्यादी.",
+    "receivedAt": "मिळाल्याची तारीख",
+    "note": "टीप",
+    "allocationNote": "रक्कम आधी सर्वात जुन्या थकित बिलांना लावली जाते. उरलेली रक्कम खात्यावर जमा राहते.",
+    "creditTerms": "उधारीच्या अटी",
+    "creditLimit": "उधार मर्यादा",
+    "creditLimitHint": "0 म्हणजे मर्यादा नाही.",
+    "creditDays": "उधार दिवस",
+    "creditDaysHint": "बिलाच्या तारखेनंतर किती दिवसांत रक्कम देय आहे.",
+    "termsSaved": "उधारीच्या अटी जतन केल्या.",
+    "termsSummary": "{days, plural, one {# दिवसाची उधारी} other {# दिवसांची उधारी}}",
+    "noLimit": "मर्यादा नाही",
+    "available": "उपलब्ध उधारी",
+    "backToAccounts": "सर्व खाती",
+    "overdueNotice": "{amount} गेल्या {days, plural, one {# दिवसापासून} other {# दिवसांपासून}} थकीत आहे.",
+    "buyerSideHint": "तुमचा पुरवठादार त्यांच्या बाजूने भरणा नोंदवतो. थेट भरणा करा, इथली शिल्लक आपोआप अद्ययावत होईल."
   },
   "notifications": {
     "title": "सूचना",
@@ -630,7 +694,11 @@
       "order_placed": "{party} कडून नवीन ऑर्डर {orderNo} · {total}",
       "order_status": "ऑर्डर {orderNo} ({party}) आता {status} आहे",
       "kyc_decision": "{approved, select, 1 {तुमचा व्यवसाय सत्यापित झाला आहे. आता तुम्ही व्यापार सुरू करू शकता.} other {पडताळणीत बदल आवश्यक आहेत. कृपया तुमचा तपशील अपडेट करा.}}",
-      "support_update": "सपोर्ट तिकीट {number} अपडेट झाले ({status})"
+      "support_update": "सपोर्ट तिकीट {number} अपडेट झाले ({status})",
+      "payment_recorded": "{seller} यांनी तुमच्या खात्यावर {amount, number, ::currency/INR} चा भरणा नोंदवला",
+      "payment_due": "{party} यांचे बिल {orderNo} ({amount, number, ::currency/INR}) {days, plural, one {# दिवसापासून} other {# दिवसांपासून}} थकीत आहे",
+      "batch_recall": "रिकॉल: {product} बॅच {batchNo} — विक्री थांबवा आणि तुमचा साठा तपासा",
+      "licence_expiring": "तुमचा {form} परवाना {days, plural, one {# दिवसात} other {# दिवसांत}} संपत आहे"
     }
   },
   "alerts": {

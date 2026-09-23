@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { runExpiryAlerts } from "@/lib/alerts/expiry";
 import { env } from "@/lib/env";
+import { runPaymentReminders } from "@/lib/ledger/reminders";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -22,5 +23,6 @@ export async function GET(req: Request) {
   if (!authorized(req)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const started = Date.now();
   const expiry = await runExpiryAlerts();
-  return NextResponse.json({ ok: true, expiry, ms: Date.now() - started });
+  const payments = await runPaymentReminders();
+  return NextResponse.json({ ok: true, expiry, payments, ms: Date.now() - started });
 }

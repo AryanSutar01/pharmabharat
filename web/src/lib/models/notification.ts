@@ -8,6 +8,10 @@ export const NOTIFICATION_KINDS = [
   "order_status",
   "kyc_decision",
   "support_update",
+  "payment_recorded",
+  "payment_due",
+  "batch_recall",
+  "licence_expiring",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 

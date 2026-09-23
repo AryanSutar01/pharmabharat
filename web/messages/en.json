@@ -111,7 +111,12 @@
     "invalid_order_no": "Order numbers look like PB-2609-000123",
     "box_photo_required": "Add at least one photo of the box/batch",
     "too_many_files": "You can attach up to 5 files",
-    "photo_must_be_image": "Photos must be images (only the invoice may be a PDF)"
+    "photo_must_be_image": "Photos must be images (only the invoice may be a PDF)",
+    "invalid_amount": "Enter a valid amount.",
+    "no_open_invoices": "This buyer has no unpaid invoices.",
+    "invalid_id": "Account not found.",
+    "server_error": "Something went wrong. Please try again.",
+    "credit_limit": "This order crosses your credit limit with the seller. Clear pending invoices or choose cash on delivery."
   },
   "landing": {
     "tagline": "India's B2B pharma marketplace",
@@ -158,6 +163,7 @@
     "home": "Home",
     "catalog": "Catalog",
     "orders": "Orders",
+    "ledger": "Ledger",
     "chat": "Chat",
     "team": "Team",
     "business": "Business profile",
@@ -615,7 +621,65 @@
       "delivered": "Delivered",
       "rejected": "Rejected",
       "cancelled": "Cancelled"
-    }
+    },
+    "dueOn": "Due on",
+    "paidSoFar": "Paid so far"
+  },
+  "ledger": {
+    "title": "Ledger",
+    "description": {
+      "seller": "What your buyers owe you, invoice by invoice.",
+      "buyer": "What you owe your suppliers, invoice by invoice."
+    },
+    "side": {
+      "seller": "Receivable",
+      "buyer": "Payable"
+    },
+    "outstanding": {
+      "seller": "To receive",
+      "buyer": "To pay"
+    },
+    "overdue": "Overdue",
+    "empty": "Nothing outstanding right now.",
+    "invoiceCount": "{count, plural, one {# open invoice} other {# open invoices}}",
+    "lastPayment": "last payment {date}",
+    "overdueBy": "{amount} overdue by {days, plural, one {# day} other {# days}}",
+    "withinTerms": "Within terms",
+    "statement": "Statement",
+    "statementHint": "Invoices and receipts, oldest first.",
+    "noEntries": "No entries yet.",
+    "due": "due {date}",
+    "balance": "Balance {amount}",
+    "recordPayment": "Record payment",
+    "recordPaymentHint": "Money received from this buyer, outside the site.",
+    "paymentSaved": "Payment recorded.",
+    "amount": "Amount received",
+    "amountHint": "Outstanding: {amount}",
+    "method": "Method",
+    "methodLabel": {
+      "cash": "Cash",
+      "upi": "UPI",
+      "bank": "Bank transfer",
+      "cheque": "Cheque",
+      "adjustment": "Adjustment"
+    },
+    "reference": "Reference",
+    "referenceHint": "UTR, cheque number, etc.",
+    "receivedAt": "Received on",
+    "note": "Note",
+    "allocationNote": "The amount is set against the oldest unpaid invoices first. Anything extra stays on account.",
+    "creditTerms": "Credit terms",
+    "creditLimit": "Credit limit",
+    "creditLimitHint": "0 means no limit.",
+    "creditDays": "Credit days",
+    "creditDaysHint": "Days after the invoice date that payment is due.",
+    "termsSaved": "Credit terms saved.",
+    "termsSummary": "{days, plural, one {# day credit} other {# days credit}}",
+    "noLimit": "No limit",
+    "available": "Credit available",
+    "backToAccounts": "All accounts",
+    "overdueNotice": "{amount} has been overdue for {days, plural, one {# day} other {# days}}.",
+    "buyerSideHint": "Your supplier records payments on their side. Pay them directly and the balance here will update."
   },
   "notifications": {
     "title": "Notifications",
@@ -630,7 +694,11 @@
       "order_placed": "New order {orderNo} from {party} · {total}",
       "order_status": "Order {orderNo} ({party}) is now {status}",
       "kyc_decision": "{approved, select, 1 {Your business is verified. You can start trading.} other {Verification needs changes. Please update your details.}}",
-      "support_update": "Support ticket {number} was updated ({status})"
+      "support_update": "Support ticket {number} was updated ({status})",
+      "payment_recorded": "{seller} recorded a payment of {amount, number, ::currency/INR} on your account",
+      "payment_due": "Invoice {orderNo} for {party} ({amount, number, ::currency/INR}) is {days, plural, one {# day} other {# days}} overdue",
+      "batch_recall": "Recall: {product} batch {batchNo} — stop selling and check your stock",
+      "licence_expiring": "Your {form} licence expires in {days, plural, one {# day} other {# days}}"
     }
   },
   "alerts": {

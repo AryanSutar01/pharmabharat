@@ -37,6 +37,7 @@ export const getNav = cache(async () => {
     ...(seller ? [{ href: "/app/inventory", label: t("nav.inventory"), icon: "inventory" as const, mobile: true }] : []),
     ...(buyer ? [{ href: "/app/cart", label: t("nav.cart"), icon: "cart" as const, badge: inCart }] : []),
     { href: "/app/orders", label: t("nav.orders"), icon: "orders", mobile: true },
+    ...(can(role, "billing.view") ? [{ href: "/app/ledger", label: t("nav.ledger"), icon: "ledger" as const }] : []),
     ...(canChat ? [{ href: "/app/chat", label: t("nav.chat"), icon: "chat" as const, mobile: !seller, badge: unreadChats }] : []),
     { href: "/app/notifications", label: t("nav.notifications"), icon: "bell", badge: unread },
     { href: "/app/alerts", label: t("nav.alerts"), icon: "alert" },

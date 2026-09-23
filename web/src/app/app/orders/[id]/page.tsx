@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isValidObjectId } from "mongoose";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Badge, Card, CardHeader, PageHeader, buttonClass } from "@/components/ui";
+import { Badge, Card, CardHeader, PageHeader, buttonClass, cn } from "@/components/ui";
 import { connectDB } from "@/lib/db/mongo";
 import { stateName } from "@/lib/india";
 import { Order } from "@/lib/models/order";
@@ -24,6 +24,7 @@ export default async function OrderPage({ params }: PageProps<"/app/orders/[id]"
 
   const t = await getTranslations();
   const format = await getFormatter();
+  const now = new Date();
   const inr = (v: number) => format.number(v, { style: "currency", currency: "INR", maximumFractionDigits: 2 });
   const monthYear = (d: Date) => format.dateTime(new Date(d), { month: "short", year: "numeric" });
 
@@ -134,6 +135,29 @@ export default async function OrderPage({ params }: PageProps<"/app/orders/[id]"
               )}
             </div>
           </Card>
+
+          {order.payment?.dueAt && order.payment.status !== "paid" ? (
+            <Card>
+              <CardHeader title={t("orders.payment")} />
+              <div className="space-y-2 p-4 text-sm sm:p-5">
+                <div className="flex justify-between">
+                  <span className="text-muted">{t("orders.dueOn")}</span>
+                  <span className={cn("font-medium", new Date(order.payment.dueAt) < now && "text-red-600")}>
+                    {format.dateTime(new Date(order.payment.dueAt), { dateStyle: "medium" })}
+                  </span>
+                </div>
+                {order.payment.paidAmount ? (
+                  <div className="flex justify-between">
+                    <span className="text-muted">{t("orders.paidSoFar")}</span>
+                    <span className="font-medium tabular-nums">{inr(order.payment.paidAmount)}</span>
+                  </div>
+                ) : null}
+                <Link href={`/app/ledger/${side === "seller" ? order.buyerId : order.sellerId}?side=${side}`} className="block pt-1 text-brand-700 hover:underline">
+                  {t("ledger.statement")} →
+                </Link>
+              </div>
+            </Card>
+          ) : null}
 
           {can(role, "chat.use") ? (
             <ChatButton

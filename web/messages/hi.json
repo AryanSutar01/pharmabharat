@@ -111,7 +111,12 @@
     "invalid_order_no": "ऑर्डर नंबर इस तरह होता है: PB-2609-000123",
     "box_photo_required": "डिब्बे/बैच की कम से कम एक फ़ोटो जोड़ें",
     "too_many_files": "आप अधिकतम 5 फ़ाइलें जोड़ सकते हैं",
-    "photo_must_be_image": "फ़ोटो इमेज होनी चाहिए (केवल इनवॉइस PDF हो सकता है)"
+    "photo_must_be_image": "फ़ोटो इमेज होनी चाहिए (केवल इनवॉइस PDF हो सकता है)",
+    "invalid_amount": "सही रकम दर्ज करें।",
+    "no_open_invoices": "इस खरीदार का कोई बकाया बिल नहीं है।",
+    "invalid_id": "खाता नहीं मिला।",
+    "server_error": "कुछ गड़बड़ हुई। दोबारा कोशिश करें।",
+    "credit_limit": "यह ऑर्डर विक्रेता के साथ आपकी उधार सीमा पार करता है। बकाया बिल चुकाएँ या कैश ऑन डिलीवरी चुनें।"
   },
   "landing": {
     "tagline": "भारत का B2B फार्मा मार्केटप्लेस",
@@ -158,6 +163,7 @@
     "home": "होम",
     "catalog": "कैटलॉग",
     "orders": "ऑर्डर",
+    "ledger": "खाता",
     "chat": "चैट",
     "team": "टीम",
     "business": "व्यवसाय प्रोफ़ाइल",
@@ -615,7 +621,65 @@
       "delivered": "डिलीवर",
       "rejected": "अस्वीकृत",
       "cancelled": "रद्द"
-    }
+    },
+    "dueOn": "देय तिथि",
+    "paidSoFar": "अब तक भुगतान"
+  },
+  "ledger": {
+    "title": "खाता (बही)",
+    "description": {
+      "seller": "आपके खरीदारों पर बकाया, हर बिल के हिसाब से।",
+      "buyer": "आपके सप्लायर का बकाया, हर बिल के हिसाब से।"
+    },
+    "side": {
+      "seller": "लेना है",
+      "buyer": "देना है"
+    },
+    "outstanding": {
+      "seller": "कुल लेना",
+      "buyer": "कुल देना"
+    },
+    "overdue": "मियाद पार",
+    "empty": "अभी कोई बकाया नहीं है।",
+    "invoiceCount": "{count, plural, one {# बकाया बिल} other {# बकाया बिल}}",
+    "lastPayment": "पिछला भुगतान {date}",
+    "overdueBy": "{amount} — {days, plural, one {# दिन} other {# दिन}} से बकाया",
+    "withinTerms": "मियाद के अंदर",
+    "statement": "विवरण",
+    "statementHint": "बिल और भुगतान, पुराने पहले।",
+    "noEntries": "अभी कोई प्रविष्टि नहीं।",
+    "due": "देय {date}",
+    "balance": "शेष {amount}",
+    "recordPayment": "भुगतान दर्ज करें",
+    "recordPaymentHint": "इस खरीदार से मिली रकम, साइट के बाहर।",
+    "paymentSaved": "भुगतान दर्ज हो गया।",
+    "amount": "प्राप्त रकम",
+    "amountHint": "बकाया: {amount}",
+    "method": "माध्यम",
+    "methodLabel": {
+      "cash": "नकद",
+      "upi": "UPI",
+      "bank": "बैंक ट्रांसफ़र",
+      "cheque": "चेक",
+      "adjustment": "समायोजन"
+    },
+    "reference": "संदर्भ",
+    "referenceHint": "UTR, चेक नंबर आदि।",
+    "receivedAt": "प्राप्ति की तारीख",
+    "note": "टिप्पणी",
+    "allocationNote": "रकम सबसे पुराने बकाया बिलों में पहले लगाई जाती है। बची रकम खाते में जमा रहती है।",
+    "creditTerms": "उधार की शर्तें",
+    "creditLimit": "उधार सीमा",
+    "creditLimitHint": "0 यानी कोई सीमा नहीं।",
+    "creditDays": "उधार दिन",
+    "creditDaysHint": "बिल की तारीख के बाद कितने दिनों में भुगतान देय है।",
+    "termsSaved": "उधार की शर्तें सहेजी गईं।",
+    "termsSummary": "{days, plural, one {# दिन का उधार} other {# दिन का उधार}}",
+    "noLimit": "कोई सीमा नहीं",
+    "available": "उपलब्ध उधार",
+    "backToAccounts": "सभी खाते",
+    "overdueNotice": "{amount} पिछले {days, plural, one {# दिन} other {# दिन}} से बकाया है।",
+    "buyerSideHint": "आपका सप्लायर अपनी ओर से भुगतान दर्ज करता है। सीधे भुगतान करें, यहाँ शेष अपने आप अपडेट होगा।"
   },
   "notifications": {
     "title": "सूचनाएँ",
@@ -630,7 +694,11 @@
       "order_placed": "{party} से नया ऑर्डर {orderNo} · {total}",
       "order_status": "ऑर्डर {orderNo} ({party}) अब {status} है",
       "kyc_decision": "{approved, select, 1 {आपका व्यवसाय सत्यापित हो गया है। अब आप व्यापार शुरू कर सकते हैं।} other {सत्यापन में बदलाव आवश्यक हैं। कृपया अपना विवरण अपडेट करें।}}",
-      "support_update": "सपोर्ट टिकट {number} अपडेट हुआ ({status})"
+      "support_update": "सपोर्ट टिकट {number} अपडेट हुआ ({status})",
+      "payment_recorded": "{seller} ने आपके खाते में {amount, number, ::currency/INR} का भुगतान दर्ज किया",
+      "payment_due": "{party} का बिल {orderNo} ({amount, number, ::currency/INR}) {days, plural, one {# दिन} other {# दिन}} से बकाया है",
+      "batch_recall": "रिकॉल: {product} बैच {batchNo} — बिक्री रोकें और अपना स्टॉक जाँचें",
+      "licence_expiring": "आपका {form} लाइसेंस {days, plural, one {# दिन} other {# दिन}} में समाप्त हो रहा है"
     }
   },
   "alerts": {

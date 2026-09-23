@@ -34,7 +34,7 @@ export async function orderAction(orderId: string, _: OrderActionResult, formDat
 
   if (action === "markPaid") {
     if (!isSeller) return { error: "forbidden" };
-    if (!(await markOrderPaid(orderId))) return { error: "invalid_transition" };
+    if (!(await markOrderPaid(orderId, { id: session.user.id, name: session.user.name }))) return { error: "invalid_transition" };
   } else {
     const t = TRANSITIONS[action];
     if ((t.side === "seller" && !isSeller) || (t.side === "buyer" && !isBuyer)) return { error: "forbidden" };
