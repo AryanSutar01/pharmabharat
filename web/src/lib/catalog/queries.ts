@@ -7,6 +7,8 @@ import { Listing } from "@/lib/models/listing";
 import { Product, type ProductDoc } from "@/lib/models/product";
 import { PRODUCT_SEARCH_INDEX } from "@/lib/catalog/search-index";
 import { marginPercent } from "@/lib/catalog/normalize";
+import { PUBLIC_LISTING_FILE_KINDS } from "@/lib/catalog/constants";
+import { cloudinaryConfigured, fileUrl, previewUrl } from "@/lib/cloudinary";
 
 /** Listings a buyer may see: active, in stock, and not expiring within 30 days. */
 export function sellableFilter(now = new Date()) {
@@ -131,6 +133,8 @@ export type Offer = {
   stock: number;
   minOrderQty: number;
   storage: string;
+  /** Box/batch and other photos (never the purchase invoice). */
+  photos: { thumb: string; full: string }[];
 };
 
 export async function getProductWithOffers(productId: string) {
@@ -165,6 +169,11 @@ export async function getProductWithOffers(productId: string) {
         stock: l.stock,
         minOrderQty: l.minOrderQty ?? 1,
         storage: l.storage ?? "room",
+        photos: cloudinaryConfigured()
+          ? (l.files ?? [])
+              .filter((f) => PUBLIC_LISTING_FILE_KINDS.includes(f.kind) && f.format !== "pdf")
+              .map((f) => ({ thumb: previewUrl(f.publicId, 160), full: fileUrl(f.publicId, f.format ?? "jpg") }))
+          : [],
       };
     });
 

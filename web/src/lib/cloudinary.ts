@@ -121,3 +121,74 @@ export function chatImageUrl(publicId: string, width = 800) {
     transformation: [{ width, crop: "limit", quality: "auto", fetch_format: "auto" }],
   });
 }
+
+// ------------------------------------------------------------------ listing photos & invoices
+
+export const LISTING_FILE_FORMATS = ["jpg", "jpeg", "png", "webp", "pdf"];
+
+export function listingFolder(sellerId: string) {
+  return `pharmabharat/listings/${sellerId}`;
+}
+
+/** Signed direct upload for listing files (private "authenticated" assets). */
+export function signListingUpload(sellerId: string) {
+  const c = client();
+  const e = env();
+  const timestamp = Math.round(Date.now() / 1000);
+  const params = {
+    timestamp,
+    folder: listingFolder(sellerId),
+    type: "authenticated",
+    allowed_formats: LISTING_FILE_FORMATS.join(","),
+  };
+  return {
+    ...params,
+    signature: c.utils.api_sign_request(params, e.CLOUDINARY_API_SECRET!),
+    apiKey: e.CLOUDINARY_API_KEY!,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${e.CLOUDINARY_CLOUD_NAME}/image/upload`,
+  };
+}
+
+/** Confirms an uploaded file exists in this seller's folder (guards against forged ids). */
+export async function verifyListingFile(sellerId: string, publicId: string) {
+  if (!publicId.startsWith(`${listingFolder(sellerId)}/`)) return null;
+  try {
+    const r = await client().api.resource(publicId, { type: "authenticated", resource_type: "image" });
+    if (r.bytes > KYC_MAX_BYTES || !LISTING_FILE_FORMATS.includes(r.format)) return null;
+    return {
+      publicId: r.public_id as string,
+      format: r.format as string,
+      width: r.width as number,
+      height: r.height as number,
+      bytes: r.bytes as number,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteListingFile(publicId: string) {
+  await client().uploader.destroy(publicId, { type: "authenticated", resource_type: "image", invalidate: true });
+}
+
+/**
+ * Signed preview image for any private asset (KYC documents, listing files).
+ * PDFs are rendered as an image of their first page, so admins can scan
+ * documents without downloading each one.
+ */
+export function previewUrl(publicId: string, width = 600) {
+  return client().url(publicId, {
+    type: "authenticated",
+    sign_url: true,
+    secure: true,
+    format: "jpg",
+    transformation: [{ page: 1, width, crop: "limit", quality: "auto" }],
+  });
+}
+
+/** Full file: signed image URL for pictures, 10-minute download link for PDFs. */
+export function fileUrl(publicId: string, format: string) {
+  if (format === "pdf") return kycDownloadUrl(publicId, "pdf");
+  return client().url(publicId, { type: "authenticated", sign_url: true, secure: true, format });
+}
+

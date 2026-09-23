@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
 import { useErrorText } from "@/components/use-error-text";
@@ -22,7 +23,16 @@ export type ProfileDefaults = {
   fssaiNumber: string;
 };
 
-export function ProfileForm({ type, defaults: saved }: { type: BusinessType; defaults: ProfileDefaults }) {
+export function ProfileForm({
+  type,
+  defaults: saved,
+  nextHref,
+}: {
+  type: BusinessType;
+  defaults: ProfileDefaults;
+  /** Where to go after a successful save (next onboarding step). */
+  nextHref?: string;
+}) {
   const t = useTranslations("onboarding");
   const tc = useTranslations("common");
   const err = useErrorText();
@@ -30,6 +40,10 @@ export function ProfileForm({ type, defaults: saved }: { type: BusinessType; def
   const defaults = state.values ?? saved;
   const [licenseRows, setLicenseRows] = useState(Math.max(1, saved.drugLicenses.length));
   const e = (k: string) => err(state.errors?.[k]);
+  const router = useRouter();
+  useEffect(() => {
+    if (state.ok && nextHref) router.push(nextHref);
+  }, [state, nextHref, router]);
 
   return (
     <form action={action} className="space-y-6" noValidate>
@@ -171,7 +185,7 @@ export function ProfileForm({ type, defaults: saved }: { type: BusinessType; def
 
       <div className="flex justify-end border-t border-line pt-4">
         <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-          {pending ? tc("saving") : t("saveDetails")}
+          {pending ? tc("saving") : nextHref ? `${t("next")} →` : t("saveDetails")}
         </Button>
       </div>
     </form>

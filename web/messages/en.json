@@ -108,7 +108,10 @@
     "alerts_full": "You can have up to 200 price alerts",
     "rate_limited": "You're sending messages too fast. Wait a minute and try again.",
     "too_short": "Please add a little more detail",
-    "invalid_order_no": "Order numbers look like PB-2609-000123"
+    "invalid_order_no": "Order numbers look like PB-2609-000123",
+    "box_photo_required": "Add at least one photo of the box/batch",
+    "too_many_files": "You can attach up to 5 files",
+    "photo_must_be_image": "Photos must be images (only the invoice may be a PDF)"
   },
   "landing": {
     "tagline": "India's B2B pharma marketplace",
@@ -222,7 +225,18 @@
     "suspendedTitle": "Business suspended",
     "suspendedBody": "This business has been suspended. Contact support for help.",
     "staffWaiting": "Your business owner is completing verification. You'll get access once it's approved.",
-    "submittedOn": "Submitted on {date}"
+    "submittedOn": "Submitted on {date}",
+    "stepOf": "Step {current} of 3",
+    "progressDone": "{done} of 3 complete",
+    "back": "Back",
+    "next": "Continue",
+    "stepDetailsHint": "Tell us about your business and its licences.",
+    "stepDocumentsHint": "Upload clear copies so we can verify you quickly.",
+    "stepReviewHint": "Check everything, then submit. Details are locked while we review.",
+    "reviewTitle": "Review & submit",
+    "edit": "Edit",
+    "submittedStep": "Submitted",
+    "createFirst": "First, choose your business type"
   },
   "app": {
     "welcome": "Welcome, {name}",
@@ -355,7 +369,8 @@
     "delete": "Delete",
     "noBanners": "No banners yet.",
     "saved": "Saved",
-    "inactive": "Off"
+    "inactive": "Off",
+    "documentsHint": "Open any document to compare it with the details on the left."
   },
   "denied": {
     "title": "You don't have access to this page",
@@ -397,7 +412,9 @@
     "substitutesEmpty": "No substitutes found.",
     "sellThis": "Sell this product",
     "priceExclGst": "Prices exclude GST",
-    "prevPage": "Previous page"
+    "prevPage": "Previous page",
+    "batchPhotos": "Photos of this batch",
+    "batchPhoto": "Batch photo {n}"
   },
   "inventory": {
     "title": "Inventory",
@@ -458,7 +475,21 @@
     "csvRow": "Row {row}",
     "stockSaved": "Stock updated",
     "filterAll": "All",
-    "filterExpiring": "Expiring in 90 days"
+    "filterExpiring": "Expiring in 90 days",
+    "filesTitle": "Photos & documents",
+    "filesDescription": "Add a clear photo of the actual box showing the batch number and expiry. The purchase invoice is only visible to you and PharmaBharat admins.",
+    "fileBox": "Box / batch photo",
+    "fileInvoice": "Purchase invoice",
+    "fileOther": "Other photo",
+    "fileKind": {
+      "box": "Box",
+      "invoice": "Invoice",
+      "other": "Photo"
+    },
+    "removeFile": "Remove file",
+    "filesHint": "Up to 5 files · JPG, PNG or WebP (invoice may also be PDF) · max 5 MB each.",
+    "photosNeeded": "Photos needed",
+    "required": "required"
   },
   "dosageForm": {
     "tablet": "Tablet",

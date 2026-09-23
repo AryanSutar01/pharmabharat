@@ -8,6 +8,8 @@ import { Business } from "@/lib/models/business";
 import { Listing } from "@/lib/models/listing";
 import { Product } from "@/lib/models/product";
 import { requirePlatformRole } from "@/lib/session";
+import { DocPreviewGrid } from "@/components/doc-preview-grid";
+import { cloudinaryConfigured, fileUrl, previewUrl } from "@/lib/cloudinary";
 import { ListingModeration } from "./listing-moderation";
 
 export const metadata = { title: "Listings" };
@@ -68,8 +70,24 @@ export default async function AdminListingsPage({ searchParams }: PageProps<"/ad
                   {t("admin.seller")}: {sellerName.get(String(l.sellerId)) ?? "—"} · {t("inventory.batch")} {l.batchNo} · {inr(l.price)} /{" "}
                   {t("catalog.mrp")} {inr(l.mrp)} · {t("catalog.stock")} {l.stock}
                 </p>
+                {(l.files ?? []).length && cloudinaryConfigured() ? (
+                  <div className="mt-2 max-w-md">
+                    <DocPreviewGrid
+                      size="sm"
+                      openLabel={t("common.view")}
+                      items={(l.files ?? []).map((f, i) => ({
+                        id: `${l._id}-${i}`,
+                        label: t(`inventory.fileKind.${f.kind}`),
+                        thumb: previewUrl(f.publicId, 200),
+                        href: fileUrl(f.publicId, f.format ?? "jpg"),
+                        tone: f.kind === "invoice" ? ("warning" as const) : undefined,
+                      }))}
+                    />
+                  </div>
+                ) : null}
                 <div className="mt-1 flex flex-wrap gap-1">
                   <Badge tone={l.status === "active" ? "success" : "neutral"}>{t(`inventory.${l.status}`)}</Badge>
+                  {(l.files ?? []).some((f) => f.kind === "box") ? null : <Badge tone="warning">{t("inventory.photosNeeded")}</Badge>}
                   {l.moderation?.held ? <Badge tone="danger">{t("admin.held")}</Badge> : null}
                   {l.moderation?.held && l.moderation.reason ? <span className="text-xs text-red-700">“{l.moderation.reason}”</span> : null}
                 </div>

@@ -9,6 +9,8 @@ import { Business, REQUIRED_DOCUMENTS, type KycStatus } from "@/lib/models/busin
 import { Membership } from "@/lib/models/membership";
 import { requirePlatformRole } from "@/lib/session";
 import { getUsersByIds } from "@/lib/users";
+import { DocPreviewGrid } from "@/components/doc-preview-grid";
+import { cloudinaryConfigured, previewUrl } from "@/lib/cloudinary";
 import { DecisionForm } from "./decision-form";
 
 export const metadata = { title: "Review business" };
@@ -31,6 +33,7 @@ export default async function ReviewPage({ params }: PageProps<"/admin/kyc/[id]"
   const status = (business.kyc?.status ?? "draft") as KycStatus;
   const required = REQUIRED_DOCUMENTS[business.type];
   const uploaded = new Set(business.documents.map((d) => d.kind));
+  const missing = required.filter((k) => !uploaded.has(k));
 
   return (
     <>
@@ -89,35 +92,32 @@ export default async function ReviewPage({ params }: PageProps<"/admin/kyc/[id]"
           </Card>
 
           <Card>
-            <CardHeader title={t("admin.documents")} />
-            <ul className="divide-y divide-line">
-              {required
-                .filter((k) => !uploaded.has(k))
-                .map((k) => (
-                  <li key={k} className="flex items-center justify-between px-4 py-3 text-sm sm:px-5">
-                    <span>{t(`documentKind.${k}`)}</span>
-                    <Badge tone="danger">✕</Badge>
-                  </li>
-                ))}
-              {business.documents.map((d) => (
-                <li key={String(d._id)} className="flex items-center justify-between gap-3 px-4 py-3 text-sm sm:px-5">
-                  <span className="min-w-0">
-                    <span className="block font-medium">{t(`documentKind.${d.kind}`)}</span>
-                    <span className="block truncate text-xs text-muted">
-                      {d.originalName} · {d.format?.toUpperCase()} · {Math.round((d.bytes ?? 0) / 1024)} KB
-                    </span>
-                  </span>
-                  <a
-                    href={`/api/kyc-documents/${business._id}/${d._id}`}
-                    target="_blank"
-                    rel="noopener"
-                    className="shrink-0 text-brand-700 hover:underline"
-                  >
-                    {t("common.view")} ↗
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <CardHeader title={t("admin.documents")} description={t("admin.documentsHint")} />
+            <div className="space-y-4 p-4 sm:p-5">
+              {missing.length ? (
+                <div className="flex flex-wrap gap-2">
+                  {missing.map((k) => (
+                    <Badge key={k} tone="danger">
+                      ✕ {t(`documentKind.${k}`)}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
+              {business.documents.length ? (
+                <DocPreviewGrid
+                  openLabel={t("common.view")}
+                  items={business.documents.map((d) => ({
+                    id: String(d._id),
+                    label: t(`documentKind.${d.kind}`),
+                    sublabel: `${d.originalName ?? ""} · ${d.format?.toUpperCase() ?? ""} · ${Math.round((d.bytes ?? 0) / 1024)} KB`,
+                    thumb: cloudinaryConfigured() ? previewUrl(d.publicId, 480) : null,
+                    href: `/api/kyc-documents/${business._id}/${d._id}`,
+                  }))}
+                />
+              ) : (
+                <p className="text-sm text-muted">—</p>
+              )}
+            </div>
           </Card>
 
           <Card>

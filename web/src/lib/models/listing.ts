@@ -1,5 +1,5 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
-import { DRUG_SCHEDULES, GST_RATES, STORAGE_CONDITIONS } from "@/lib/catalog/constants";
+import { DRUG_SCHEDULES, GST_RATES, LISTING_FILE_KINDS, STORAGE_CONDITIONS } from "@/lib/catalog/constants";
 
 /**
  * A seller's offer: one batch of one product at one price.
@@ -28,6 +28,22 @@ const listingSchema = new Schema(
     conditions: { type: [String], default: [] },
 
     status: { type: String, enum: ["active", "paused"], default: "active" },
+    // Photos of the actual batch/box, the purchase invoice and other proof (max 5).
+    // Private Cloudinary assets; box/other photos are shown to buyers via signed URLs.
+    files: {
+      type: [
+        {
+          kind: { type: String, enum: LISTING_FILE_KINDS, required: true },
+          publicId: { type: String, required: true },
+          format: String,
+          width: Number,
+          height: Number,
+          bytes: Number,
+          uploadedAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
     // Admin moderation: a held listing stays paused until an admin releases it.
     moderation: {
       held: { type: Boolean, default: false },

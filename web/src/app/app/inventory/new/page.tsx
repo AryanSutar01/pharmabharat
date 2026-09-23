@@ -41,6 +41,7 @@ export default async function NewListingPage({ searchParams }: PageProps<"/app/i
       <PageHeader title={t("newTitle")} />
       <ListingForm
         listingId={null}
+        files={[]}
         product={product}
         conditions={conditions}
         defaults={{

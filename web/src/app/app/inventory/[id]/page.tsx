@@ -5,6 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui";
 import { connectDB } from "@/lib/db/mongo";
 import { listConditions } from "@/lib/catalog/queries";
+import { cloudinaryConfigured, previewUrl } from "@/lib/cloudinary";
 import { requireSeller } from "@/lib/catalog/seller";
 import { Listing } from "@/lib/models/listing";
 import { Product } from "@/lib/models/product";
@@ -36,6 +37,12 @@ export default async function EditListingPage({ params }: PageProps<"/app/invent
       <PageHeader title={t("editTitle")} />
       <ListingForm
         listingId={String(listing._id)}
+        files={(listing.files ?? []).map((f) => ({
+          kind: f.kind,
+          publicId: f.publicId,
+          preview: f.format === "pdf" || !cloudinaryConfigured() ? null : previewUrl(f.publicId, 300),
+          isPdf: f.format === "pdf",
+        }))}
         product={{
           id: String(product._id),
           name: product.name,

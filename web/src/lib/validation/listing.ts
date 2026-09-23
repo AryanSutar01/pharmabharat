@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { DOSAGE_FORMS } from "@/lib/catalog/normalize";
-import { DRUG_SCHEDULES, GST_RATES, STORAGE_CONDITIONS } from "@/lib/catalog/constants";
+import { DRUG_SCHEDULES, GST_RATES, LISTING_FILE_KINDS, MAX_LISTING_FILES, STORAGE_CONDITIONS } from "@/lib/catalog/constants";
 
 const objectId = z.string().regex(/^[a-f0-9]{24}$/i, "invalid");
 const money = z.coerce.number({ error: "invalid" }).positive("invalid").max(1_000_000, "invalid");
@@ -69,3 +69,14 @@ function utcDate(y: number, month: number, day: number) {
   const d = new Date(Date.UTC(y, month - 1, day));
   return Number.isNaN(d.getTime()) || y < 2000 || y > 2100 ? null : d;
 }
+
+/**
+ * Files attached through the listing form: up to 5, at least one photo of the
+ * actual box/batch. (CSV imports skip this and show "Photos needed" instead.)
+ */
+export const listingFilesSchema = z
+  .array(z.object({ kind: z.enum(LISTING_FILE_KINDS), publicId: z.string().min(1).max(300) }))
+  .max(MAX_LISTING_FILES, "too_many_files")
+  .refine((files) => files.some((f) => f.kind === "box"), "box_photo_required")
+  .refine((files) => new Set(files.map((f) => f.publicId)).size === files.length, "invalid");
+

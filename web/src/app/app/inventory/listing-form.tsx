@@ -12,6 +12,7 @@ import {
   type ListingFormState,
   type NewProductState,
 } from "./actions";
+import { ListingFiles, type ListingFileItem } from "./listing-files";
 
 export type PickedProduct = { id: string; name: string; manufacturer?: string; packSizeLabel?: string; mrp: number; hsn?: string; gstRate?: number };
 
@@ -35,11 +36,13 @@ export function ListingForm({
   product: initialProduct,
   defaults,
   conditions,
+  files,
 }: {
   listingId: string | null;
   product: PickedProduct | null;
   defaults: ListingDefaults;
   conditions: { slug: string; label: string }[];
+  files: ListingFileItem[];
 }) {
   const t = useTranslations("inventory");
   const te = useTranslations();
@@ -154,6 +157,13 @@ export function ListingForm({
                   ))}
                 </Select>
               </Field>
+            </div>
+          </Card>
+
+          <Card>
+            <CardHeader title={t("filesTitle")} description={t("filesDescription")} />
+            <div className="p-4 sm:p-5">
+              <ListingFiles initial={files} error={e("files")} />
             </div>
           </Card>
 

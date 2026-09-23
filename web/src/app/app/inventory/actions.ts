@@ -6,14 +6,16 @@ import { redirect } from "next/navigation";
 import { Types, isValidObjectId } from "mongoose";
 import { parse } from "csv-parse/sync";
 import { checkPriceAlertsSafely } from "@/lib/alerts/price";
+import { cloudinaryConfigured, deleteListingFile, signListingUpload, verifyListingFile } from "@/lib/cloudinary";
 import { connectDB } from "@/lib/db/mongo";
 import { compositionKeys, saltKeyOf } from "@/lib/catalog/normalize";
+import type { ListingFileKind } from "@/lib/catalog/constants";
 import { requireSeller } from "@/lib/catalog/seller";
 import { Condition } from "@/lib/models/condition";
 import { Listing } from "@/lib/models/listing";
 import { NAME_COLLATION, Product } from "@/lib/models/product";
 import { fieldErrors } from "@/lib/validation/business";
-import { listingSchema, parseFlexibleDate, sellerProductSchema } from "@/lib/validation/listing";
+import { listingFilesSchema, listingSchema, parseFlexibleDate, sellerProductSchema } from "@/lib/validation/listing";
 
 export type ListingFormState = {
   ok?: boolean;
@@ -42,12 +44,40 @@ export async function saveListing(listingId: string | null, _: ListingFormState,
     data.conditions = valid.map((c) => c.slug);
   }
 
-  const doc = { ...data, sellerId: business._id, sellerStateCode: business.address!.stateCode };
+  // Attached files arrive as JSON [{ kind, publicId }] from the upload widget.
+  let submitted;
   try {
-    if (listingId) {
-      if (!isValidObjectId(listingId)) return { message: "not_found", values };
-      const existing = await Listing.findOne({ _id: listingId, sellerId: business._id }, { expiryDate: 1 }).lean();
-      if (!existing) return { message: "not_found", values };
+    submitted = listingFilesSchema.safeParse(JSON.parse(values.files || "[]"));
+  } catch {
+    return { errors: { files: "invalid" }, values };
+  }
+  if (!submitted.success) return { errors: { files: submitted.error.issues[0]?.message ?? "invalid" }, values };
+
+  const existing = listingId && isValidObjectId(listingId)
+    ? await Listing.findOne({ _id: listingId, sellerId: business._id }, { expiryDate: 1, files: 1 }).lean()
+    : null;
+  if (listingId && !existing) return { message: "not_found", values };
+
+  // Keep already-attached files as they are; verify new uploads really exist in this seller's folder.
+  const known = new Map((existing?.files ?? []).map((f) => [f.publicId, f]));
+  type StoredFile = { kind: ListingFileKind; publicId: string; format?: string | null; width?: number | null; height?: number | null; bytes?: number | null };
+  const files: StoredFile[] = [];
+  for (const f of submitted.data) {
+    const prev = known.get(f.publicId);
+    if (prev) {
+      files.push({ kind: f.kind, publicId: prev.publicId, format: prev.format, width: prev.width, height: prev.height, bytes: prev.bytes });
+      continue;
+    }
+    const asset = await verifyListingFile(String(business._id), f.publicId);
+    if (!asset) return { errors: { files: "upload_failed" }, values };
+    if (f.kind !== "invoice" && asset.format === "pdf") return { errors: { files: "photo_must_be_image" }, values };
+    files.push({ kind: f.kind, ...asset });
+  }
+  const removed = (existing?.files ?? []).filter((f) => !files.some((x) => x.publicId === f.publicId));
+
+  const doc = { ...data, files, sellerId: business._id, sellerStateCode: business.address!.stateCode };
+  try {
+    if (listingId && existing) {
       // A corrected expiry date restarts the 90/60/30-day warnings for this batch.
       const expiryChanged = new Date(existing.expiryDate).getTime() !== doc.expiryDate.getTime();
       await Listing.updateOne(
@@ -61,9 +91,18 @@ export async function saveListing(listingId: string | null, _: ListingFormState,
     if ((err as { code?: number }).code === 11000) return { errors: { batchNo: "batch_exists" }, values };
     throw err;
   }
-  after(() => checkPriceAlertsSafely([data.productId]));
+  after(async () => {
+    await checkPriceAlertsSafely([data.productId]);
+    for (const f of removed) await deleteListingFile(f.publicId).catch(() => {});
+  });
   revalidatePath("/app/inventory");
   redirect("/app/inventory");
+}
+
+export async function getListingUploadSignature() {
+  const { business } = await requireSeller();
+  if (!cloudinaryConfigured()) throw new Error("not_configured");
+  return signListingUpload(String(business._id));
 }
 
 export async function setListingStatus(listingId: string, status: "active" | "paused") {

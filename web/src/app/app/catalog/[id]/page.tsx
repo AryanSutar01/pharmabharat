@@ -78,6 +78,19 @@ export default async function ProductPage({ params }: PageProps<"/app/catalog/[i
                         {t("catalog.expiry")} {monthYear(o.expiryDate)} · {t("catalog.stock")} {o.stock} · {t("catalog.moq")}{" "}
                         {o.minOrderQty} · {t("catalog.gst")} {o.gstRate}%
                       </p>
+                      {o.photos.length ? (
+                        <ul className="mt-2 flex gap-1.5" aria-label={t("catalog.batchPhotos")}>
+                          {o.photos.slice(0, 4).map((ph, pi) => (
+                            <li key={pi}>
+                              <a href={ph.full} target="_blank" rel="noopener" className="block overflow-hidden rounded-md border border-line hover:border-brand-500">
+                                {/* Signed Cloudinary thumbnail. */}
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={ph.thumb} alt={t("catalog.batchPhoto", { n: pi + 1 })} className="size-12 object-cover" loading="lazy" />
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
                     <div className="flex items-center justify-between gap-4 sm:justify-end">
                       <div className="text-left sm:text-right">
