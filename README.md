@@ -1,7 +1,9 @@
 # PharmaBharat
 
-B2B pharma marketplace for medical stores, distributors and pharma companies.
-Requirements and scope: [docs/SRS.md](docs/SRS.md).
+B2B pharma marketplace for medical stores, distributors and pharma companies,
+with a shop module (stock, billing counter, customers, reports) for retailers.
+
+Requirements and scope: [docs/SRS.md](docs/SRS.md) · Going live: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ```
 web/            Next.js 16 app (UI + API + server actions)

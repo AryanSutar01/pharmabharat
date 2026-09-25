@@ -1,0 +1,15 @@
+# Each workspace has its own ignores (web/, realtime/); this covers the root.
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Local datasets and scratch files that must never reach the repo
+/.data/
+/tmp/
+
+# Anything env-shaped, anywhere, except the committed examples.
+.env
+.env.*
+!.env.example

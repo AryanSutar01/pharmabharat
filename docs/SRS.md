@@ -19,7 +19,12 @@ Retailers also get a **shop module** (§3.10): their own stock, a billing counte
 | Realtime | `realtime/` Socket.io broadcaster on Render free tier (sleeps when idle; clients fall back to polling). |
 
 ### 1.2 Hosting note
-Vercel's free **Hobby plan is for non-commercial use only**. For a paying client, either run everything on Render, or have the client move to Vercel Pro before launch.
+Vercel's free **Hobby plan is for non-commercial use only**.
+
+**Decision (25 Sep 2026):** deploy to Hobby now, because that deployment exists to
+show the client and to defend the capstone. Before it takes real orders the client
+must either move the project to **Vercel Pro** or it must be rehosted on **Render**,
+whose free tier permits commercial use. Steps for both: [DEPLOY.md](DEPLOY.md).
 
 ## 2. Users & roles
 
