@@ -11,6 +11,7 @@
     "test": "vitest run",
     "import:medicines": "node scripts/import-medicines.mts",
     "seed:demo": "node scripts/seed-demo.mts",
+    "seed:shop": "node scripts/seed-shop.mts",
     "test:integration": "vitest run --config vitest.integration.config.mts"
   },
   "dependencies": {

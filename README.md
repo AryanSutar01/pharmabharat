@@ -37,6 +37,7 @@ docs/SRS.md     Requirements, decisions, build plan
 | `npm run build` | Production build |
 | `npm run import:medicines` | Import the medicine master from `web/.data/indian_medicine_data.csv` and create the Atlas Search index (re-runnable) |
 | `npm run seed:demo` | Add two `[DEMO]` distributors with sample listings (`-- --remove` to delete) |
+| `npm run seed:shop` | Fills the demo retailer with stock, 100 days of counter sales, customers, refills and supplier credit. Run after `seed:demo`. `-- --remove` undoes it. |
 
 ## Daily jobs
 

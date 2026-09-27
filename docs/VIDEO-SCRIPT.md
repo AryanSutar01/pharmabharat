@@ -12,7 +12,7 @@
 
 | | |
 |---|---|
-| ⚠️ **Demo data** | The marketplace has a seeder (`npm run seed:demo`), but **the shop module has none**. Reports, refills, customers, the ledger and the alert pages will be **empty**, and empty screens kill sections 4–8. You need a seeded shop with ~3 months of bills before you record. |
+| ✅ **Demo data** | Run these two, in order, before anything else:<br>`npm run seed:demo`<br>`npm run seed:shop -- --member you@gmail.com`<br>That gives you a shop with 27 batches on the shelf, 792 bills over 100 days, 38 customers, refills due (7 of them for a medicine that is out of stock), 3 unpaid supplier invoices and the loyalty scheme running. Undo it all with `npm run seed:shop -- --remove`. |
 | ⚠️ **Numbers on screen** | Every `[VERIFY]` marker below is a figure I could not source. Either get a citation or cut the sentence. Do not put an unsourced number in front of investors. |
 | **Browser** | Chrome, 1920×1080, zoom 100%, **no bookmarks bar**, one clean profile. Hide any real email address. |
 | **Recording** | OBS or Loom at 1080p60. Mouse movements slow and deliberate — a fast cursor reads as nervous. |
