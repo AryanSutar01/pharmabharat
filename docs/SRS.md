@@ -71,6 +71,29 @@ Status: ✅ done · 🚧 in progress · ⏳ planned (v1) · 🔜 after launch (v
 - FR-6 Admin queue with filters by status. The review screen shows details, **document previews** (thumbnails, including the first page of PDFs, so an admin can cross-check every uploaded file against the typed details without downloading them; opening one uses a 10-minute signed link), members, and a link to the GST portal. Decisions: approve, request changes (note required), suspend (note required), reinstate. The owner is emailed on approval or rejection.
 - FR-7 Only **approved** businesses can use `/app`. Suspended businesses lose access.
 
+
+**GST position (added 30 Sep 2026).** Not every medical shop crosses the GST
+registration threshold, so a business declares one of three positions at
+onboarding:
+
+| Position | GSTIN | Charges GST | Sells here | Its own bills |
+|---|---|---|---|---|
+| Registered | required | yes | yes | Tax Invoice |
+| Composition | required | **no** | no (v1) | Bill of Supply + the mandatory declaration |
+| Unregistered | none | **no** | no (v1) | Bill of Supply |
+
+- The GST certificate is only demanded of businesses that hold a GSTIN. **The
+  drug licence is required in every case** — GST is a turnover question, selling
+  medicine is not.
+- Selling on the marketplace needs full registration, because every sale there
+  raises a tax invoice. Composition and unregistered businesses can buy, and can
+  run the whole shop module.
+- The document type and tax position are **frozen onto each bill**, so
+  registering later never retitles a document already handed to a customer.
+- ⚠️ The GST treatment here (composition declaration wording, reverse charge on
+  purchases from unregistered suppliers) should be confirmed with the client's
+  chartered accountant before commercial launch.
+
 ### 3.2 Team ✅
 - FR-8 Owner invites by email and role; can revoke pending invites, change roles, and disable or enable members. The owner's own role can't be changed.
 

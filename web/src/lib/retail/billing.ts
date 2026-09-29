@@ -10,6 +10,7 @@ import { ShopItem, ShopStock } from "@/lib/models/shop-stock";
 import { financialYear, round2 } from "@/lib/orders/gst";
 import { billLine, billTotals } from "@/lib/retail/gst";
 import { pointsExpiryDate, pointsForSpend, redeemPlan } from "@/lib/retail/loyalty";
+import { collectsGst, documentTypeFor, type TaxStatus } from "@/lib/tax-status";
 import { packsAndLoose, rateFor, unitCost, unitsSold, type SaleUnit } from "@/lib/retail/units";
 
 /** Don't sell what expires this month — the customer would be handed a dud. */
@@ -140,9 +141,12 @@ export async function createBill(
   businessId: mongoose.Types.ObjectId,
   input: BillInput,
   user: { id: string; name: string },
+  /** The shop's GST position; a composition or unregistered shop cannot charge tax. */
+  taxStatus?: TaxStatus,
 ): Promise<BillDoc> {
   await connectDB();
   if (!input.lines.length) throw new BillingError("empty");
+  const charging = collectsGst(taxStatus);
 
   const stockIds = input.lines.map((l) => l.stockId);
   const batches = await ShopStock.find({ businessId, _id: { $in: stockIds } }).lean();
@@ -162,7 +166,13 @@ export async function createBill(
     if (units < 1 || units > batch.units) throw new BillingError("out_of_stock", batch.name);
 
     const rate = rateFor({ mrp: batch.mrp, saleUnit, unitsPerPack: per, rounding: looseRounding });
-    const tax = billLine({ qty: l.qty, rate, gstRate: batch.gstRate, discountPercent: l.discountPercent });
+    const tax = billLine({
+      qty: l.qty,
+      rate,
+      gstRate: batch.gstRate,
+      discountPercent: l.discountPercent,
+      collectsGst: charging,
+    });
     return {
       stockId: batch._id,
       productId: batch.productId,
@@ -224,6 +234,8 @@ export async function createBill(
           {
             businessId,
             billNo: `${fy}/${String(seq).padStart(5, "0")}`,
+            documentType: documentTypeFor(taxStatus),
+            taxStatus: taxStatus ?? ("registered" as const),
             customerId: customer?._id,
             customer: { name: customer?.name ?? input.customer?.name, phone: customer?.phone ?? input.customer?.phone },
             lines,

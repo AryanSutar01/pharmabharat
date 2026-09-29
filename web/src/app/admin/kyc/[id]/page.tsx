@@ -5,7 +5,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { BusinessSummary } from "@/components/business-summary";
 import { Alert, Badge, Card, CardHeader, PageHeader } from "@/components/ui";
 import { connectDB } from "@/lib/db/mongo";
-import { Business, REQUIRED_DOCUMENTS, type KycStatus } from "@/lib/models/business";
+import { Business, requiredDocuments, type KycStatus } from "@/lib/models/business";
 import { Membership } from "@/lib/models/membership";
 import { requirePlatformRole } from "@/lib/session";
 import { getUsersByIds } from "@/lib/users";
@@ -31,7 +31,7 @@ export default async function ReviewPage({ params }: PageProps<"/admin/kyc/[id]"
   const users = await getUsersByIds(members.map((m) => m.userId));
   const owner = users.get(business.ownerUserId);
   const status = (business.kyc?.status ?? "draft") as KycStatus;
-  const required = REQUIRED_DOCUMENTS[business.type];
+  const required = requiredDocuments(business.type, business.taxStatus);
   const uploaded = new Set(business.documents.map((d) => d.kind));
   const missing = required.filter((k) => !uploaded.has(k));
 

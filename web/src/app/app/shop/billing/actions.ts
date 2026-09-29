@@ -5,6 +5,7 @@ import { z } from "zod";
 import { BillingError, createBill, searchShelf, type ShelfHit } from "@/lib/retail/billing";
 import { createCustomer, searchCustomers, type CustomerHit } from "@/lib/retail/customers";
 import { requireShop } from "@/lib/retail/guard";
+import type { TaxStatus } from "@/lib/tax-status";
 import { customerSchema } from "@/lib/validation/customer";
 
 export type BillResult = { ok?: boolean; billId?: string; error?: string; detail?: string };
@@ -85,7 +86,12 @@ export async function saveBill(payload: unknown): Promise<BillResult> {
   if (!parsed.success) return { error: "invalid" };
 
   try {
-    const bill = await createBill(business._id, parsed.data, { id: session.user.id, name: session.user.name });
+    const bill = await createBill(
+      business._id,
+      parsed.data,
+      { id: session.user.id, name: session.user.name },
+      business.taxStatus as TaxStatus | undefined,
+    );
     revalidatePath("/app/shop/stock");
     revalidatePath("/app/shop/bills");
     return { ok: true, billId: String(bill._id) };

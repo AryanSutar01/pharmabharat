@@ -6,6 +6,9 @@
 //   backwards out of it: taxable = gross / (1 + rate/100). A tablet cut from a
 //   strip is priced from that same MRP, so the same rule holds.
 // - The customer is always in the shop's own state, so it is always CGST + SGST.
+// - A shop that is not GST-registered, or is registered under the composition
+//   scheme, may not collect GST at all: it issues a Bill of Supply instead of a
+//   Tax Invoice, and no part of the price is tax.
 //
 // A discount is given on the MRP, and the tax follows the discounted price —
 // that is what the customer actually paid, and what the shop owes GST on.
@@ -14,6 +17,12 @@ import { round2 } from "@/lib/orders/gst";
 
 export type BillLineInput = {
   qty: number;
+  /**
+   * False for a composition or unregistered shop, which may not collect GST.
+   * The customer pays the same price; none of it is tax, so the whole amount
+   * is the taxable value and the CGST/SGST columns stay empty.
+   */
+  collectsGst?: boolean;
   /**
    * Price of one of whatever was sold, including GST: the strip's MRP for a
    * whole strip, or the per-tablet price for a cut one (see lib/retail/units).
@@ -52,6 +61,7 @@ export function billLine(line: BillLineInput): BillLineTax {
   const percent = Math.min(Math.max(line.discountPercent ?? 0, 0), 100);
   const discount = round2((gross * percent) / 100);
   const total = round2(gross - discount);
+  if (line.collectsGst === false) return { gross, discount, total, taxable: total, cgst: 0, sgst: 0 };
   // MRP includes GST, so strip it back out.
   const taxable = round2(total / (1 + line.gstRate / 100));
   const gst = round2(total - taxable);

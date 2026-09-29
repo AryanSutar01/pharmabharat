@@ -4,6 +4,7 @@ import { Card, PageHeader } from "@/components/ui";
 import { shopSettings } from "@/lib/models/shop-settings";
 import { dayTotals } from "@/lib/retail/billing";
 import { requireShop } from "@/lib/retail/guard";
+import { collectsGst } from "@/lib/tax-status";
 import { BillingCounter } from "./billing-counter";
 
 export const metadata = { title: "Billing" };
@@ -48,7 +49,7 @@ export default async function BillingPage() {
         </Card>
       </div>
 
-      <BillingCounter loyalty={settings.loyalty} />
+      <BillingCounter loyalty={settings.loyalty} collectsGst={collectsGst(business.taxStatus)} />
     </>
   );
 }

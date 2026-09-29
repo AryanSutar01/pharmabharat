@@ -7,12 +7,14 @@ import { Alert, Button, Field, Input, Select } from "@/components/ui";
 import { useErrorText } from "@/components/use-error-text";
 import { STATES } from "@/lib/india";
 import type { BusinessType } from "@/lib/permissions";
+import { TAX_STATUSES, needsGstin, type TaxStatus } from "@/lib/tax-status";
 import { LICENSE_FORMS } from "@/lib/validation/business";
 import { saveBusinessProfile, type FormState } from "./actions";
 
 export type ProfileDefaults = {
   legalName: string;
   tradeName: string;
+  taxStatus: TaxStatus;
   gstin: string;
   pan: string;
   phone: string;
@@ -36,6 +38,7 @@ export function ProfileForm({
   const t = useTranslations("onboarding");
   const tc = useTranslations("common");
   const err = useErrorText();
+  const [taxStatus, setTaxStatus] = useState<TaxStatus>(saved.taxStatus ?? "registered");
   const [state, action, pending] = useActionState<FormState, FormData>(saveBusinessProfile, {});
   const defaults = state.values ?? saved;
   const [licenseRows, setLicenseRows] = useState(Math.max(1, saved.drugLicenses.length));
@@ -57,17 +60,30 @@ export function ProfileForm({
         <Field label={<>{t("tradeName")} <span className="font-normal text-muted">({tc("optional")})</span></>} error={e("tradeName")}>
           <Input name="tradeName" defaultValue={defaults.tradeName} />
         </Field>
-        <Field label={t("gstin")} error={e("gstin")}>
-          <Input
-            name="gstin"
-            defaultValue={defaults.gstin}
-            maxLength={15}
-            className="font-mono uppercase"
-            autoCapitalize="characters"
-            placeholder="27ABCDE1234F1Z5"
-            required
-          />
+        <Field label={t("taxStatus")} hint={t(`taxStatusHelp.${taxStatus}`)} error={e("taxStatus")} className="sm:col-span-2">
+          <Select name="taxStatus" value={taxStatus} onChange={(ev) => setTaxStatus(ev.target.value as TaxStatus)}>
+            {TAX_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {t(`taxStatusLabel.${s}`)}
+              </option>
+            ))}
+          </Select>
         </Field>
+        {/* An unregistered business has no GSTIN to give, so the field goes away
+            entirely rather than sitting there empty and failing validation. */}
+        {needsGstin(taxStatus) ? (
+          <Field label={t("gstin")} error={e("gstin")}>
+            <Input
+              name="gstin"
+              defaultValue={defaults.gstin}
+              maxLength={15}
+              className="font-mono uppercase"
+              autoCapitalize="characters"
+              placeholder="27ABCDE1234F1Z5"
+              required
+            />
+          </Field>
+        ) : null}
         <Field label={t("pan")} error={e("pan")}>
           <Input
             name="pan"

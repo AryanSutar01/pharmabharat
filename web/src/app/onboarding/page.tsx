@@ -6,7 +6,8 @@ import { SimpleHeader } from "@/components/simple-header";
 import { Alert, Badge, Card, CardHeader, PageHeader, buttonClass, cn } from "@/components/ui";
 import { cloudinaryConfigured } from "@/lib/cloudinary";
 import { kycChecklist } from "@/lib/kyc";
-import { DOCUMENT_KINDS, REQUIRED_DOCUMENTS, type BusinessDoc, type KycStatus } from "@/lib/models/business";
+import { DOCUMENT_KINDS, requiredDocuments, type BusinessDoc, type KycStatus } from "@/lib/models/business";
+import type { TaxStatus } from "@/lib/tax-status";
 import { can } from "@/lib/permissions";
 import { getBusinessContext } from "@/lib/session";
 import { CreateBusinessForm } from "./create-business-form";
@@ -28,6 +29,7 @@ function toDefaults(b: BusinessDoc): ProfileDefaults {
   return {
     legalName: b.legalName ?? "",
     tradeName: b.tradeName ?? "",
+    taxStatus: (b.taxStatus ?? "registered") as TaxStatus,
     gstin: b.gstin ?? "",
     pan: b.pan ?? "",
     phone: b.phone ?? "",
@@ -80,7 +82,7 @@ export default async function OnboardingPage({ searchParams }: PageProps<"/onboa
   ];
   const doneCount = steps.filter((s) => s.done).length;
 
-  const required = business ? REQUIRED_DOCUMENTS[business.type] : [];
+  const required = business ? requiredDocuments(business.type, business.taxStatus) : [];
   const optional = DOCUMENT_KINDS.filter((k) => !required.includes(k));
   const docs: UploadedDoc[] = (business?.documents ?? []).map((d) => ({
     id: String(d._id),

@@ -120,7 +120,9 @@
     "cost_above_mrp": "Purchase rate cannot be more than the MRP.",
     "consent_required": "The customer must agree before their details can be saved.",
     "empty": "Add at least one medicine to the bill.",
-    "expired": "That batch has expired — pick another."
+    "expired": "That batch has expired — pick another.",
+    "gstin_not_expected": "Remove the GSTIN, or change the registration above.",
+    "gst_required_to_sell": "Selling needs GST registration, because every sale must carry a tax invoice. You can still buy and run your shop."
   },
   "landing": {
     "tagline": "India's B2B pharma marketplace",
@@ -257,7 +259,18 @@
     "reviewTitle": "Review & submit",
     "edit": "Edit",
     "submittedStep": "Submitted",
-    "createFirst": "First, choose your business type"
+    "createFirst": "First, choose your business type",
+    "taxStatus": "GST registration",
+    "taxStatusLabel": {
+      "registered": "Registered under GST",
+      "composition": "Registered under the composition scheme",
+      "unregistered": "Not registered (below the turnover limit)"
+    },
+    "taxStatusHelp": {
+      "registered": "You have a GSTIN and charge GST on what you sell.",
+      "composition": "You have a GSTIN under the composition scheme. You pay a flat rate yourself and must not charge GST to customers — your bills will be a Bill of Supply.",
+      "unregistered": "Your turnover is below the GST registration limit, so you have no GSTIN. Your bills will be a Bill of Supply. You can buy on PharmaBharat; selling needs GST registration."
+    }
   },
   "app": {
     "welcome": "Welcome, {name}",
@@ -1309,6 +1322,10 @@
     "looseRounding": "Loose tablet price",
     "looseRoundingHint": "Dividing a strip's MRP rarely lands on a whole paisa. Most shops round the tablet price up.",
     "roundUp": "Round up",
-    "roundExact": "Keep exact"
+    "roundExact": "Keep exact",
+    "taxInvoice": "Tax Invoice",
+    "billOfSupply": "Bill of Supply",
+    "gstNotCollected": "This shop does not charge GST, so there is nothing to report here.",
+    "gstNotCollectedHint": "Bills are issued as a Bill of Supply."
   }
 }

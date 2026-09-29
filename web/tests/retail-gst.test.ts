@@ -35,6 +35,20 @@ describe("retail bill line", () => {
     expect(round(line.taxable + line.cgst + line.sgst)).toBe(28);
   });
 
+  it("charges no tax for a shop that may not collect it", () => {
+    // A bill of supply: the customer pays the same, but none of it is tax.
+    const line = billLine({ qty: 2, rate: 105, gstRate: 5, collectsGst: false });
+    expect(line).toEqual({ gross: 210, discount: 0, total: 210, taxable: 210, cgst: 0, sgst: 0 });
+  });
+
+  it("still honours a discount on a bill of supply", () => {
+    expect(billLine({ qty: 1, rate: 200, gstRate: 12, discountPercent: 10, collectsGst: false })).toMatchObject({
+      total: 180,
+      taxable: 180,
+      cgst: 0,
+    });
+  });
+
   it("ignores a nonsense discount", () => {
     expect(billLine({ qty: 1, rate: 100, gstRate: 5, discountPercent: -5 }).discount).toBe(0);
     expect(billLine({ qty: 1, rate: 100, gstRate: 5, discountPercent: 250 }).total).toBe(0);

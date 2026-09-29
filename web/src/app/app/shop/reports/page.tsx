@@ -5,6 +5,7 @@ import { ColumnChart } from "@/components/charts/column-chart";
 import { StatTile } from "@/components/charts/stat-tile";
 import { Card, CardHeader, PageHeader, cn } from "@/components/ui";
 import { requireShop } from "@/lib/retail/guard";
+import { collectsGst } from "@/lib/tax-status";
 import { DEAD_STOCK_DAYS, shopReport } from "@/lib/retail/reports";
 
 export const metadata = { title: "Shop reports" };
@@ -22,6 +23,7 @@ export default async function ShopReportsPage({ searchParams }: PageProps<"/app/
   const inr = (v: number) => format.number(v, { style: "currency", currency: "INR", maximumFractionDigits: 0 });
   const inr2 = (v: number) => format.number(v, { style: "currency", currency: "INR", maximumFractionDigits: 2 });
   const gstTotal = report.gst.reduce((a, r) => a + r.cgst + r.sgst, 0);
+  const charging = collectsGst(business.taxStatus);
 
   return (
     <>
@@ -162,8 +164,10 @@ export default async function ShopReportsPage({ searchParams }: PageProps<"/app/
         </Card>
 
         <Card className="overflow-x-auto">
-          <CardHeader title={t("gstSummary")} description={t("gstSummaryHint")} />
-          {report.gst.length === 0 ? (
+          <CardHeader title={t("gstSummary")} description={charging ? t("gstSummaryHint") : t("gstNotCollectedHint")} />
+          {!charging ? (
+            <p className="px-4 py-10 text-center text-sm text-muted sm:px-5">{t("gstNotCollected")}</p>
+          ) : report.gst.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm text-muted">{t("noSalesYet")}</p>
           ) : (
             <table className="w-full text-sm">

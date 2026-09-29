@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { BUSINESS_TYPES } from "@/lib/permissions";
 import { PAN_RE, PHONE_RE, PINCODE_RE, STATE_CODES, isValidGstin } from "@/lib/india";
+import { needsGstin, TAX_STATUSES } from "@/lib/tax-status";
 
 /** Licence forms under the Drugs and Cosmetics Rules, 1945, grouped by business type. */
 export const LICENSE_FORMS = {
@@ -32,9 +33,15 @@ const licenseSchema = z.object({
 export const businessProfileSchema = z
   .object({
     type: z.enum(BUSINESS_TYPES),
+    taxStatus: z.enum(TAX_STATUSES).default("registered"),
     legalName: trimmed().min(2, "required"),
     tradeName: optionalTrimmed(),
-    gstin: trimmed(15).toUpperCase().refine(isValidGstin, "invalid_gstin"),
+    // Optional here, then required below for anyone who should hold one — an
+    // unregistered business has no GSTIN to give.
+    gstin: trimmed(15)
+      .toUpperCase()
+      .optional()
+      .transform((v) => v || undefined),
     pan: trimmed(10).toUpperCase().regex(PAN_RE, "invalid_pan"),
     phone: trimmed(10).regex(PHONE_RE, "invalid_phone"),
     email: z.email("invalid_email").trim().toLowerCase(),
@@ -58,11 +65,23 @@ export const businessProfileSchema = z
       .optional(),
   })
   .superRefine((b, ctx) => {
+    // A registered or composition dealer holds a GSTIN; an unregistered one
+    // must not send us a stale number left in the form.
+    if (needsGstin(b.taxStatus)) {
+      if (!b.gstin) {
+        ctx.addIssue({ code: "custom", path: ["gstin"], message: "required" });
+      } else if (!isValidGstin(b.gstin)) {
+        ctx.addIssue({ code: "custom", path: ["gstin"], message: "invalid_gstin" });
+      }
+    } else if (b.gstin) {
+      ctx.addIssue({ code: "custom", path: ["gstin"], message: "gstin_not_expected" });
+    }
+
     // GSTIN embeds the PAN (chars 3-12) and the state code (chars 1-2).
-    if (b.gstin.length === 15 && b.pan.length === 10 && b.gstin.slice(2, 12) !== b.pan) {
+    if (b.gstin?.length === 15 && b.pan.length === 10 && b.gstin.slice(2, 12) !== b.pan) {
       ctx.addIssue({ code: "custom", path: ["pan"], message: "pan_gstin_mismatch" });
     }
-    if (b.gstin.length === 15 && b.gstin.slice(0, 2) !== b.address.stateCode) {
+    if (b.gstin?.length === 15 && b.gstin.slice(0, 2) !== b.address.stateCode) {
       ctx.addIssue({ code: "custom", path: ["address", "stateCode"], message: "state_gstin_mismatch" });
     }
     const allowed = LICENSE_FORMS[b.type] as readonly string[];

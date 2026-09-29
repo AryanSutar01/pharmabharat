@@ -1,9 +1,13 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
 import { BUSINESS_TYPES } from "@/lib/permissions";
 import { STATE_CODES } from "@/lib/india";
+import { TAX_STATUSES, needsGstin, type TaxStatus } from "@/lib/tax-status";
 
 export const KYC_STATUSES = ["draft", "pending", "approved", "rejected", "suspended"] as const;
 export type KycStatus = (typeof KYC_STATUSES)[number];
+
+export { TAX_STATUSES, collectsGst, needsGstin, documentTypeFor, COMPOSITION_DECLARATION } from "@/lib/tax-status";
+export type { TaxStatus, SalesDocumentType } from "@/lib/tax-status";
 
 export const DOCUMENT_KINDS = [
   "gst_certificate",
@@ -17,11 +21,28 @@ export const DOCUMENT_KINDS = [
 ] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 
-/** Documents each business type must upload before it can submit KYC. */
+/**
+ * Documents each business type must upload before it can submit KYC.
+ * The GST certificate is only asked of businesses that actually hold a GSTIN —
+ * a shop below the registration threshold has none to give. The drug licence is
+ * never optional: GST is a turnover question, selling medicine is not.
+ */
+const BASE_DOCUMENTS: Record<(typeof BUSINESS_TYPES)[number], DocumentKind[]> = {
+  retailer: ["drug_license", "pan_card", "pharmacist_certificate"],
+  wholesaler: ["drug_license", "pan_card"],
+  company: ["manufacturing_license", "pan_card"],
+};
+
+export function requiredDocuments(type: (typeof BUSINESS_TYPES)[number], taxStatus?: TaxStatus): DocumentKind[] {
+  const base = BASE_DOCUMENTS[type];
+  return needsGstin(taxStatus) ? (["gst_certificate", ...base] as DocumentKind[]) : [...base];
+}
+
+/** Kept for call sites that only care about the fully registered case. */
 export const REQUIRED_DOCUMENTS: Record<(typeof BUSINESS_TYPES)[number], DocumentKind[]> = {
-  retailer: ["gst_certificate", "drug_license", "pan_card", "pharmacist_certificate"],
-  wholesaler: ["gst_certificate", "drug_license", "pan_card"],
-  company: ["gst_certificate", "manufacturing_license", "pan_card"],
+  retailer: requiredDocuments("retailer"),
+  wholesaler: requiredDocuments("wholesaler"),
+  company: requiredDocuments("company"),
 };
 
 const addressSchema = new Schema(
@@ -66,7 +87,10 @@ const businessSchema = new Schema(
     type: { type: String, enum: BUSINESS_TYPES, required: true, index: true },
     legalName: { type: String, required: true, trim: true },
     tradeName: { type: String, trim: true },
-    gstin: { type: String, uppercase: true, trim: true, sparse: true, unique: true },
+    /** Registered, registered under composition, or below the threshold. */
+    taxStatus: { type: String, enum: TAX_STATUSES, default: "registered" },
+    /** Absent for an unregistered business — never an empty string (see the index). */
+    gstin: { type: String, uppercase: true, trim: true },
     pan: { type: String, uppercase: true, trim: true },
     phone: { type: String, trim: true },
     email: { type: String, lowercase: true, trim: true },
@@ -103,6 +127,12 @@ const businessSchema = new Schema(
 );
 
 businessSchema.index({ "kyc.status": 1, "kyc.submittedAt": 1 });
+// Partial, not sparse: unregistered businesses have no GSTIN at all, and an
+// empty string must not count as one either, or the second one would collide.
+businessSchema.index(
+  { gstin: 1 },
+  { unique: true, partialFilterExpression: { gstin: { $type: "string", $gt: "" } } },
+);
 
 export type BusinessDoc = InferSchemaType<typeof businessSchema> & { _id: mongoose.Types.ObjectId };
 

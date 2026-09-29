@@ -1,6 +1,7 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
 import { GST_RATES } from "@/lib/catalog/constants";
 import { BILL_PAYMENT_MODES } from "@/lib/retail/constants";
+import { TAX_STATUSES } from "@/lib/tax-status";
 
 export { BILL_PAYMENT_MODES };
 export type { BillPaymentMode } from "@/lib/retail/constants";
@@ -48,6 +49,13 @@ const billSchema = new Schema(
   {
     businessId: { type: Schema.Types.ObjectId, ref: "Business", required: true, index: true },
     billNo: { type: String, required: true },
+    /**
+     * Frozen at the time of sale, like the line items: if the shop registers
+     * for GST later, an old bill of supply must still read as one.
+     */
+    documentType: { type: String, enum: ["tax_invoice", "bill_of_supply"], default: "tax_invoice" },
+    /** The shop's GST position when this bill was raised. */
+    taxStatus: { type: String, enum: TAX_STATUSES, default: "registered" },
     customerId: { type: Schema.Types.ObjectId, ref: "Customer" },
     /** Name and phone as printed, kept even if the customer is later anonymised. */
     customer: { name: String, phone: String },

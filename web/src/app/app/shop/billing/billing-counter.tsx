@@ -31,7 +31,7 @@ const PAYMENT_MODES = ["cash", "upi", "card"] as const;
 /** Schedule H and H1 medicines need the prescriber recorded. */
 const RX_SCHEDULES = ["h", "h1", "x"];
 
-export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
+export function BillingCounter({ loyalty, collectsGst }: { loyalty: LoyaltyRules; collectsGst: boolean }) {
   const t = useTranslations("shop");
   const err = useErrorText();
   const format = useFormatter();
@@ -58,7 +58,7 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
       batch,
       rate,
       available,
-      tax: billLine({ qty: l.qty, rate, gstRate: batch.gstRate, discountPercent: l.discountPercent }),
+      tax: billLine({ qty: l.qty, rate, gstRate: batch.gstRate, discountPercent: l.discountPercent, collectsGst }),
     };
   });
   const gross = billTotals(priced.map((p) => p.tax)).grandTotal;
@@ -294,8 +294,12 @@ export function BillingCounter({ loyalty }: { loyalty: LoyaltyRules }) {
             <dl className="space-y-1 border-t border-line pt-3">
               <Row label={t("subtotal")} value={inr(totals.gross)} />
               {totals.discount ? <Row label={t("discount")} value={`− ${inr(totals.discount)}`} /> : null}
-              <Row label={t("taxable")} value={inr(totals.taxable)} />
-              <Row label={`${t("cgst")} + ${t("sgst")}`} value={inr(totals.tax)} />
+              {collectsGst ? (
+                <>
+                  <Row label={t("taxable")} value={inr(totals.taxable)} />
+                  <Row label={`${t("cgst")} + ${t("sgst")}`} value={inr(totals.tax)} />
+                </>
+              ) : null}
               {redeem.points ? <Row label={t("pointsUsed", { points: redeem.points })} value={`− ${inr(redeem.value)}`} /> : null}
               {totals.roundOff ? <Row label={t("roundOff")} value={inr(totals.roundOff)} /> : null}
               <div className="flex justify-between border-t border-line pt-2 text-base font-semibold">

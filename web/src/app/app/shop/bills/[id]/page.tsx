@@ -5,6 +5,7 @@ import { Card, PageHeader, buttonClass } from "@/components/ui";
 import { amountInWords } from "@/lib/orders/gst";
 import { getBill } from "@/lib/retail/billing";
 import { requireShop } from "@/lib/retail/guard";
+import { COMPOSITION_DECLARATION } from "@/lib/tax-status";
 import { PrintButton } from "./print-button";
 
 export const metadata = { title: "Bill" };
@@ -19,6 +20,9 @@ export default async function BillPage({ params }: PageProps<"/app/shop/bills/[i
   const format = await getFormatter();
   const inr = (v: number) => format.number(v, { style: "currency", currency: "INR", maximumFractionDigits: 2 });
   const shopName = business.tradeName || business.legalName;
+  // Frozen on the bill, not read from the shop now: registering for GST later
+  // must not retitle documents already given to a customer.
+  const billOfSupply = bill.documentType === "bill_of_supply";
   const address = business.address;
   const licence = business.drugLicenses?.map((l) => `${l.form}: ${l.number}`).join(" · ");
 
@@ -44,6 +48,9 @@ export default async function BillPage({ params }: PageProps<"/app/shop/bills/[i
         <div className="space-y-4 p-5 text-sm">
           <header className="border-b border-line pb-3 text-center">
             <h1 className="text-lg font-bold">{shopName}</h1>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+              {billOfSupply ? t("billOfSupply") : t("taxInvoice")}
+            </p>
             {address ? (
               <p className="text-xs text-muted">
                 {[address.line1, address.line2, address.city, address.pincode].filter(Boolean).join(", ")}
@@ -54,6 +61,9 @@ export default async function BillPage({ params }: PageProps<"/app/shop/bills/[i
               {business.gstin ? ` · GSTIN: ${business.gstin}` : ""}
             </p>
             {licence ? <p className="text-xs text-muted">{licence}</p> : null}
+            {bill.taxStatus === "composition" ? (
+              <p className="mt-1 text-[11px] font-medium text-ink">{COMPOSITION_DECLARATION}</p>
+            ) : null}
           </header>
 
           <div className="flex flex-wrap justify-between gap-2 text-xs">
@@ -88,7 +98,8 @@ export default async function BillPage({ params }: PageProps<"/app/shop/bills/[i
                     <span className="font-medium">{l.name}</span>
                     <span className="block text-muted">
                       {l.packSizeLabel}
-                      {l.hsn ? ` · HSN ${l.hsn}` : ""} · {l.gstRate}%
+                      {l.hsn && !billOfSupply ? ` · HSN ${l.hsn}` : ""}
+                      {billOfSupply ? "" : ` · ${l.gstRate}%`}
                     </span>
                   </td>
                   <td className="py-1.5">
@@ -111,9 +122,13 @@ export default async function BillPage({ params }: PageProps<"/app/shop/bills/[i
           <dl className="ml-auto max-w-xs space-y-1 text-xs">
             <Row label={t("subtotal")} value={inr(bill.totals?.gross ?? 0)} />
             {bill.totals?.discount ? <Row label={t("discount")} value={`− ${inr(bill.totals.discount)}`} /> : null}
-            <Row label={t("taxable")} value={inr(bill.totals?.taxable ?? 0)} />
-            <Row label={t("cgst")} value={inr(bill.totals?.cgst ?? 0)} />
-            <Row label={t("sgst")} value={inr(bill.totals?.sgst ?? 0)} />
+            {billOfSupply ? null : (
+              <>
+                <Row label={t("taxable")} value={inr(bill.totals?.taxable ?? 0)} />
+                <Row label={t("cgst")} value={inr(bill.totals?.cgst ?? 0)} />
+                <Row label={t("sgst")} value={inr(bill.totals?.sgst ?? 0)} />
+              </>
+            )}
             {bill.totals?.redeemed ? <Row label={t("loyaltyPaid")} value={`− ${inr(bill.totals.redeemed)}`} /> : null}
             {bill.totals?.roundOff ? <Row label={t("roundOff")} value={inr(bill.totals.roundOff)} /> : null}
             <div className="flex justify-between border-t border-line pt-1.5 text-sm font-semibold">
