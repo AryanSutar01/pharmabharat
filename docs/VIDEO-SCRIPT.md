@@ -61,8 +61,8 @@ whole product — everything after this is a consequence of it.
 > distributors and pharma companies — and, for the store, a complete shop system:
 > its stock, its billing counter, its customers, its accounts.
 >
-> Every business on it is verified against its GST registration and its drug
-> licence before it can trade. Nobody sells here anonymously.
+> Every business on it is verified before it can trade — its drug licence, and
+> its GST registration where it has one. Nobody sells here anonymously.
 >
 > And everything in it is tracked at the level of the **batch**, not the medicine.
 
