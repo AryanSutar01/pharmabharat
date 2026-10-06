@@ -2,7 +2,11 @@ import "server-only";
 import { z } from "zod";
 
 const schema = z.object({
-  BETTER_AUTH_URL: z.url().default("http://localhost:3000"),
+  // Resolved by baseUrl() below, so a deployment can never fall back to localhost.
+  BETTER_AUTH_URL: z.url({
+    error:
+      "BETTER_AUTH_URL must be the URL this instance is served from, e.g. https://your-app.vercel.app",
+  }),
   BETTER_AUTH_SECRET: z.string().min(32, "BETTER_AUTH_SECRET must be at least 32 chars"),
   MONGODB_URI: z.string().startsWith("mongodb"),
   // Explicit so a URI without a /dbname path doesn't silently write to "test".
@@ -27,6 +31,30 @@ const schema = z.object({
   MAIL_FROM: z.string().default("PharmaBharat <no-reply@pharmabharat.local>"),
 });
 
+/**
+ * Where this instance is actually reachable.
+ *
+ * better-auth builds the Google callback URL out of this, so a wrong value is
+ * not a small problem: the user signs in on the live site, consents, and Google
+ * sends them to whatever host this names. This used to default to localhost,
+ * which meant a deployment with the variable unset booted fine and then dropped
+ * every visitor onto their own machine after consenting.
+ *
+ * Vercel does not set BETTER_AUTH_URL, so derive it from Vercel's own variables
+ * and let the parse fail loudly if there is nothing to derive it from.
+ */
+function baseUrl(): string | undefined {
+  if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
+  // The stable production domain in production, because Google only accepts
+  // redirect URIs that are registered and VERCEL_URL changes every deploy.
+  const vercel =
+    process.env.VERCEL_ENV === "production"
+      ? process.env.VERCEL_PROJECT_PRODUCTION_URL
+      : process.env.VERCEL_URL;
+  if (vercel) return `https://${vercel}`;
+  return process.env.VERCEL ? undefined : "http://localhost:3000";
+}
+
 type Env = z.infer<typeof schema>;
 
 let cached: Env | undefined;
@@ -34,7 +62,7 @@ let cached: Env | undefined;
 /** Validated server env. Parsed lazily so `next build` works without secrets. */
 export function env(): Env {
   if (cached) return cached;
-  const parsed = schema.safeParse(process.env);
+  const parsed = schema.safeParse({ ...process.env, BETTER_AUTH_URL: baseUrl() });
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `  ${i.path.join(".")}: ${i.message}`).join("\n");
     throw new Error(`Invalid environment variables:\n${issues}\nSee .env.example`);

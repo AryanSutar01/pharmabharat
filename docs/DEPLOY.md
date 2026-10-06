@@ -67,7 +67,7 @@ your local `web/.env.local`, except where noted.
 | `MONGODB_URI` | the Atlas connection string |
 | `MONGODB_DB` | `pharmabharat` — the app reads this, not the database in the URI |
 | `BETTER_AUTH_SECRET` | same long random string; changing it signs everyone out |
-| `BETTER_AUTH_URL` | **the deployed URL**, e.g. `https://pharmabharat.vercel.app` — not localhost |
+| `BETTER_AUTH_URL` | **the deployed URL**, e.g. `https://pharmabharat.vercel.app` — not localhost. On Vercel the app falls back to the project's production domain if this is unset, but set it explicitly once you have a custom domain |
 | `GOOGLE_CLIENT_ID` | |
 | `GOOGLE_CLIENT_SECRET` | |
 | `ADMIN_EMAILS` | comma-separated; these accounts become platform admins on sign-in |
@@ -82,6 +82,12 @@ your local `web/.env.local`, except where noted.
 `BETTER_AUTH_URL` is a chicken-and-egg: you do not know the URL until the first
 deploy. Deploy once, copy the URL, set the variable, then **redeploy** (a
 redeploy is required — environment variables are read at build and run time).
+
+**If sign-in sends people to localhost, this is why.** better-auth builds the
+Google callback URL out of `BETTER_AUTH_URL`. When it is unset the app now falls
+back to Vercel's own domain for the deployment rather than to localhost, so the
+old silent failure is gone — but a custom domain still needs the variable set,
+and either way the exact URL has to be registered with Google in §2.3.
 
 ### 2.3 Google sign-in
 
