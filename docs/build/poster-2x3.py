@@ -68,6 +68,29 @@ def panel(x, top, w, h, border=1.4):
     c.rect(x, Y(top + h), w, h, stroke=1, fill=1)
 
 
+def measure(flows, avail_w):
+    """Height a list of flowables needs at a given width."""
+    total = 0.0
+    for fl in flows:
+        total += fl.wrap(avail_w, 1e6)[1] + fl.getSpaceAfter() + fl.getSpaceBefore()
+    return total
+
+
+def autofit(builder, avail_w, avail_h, lo=12.0, hi=26.0, step=0.25):
+    """Largest body size at which builder(size) still fits the box.
+
+    A poster box that is two-thirds full reads as a mistake, and text sized for
+    a screen is unreadable on a 2ft x 3ft flex. Measuring beats guessing.
+    """
+    best, size = lo, lo
+    while size <= hi:
+        if measure(builder(size), avail_w) <= avail_h:
+            best, size = size, size + step
+        else:
+            break
+    return best
+
+
 def section(x, top, w, h, title, flowables, pad=12, band_fill=BAND, text_h=None):
     """Blue caption band + bordered white body, text flowed inside.
 
@@ -123,18 +146,26 @@ TOP = 406.0
 
 # ================================================================ A — background | problem
 A_H = 312.0
-section(M, TOP, COL2, A_H, "Background", text_h=A_H - BAND_H - 108, flowables=[
-    Paragraph(
-        "India dispenses more medicine than any nation on earth through roughly <b>900,000 independent "
-        "pharmacies</b> — and almost none of them can see the single number that decides whether stock "
-        "becomes revenue or waste: <b>the batch expiry date</b>. It is printed on the carton, copied onto a "
-        "paper bill, and then it disappears.", body(15.5, 20)),
-    Paragraph(
-        "<b>PharmaBharat rebuilds that missing layer.</b> It is one verified network on which retailers, "
-        "wholesale distributors and pharmaceutical manufacturers trade <b>at the level of the batch</b> — "
-        "and on which every medical store simultaneously runs its entire business: unit-level stock, GST "
-        "counter billing, customers, credit and statutory compliance, all on the same data.", body(15.5, 20)),
-])
+BG_TEXT_H = A_H - BAND_H - 108
+
+
+def bg(z):
+    return [
+        Paragraph(
+            "India dispenses more medicine than any nation on earth through roughly <b>900,000 independent "
+            "pharmacies</b> — and almost none of them can see the single number that decides whether stock "
+            "becomes revenue or waste: <b>the batch expiry date</b>. It is printed on the carton, copied onto a "
+            "paper bill, and then it disappears.", body(z, z * 1.29)),
+        Paragraph(
+            "<b>PharmaBharat rebuilds that missing layer.</b> One verified network on which retailers, "
+            "distributors and manufacturers trade <b>at the level of the batch</b> — and on which every "
+            "medical store simultaneously runs its whole business: stock, GST counter billing, customers, "
+            "credit and compliance.", body(z, z * 1.29)),
+    ]
+
+
+Z_BG = autofit(bg, COL2 - 2 * 12, BG_TEXT_H - 22)
+section(M, TOP, COL2, A_H, "Background", text_h=BG_TEXT_H, flowables=bg(Z_BG))
 
 # chain-of-custody strip, drawn inside the Background panel
 chain = [("Manufacturer", "batch created"), ("Distributor", "batch moved"),
@@ -170,20 +201,22 @@ c.setFont("Times-Bold", 15.5)
 c.drawCentredString(M + COL2 / 2.0, Y(ny + 86),
                     "One unbroken chain of custody — godown to the tablet cut at the counter.")
 
-section(M + COL2 + GAP, TOP, COL2, A_H, "Problem Statement", [
-    Paragraph("Pharmaceutical retail loses money in three places at once — and all three descend from the "
-              "same blind spot.", body(15.5, 19.5)),
-] + bullets([
-    "<b>On the shelf.</b> Medicines expire unseen. An estimated <b>3–5% of stock value</b> is written off to "
-    "expiry across the distribution chain, a loss carried almost entirely by the smallest players.",
-    "<b>At the point of purchase.</b> The same molecule carries different prices from different distributors, "
-    "discoverable only by telephone. Most shops never compare — they reorder from habit.",
-    "<b>In compliance.</b> Schedule H/H1 registers are handwritten, drug licences lapse unnoticed, and a batch "
-    "recall still travels by phone call — if it travels at all.",
-], 15, 19) + [
-    Paragraph("<b>Nobody can see the batch. Everything else follows from that.</b>",
-              body(16, 19, TA_CENTER, BAND)),
-])
+def ps(z):
+    return [Paragraph("Pharmaceutical retail loses money in three places at once — and all three descend "
+                      "from the same blind spot.", body(z, z * 1.27))] + bullets([
+        "<b>On the shelf.</b> Medicines expire unseen. An estimated <b>3–5% of stock value</b> is written "
+        "off to expiry across the distribution chain, a loss carried almost entirely by the smallest players.",
+        "<b>At the point of purchase.</b> The same molecule carries different prices from different "
+        "distributors, discoverable only by telephone. Most shops never compare — they reorder from habit.",
+        "<b>In compliance.</b> Schedule H/H1 registers are handwritten, drug licences lapse unnoticed, and a "
+        "batch recall still travels by phone call — if it travels at all.",
+    ], z, z * 1.27, space=z * 0.42) + [
+        Paragraph("<b>Nobody can see the batch. Everything else follows from that.</b>",
+                  body(z + 1, (z + 1) * 1.22, TA_CENTER, BAND))]
+
+
+Z_PS = autofit(ps, COL2 - 24, A_H - BAND_H - 22)
+section(M + COL2 + GAP, TOP, COL2, A_H, "Problem Statement", ps(Z_PS))
 
 # ================================================================ B — objectives
 B_TOP, B_H = TOP + A_H + 12, 202.0
@@ -196,10 +229,14 @@ obj = ["Verify <b>every</b> trading entity through KYC — drug licence, GST pos
 band(M, B_TOP, CW, "Objectives")
 panel(M, B_TOP + BAND_H, CW, B_H - BAND_H)
 half = (CW - 40) / 2.0
+Z_OBJ = min(autofit(lambda z: bullets(obj[:3], z, z * 1.27, bullet="▸", space=z * 0.45),
+                    half - 12, B_H - BAND_H - 16),
+            autofit(lambda z: bullets(obj[3:], z, z * 1.27, bullet="▸", space=z * 0.45),
+                    half - 12, B_H - BAND_H - 16))
 for i, chunk in enumerate([obj[:3], obj[3:]]):
     f = Frame(M + 14 + i * (half + 12), Y(B_TOP + B_H), half, B_H - BAND_H,
               leftPadding=4, rightPadding=8, topPadding=10, bottomPadding=4, showBoundary=0)
-    f.addFromList(bullets(chunk, 15, 19, bullet="▸", space=7), c)
+    f.addFromList(bullets(chunk, Z_OBJ, Z_OBJ * 1.27, bullet="▸", space=Z_OBJ * 0.45), c)
 
 # ================================================================ C — methodology
 C_TOP, C_H = B_TOP + B_H + 12, 188.0
@@ -268,7 +305,7 @@ c.drawCentredString(M + DW / 2.0, Y(cap_y + 30),
                     "The nightly job is the one path that does not — it carries a shared secret instead.")
 
 TX = M + DW + GAP
-section(TX, D_TOP, TW, D_H, "Technical Specifications", bullets([
+SPEC = [
     "<b>Frontend:</b> Next.js 16 App Router, React 19, TypeScript, Tailwind CSS",
     "<b>Backend:</b> React Server Components + Server Actions — no separate API tier, so a page and the "
     "action that mutates it share one authorization path",
@@ -278,34 +315,37 @@ section(TX, D_TOP, TW, D_H, "Technical Specifications", bullets([
     "<b>Authorization:</b> permission matrix of business type × member role, enforced server-side on "
     "<b>every</b> action; the edge proxy authorises nothing",
     "<b>Dispensing:</b> FEFO engine — the batch expiring first is always offered first",
-    "<b>Taxation:</b> CGST/SGST/IGST engine, MRP-inclusive reverse computation, three GST positions "
-    "(registered, composition, unregistered)",
-    "<b>Compliance:</b> Schedule H/H1 digital register, licence-expiry enforcement, platform-wide recall freeze",
+    "<b>Taxation:</b> CGST/SGST/IGST engine, MRP-inclusive reverse computation, three GST positions",
+    "<b>Compliance:</b> Schedule H/H1 digital register, licence-expiry enforcement, recall freeze",
     "<b>Localisation:</b> English, <font name=\"%s\">हिन्दी</font>, "
-    "<font name=\"%s\">मराठी</font> — key parity enforced by automated test" % (DEVA, DEVA),
+    "<font name=\"%s\">मराठी</font> — key parity enforced by test" % (DEVA, DEVA),
     "<b>Documents:</b> Cloudinary authenticated assets served only via signed redirects",
     "<b>Catalogue:</b> 246,064-medicine national master with fuzzy and salt-level search",
-], 14, 17.5, space=7))
+]
+Z_SPEC = autofit(lambda z: bullets(SPEC, z, z * 1.24, space=z * 0.48), TW - 24, D_H - BAND_H - 22)
+section(TX, D_TOP, TW, D_H, "Technical Specifications",
+        bullets(SPEC, Z_SPEC, Z_SPEC * 1.24, space=Z_SPEC * 0.48))
 
 # ================================================================ E — results | applications
 E_TOP, E_H = D_TOP + D_H + 12, 292.0
-section(M, E_TOP, COL2, E_H, "Results and Conclusions", [
-    Paragraph("<b>Results</b>", body(16, 18, space=4, color=BAND)),
-] + bullets([
-    "<b>41 / 41</b> functional requirements implemented and verified",
-    "<b>208 automated tests</b> passing — 115 unit, 93 integration",
-    "<b>10 production modules</b>, each delivered green, across <b>3 languages</b>",
-    "<b>246,064 medicines</b> searchable; batch traceability godown → counter",
-], 14.5, 17.5, space=4) + [
-    Paragraph("<b>Conclusion</b>", body(16, 18, space=4, color=BAND)),
-    Paragraph("PharmaBharat demonstrates that verified B2B ordering, GST-compliant retail billing, unit-level "
-              "inventory, credit management, statutory registers and nationwide recall propagation can be unified "
-              "in a single low-cost platform an independent pharmacy can actually run — turning the batch "
-              "expiry date from the industry's most expensive blind spot into its most valuable signal.",
-              body(14.5, 17.5)),
-])
+def res(z):
+    return [Paragraph("<b>Results</b>", body(z + 1, (z + 1) * 1.2, space=z * 0.3, color=BAND))] + bullets([
+        "<b>41 / 41</b> functional requirements implemented and verified",
+        "<b>208 automated tests</b> passing — 115 unit, 93 integration",
+        "<b>10 production modules</b>, each delivered green, across <b>3 languages</b>",
+        "<b>246,064 medicines</b> searchable; batch traceability godown → counter",
+    ], z, z * 1.24, space=z * 0.3) + [
+        Paragraph("<b>Conclusion</b>", body(z + 1, (z + 1) * 1.2, space=z * 0.3, color=BAND)),
+        Paragraph("Verified B2B ordering, GST-compliant retail billing, unit-level inventory, credit "
+                  "management, statutory registers and nationwide recall propagation, unified in one low-cost "
+                  "platform an independent pharmacy can actually run — turning the batch expiry date from "
+                  "the industry's most expensive blind spot into its most valuable signal.", body(z, z * 1.24))]
 
-section(M + COL2 + GAP, E_TOP, COL2, E_H, "Applications", bullets([
+
+Z_RES = autofit(res, COL2 - 24, E_H - BAND_H - 22)
+section(M, E_TOP, COL2, E_H, "Results and Conclusions", res(Z_RES))
+
+APPS = [
     "<b>Retail pharmacies:</b> cheaper verified buying, plus a complete digital counter that replaces the register",
     "<b>Wholesale distributors:</b> verified demand, faster movement of near-expiry stock, fewer credit disputes",
     "<b>Pharmaceutical manufacturers:</b> true sell-through visibility and instant, provable recall reach",
@@ -314,10 +354,13 @@ section(M + COL2 + GAP, E_TOP, COL2, E_H, "Applications", bullets([
     "inspection becomes a download",
     "<b>Adjacent trades:</b> the batch-and-expiry core extends directly to agro-chemical, veterinary and "
     "perishable FMCG distribution",
-], 14.5, 17.5, space=8))
+]
+Z_APP = autofit(lambda z: bullets(APPS, z, z * 1.24, space=z * 0.5), COL2 - 24, E_H - BAND_H - 22)
+section(M + COL2 + GAP, E_TOP, COL2, E_H, "Applications",
+        bullets(APPS, Z_APP, Z_APP * 1.24, space=Z_APP * 0.5))
 
 # ================================================================ F — future scope
-F_TOP, F_H = E_TOP + E_H + 12, 362.0
+F_TOP, F_H = E_TOP + E_H + 12, 376.0
 band(M, F_TOP, CW, "Future Scope — The Artificial Intelligence Roadmap")
 panel(M, F_TOP + BAND_H, CW, F_H - BAND_H)
 
@@ -346,7 +389,10 @@ horizons = [
 ]
 hw = (CW - 28 - 2 * 14) / 3.0
 hy = F_TOP + BAND_H + 12
-hh = F_H - BAND_H - 24 - 34
+hh = F_H - BAND_H - 96
+Z_HZ = min(autofit(lambda z, it=h[3]: bullets(it, z, z * 1.22, bullet="▪", indent=12,
+                                             space=z * 0.45), hw - 17, hh - 10)
+           for h in horizons)
 for i, (col, label, name, items) in enumerate(horizons):
     x = M + 14 + i * (hw + 14)
     c.setFillColor(col)
@@ -362,7 +408,7 @@ for i, (col, label, name, items) in enumerate(horizons):
     c.rect(x, Y(hy + 38 + hh), hw, hh, stroke=1, fill=0)
     f = Frame(x, Y(hy + 38 + hh), hw, hh, leftPadding=9, rightPadding=8,
               topPadding=8, bottomPadding=2, showBoundary=0)
-    f.addFromList(bullets(items, 12.6, 15, bullet="▪", indent=12, space=6), c)
+    f.addFromList(bullets(items, Z_HZ, Z_HZ * 1.22, bullet="▪", indent=12, space=Z_HZ * 0.45), c)
 
 kicker = hy + 38 + hh + 8
 c.setFillColor(PALE)
@@ -372,6 +418,9 @@ c.setFont("Times-Bold", 16)
 c.drawCentredString(W / 2.0, Y(kicker + 20),
                     "Every model above trains on data the platform already captures. The hard part — getting "
                     "every batch and every date into a system at all — is built.")
+
+print("fitted sizes: bg=%.2f problem=%.2f objectives=%.2f spec=%.2f results=%.2f apps=%.2f horizons=%.2f"
+      % (Z_BG, Z_PS, Z_OBJ, Z_SPEC, Z_RES, Z_APP, Z_HZ))
 
 c.showPage()
 c.save()
