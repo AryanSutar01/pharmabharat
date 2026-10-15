@@ -140,34 +140,34 @@ section(M, TOP, COL2, A_H, "Background", text_h=A_H - BAND_H - 108, flowables=[
 chain = [("Manufacturer", "batch created"), ("Distributor", "batch moved"),
          ("Pharmacy", "batch dispensed"), ("Patient", "batch on the bill")]
 nw = (COL2 - 28 - 3 * 22) / 4.0
-ny = TOP + 222
+ny = TOP + 218
 for i, (t, sub) in enumerate(chain):
     nx = M + 14 + i * (nw + 22)
     c.setFillColor(PALE)
     c.setStrokeColor(TEAL)
     c.setLineWidth(1.1)
-    c.roundRect(nx, Y(ny + 58), nw, 58, 6, stroke=1, fill=1)
+    c.roundRect(nx, Y(ny + 62), nw, 62, 6, stroke=1, fill=1)
     c.setFillColor(BAND)
-    c.setFont("Times-Bold", 17)
-    c.drawCentredString(nx + nw / 2.0, Y(ny + 25), t)
+    c.setFont("Times-Bold", 18)
+    c.drawCentredString(nx + nw / 2.0, Y(ny + 26), t)
     c.setFillColor(TEAL)
-    c.setFont("Times-Italic", 14)
-    c.drawCentredString(nx + nw / 2.0, Y(ny + 46), sub)
+    c.setFont("Times-Italic", 18)
+    c.drawCentredString(nx + nw / 2.0, Y(ny + 50), sub)
     if i < 3:
         c.setStrokeColor(TEAL)
         c.setLineWidth(2)
         ax = nx + nw + 4
-        c.line(ax, Y(ny + 29), ax + 9, Y(ny + 29))
+        c.line(ax, Y(ny + 31), ax + 9, Y(ny + 31))
         c.setFillColor(TEAL)
         pth = c.beginPath()
-        pth.moveTo(ax + 8, Y(ny + 29) - 5)
-        pth.lineTo(ax + 16, Y(ny + 29))
-        pth.lineTo(ax + 8, Y(ny + 29) + 5)
+        pth.moveTo(ax + 8, Y(ny + 31) - 5)
+        pth.lineTo(ax + 16, Y(ny + 31))
+        pth.lineTo(ax + 8, Y(ny + 31) + 5)
         pth.close()
         c.drawPath(pth, stroke=0, fill=1)
 c.setFillColor(TEAL)
 c.setFont("Times-Bold", 15.5)
-c.drawCentredString(M + COL2 / 2.0, Y(ny + 82),
+c.drawCentredString(M + COL2 / 2.0, Y(ny + 86),
                     "One unbroken chain of custody — godown to the tablet cut at the counter.")
 
 section(M + COL2 + GAP, TOP, COL2, A_H, "Problem Statement", [
@@ -225,10 +225,10 @@ for i, (n, t, s) in enumerate(steps):
     c.setFillColor(white)
     c.setFont("Times-Bold", 18)
     c.drawCentredString(x + 22, Y(sy_top + sh / 2.0 + 6), n)
-    f = Frame(x, Y(sy_top + sh), sw, sh - 4, leftPadding=40, rightPadding=34,
-              topPadding=(sh - 48) / 2.0, bottomPadding=2, showBoundary=0)
-    f.addFromList([Paragraph("<b>%s</b>" % t, body(18, 21, TA_CENTER, BAND, space=4)),
-                   Paragraph(s, body(15, 17.5, TA_CENTER, MUTE, space=0))], c)
+    f = Frame(x, Y(sy_top + sh), sw, sh - 4, leftPadding=44, rightPadding=14,
+              topPadding=(sh - 52) / 2.0, bottomPadding=2, showBoundary=0)
+    f.addFromList([Paragraph("<b>%s</b>" % t, body(18, 22, TA_CENTER, BAND, space=5)),
+                   Paragraph(s, body(18, 21, TA_CENTER, MUTE, space=0))], c)
     if i < 5:
         c.setStrokeColor(BAND)
         c.setLineWidth(2)
