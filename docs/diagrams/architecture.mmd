@@ -1,0 +1,71 @@
+%% PharmaBharat — system architecture (editable source)
+%% The SVG beside this file is the one to put in a report; this is here so the
+%% diagram can be changed without hand-editing coordinates. Render with the
+%% Mermaid Live Editor (mermaid.live) or any Markdown viewer that supports it.
+%%
+%% The claim: every request reaches the database only after a permission check.
+%% The dashed edge is the single exception, and it carries a shared secret.
+
+flowchart TB
+  subgraph entry [" "]
+    direction LR
+    R["Retailer<br/><small>medical shop · counter</small>"]
+    W["Wholesaler<br/><small>distributor</small>"]
+    C["Pharma company<br/><small>listings · recalls</small>"]
+    A["Platform admin<br/><small>KYC · recalls · support</small>"]
+    CRON["Scheduler<br/><small>Vercel Cron / crontab · 03:30</small>"]
+  end
+
+  PROXY["src/proxy.ts — optimistic cookie check only<br/><small>no session cookie → /sign-in · authorises nothing</small>"]
+
+  subgraph runtime ["Next.js 16 App Router — one deployment"]
+    direction LR
+    RSC["Server Components<br/><small>pages, read-only queries</small>"]
+    SA["Server Actions<br/><small>every mutation</small>"]
+    RH["Route Handlers<br/><small>auth · cron · invoice · KYC</small>"]
+  end
+
+  GUARD["<b>Authorization — src/lib/session.ts</b><br/>requireUser · requirePlatformRole · requireBusiness&#123;permission&#125;<br/><small>permissions.ts: business type × member role → permission</small>"]
+
+  subgraph services ["Domain services — src/lib"]
+    direction LR
+    SVC1["catalog · orders · retail/shop · ledger · alerts"]
+    SVC2["recalls · compliance · support · mail · chat"]
+  end
+
+  subgraph data ["Data access"]
+    direction LR
+    MOD["mongoose models (19)"]
+    DRV["native driver<br/><small>better-auth collections</small>"]
+  end
+
+  DB[("MongoDB Atlas — ap-south-1<br/><small>transactions for checkout, billing, ledger</small>")]
+
+  subgraph ext ["External services"]
+    direction TB
+    G["Google OAuth<br/><small>the only way in</small>"]
+    CL["Cloudinary<br/><small>KYC docs, authenticated</small>"]
+    SMTP["SMTP · Gmail<br/><small>alerts, reminders, invoices</small>"]
+    WS["Socket.io service<br/><small>optional; polls if absent</small>"]
+  end
+
+  R --> PROXY
+  W --> PROXY
+  C --> PROXY
+  A --> PROXY
+  PROXY -->|request continues| runtime
+  runtime ==>|every page and action calls a guard first| GUARD
+  GUARD -->|permitted| services
+  services --> data --> DB
+
+  CRON -.->|"/api/cron/daily · Bearer CRON_SECRET<br/>no proxy, no user guard"| services
+
+  RH <--> G
+  RH <--> CL
+  SVC1 --> SMTP
+  SVC2 --> WS
+
+  classDef band fill:#ecfdf5,stroke:#0f766e,stroke-width:2px,color:#0f766e
+  classDef weak fill:#ffffff,stroke:#94a3b8,stroke-dasharray:5 4
+  class GUARD band
+  class PROXY weak

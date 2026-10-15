@@ -1,0 +1,224 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 860" width="1280" height="860"
+     font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" role="img"
+     aria-label="PharmaBharat system architecture: browser requests pass an optimistic cookie check in the proxy, then every page, server action and route handler calls a session guard before any domain service or database access. The nightly cron job is the only path that bypasses the user guards, authenticating with a shared secret instead.">
+  <title>PharmaBharat — system architecture</title>
+  <desc>Layered architecture. Four kinds of user and a scheduler enter at the top. Browser traffic
+  crosses src/proxy.ts, which only checks for a session cookie, then reaches Next.js server
+  components, server actions and route handlers. All of those call a guard in lib/session.ts, which
+  resolves permissions from business type and member role, before reaching the ten domain services,
+  the mongoose models and MongoDB Atlas. A dashed line shows the daily cron route reaching the
+  services directly, authorised by a shared secret rather than a user session.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f766e"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="860" fill="#ffffff"/>
+
+  <text x="28" y="30" font-size="19" font-weight="600" fill="#0f172a">PharmaBharat — system architecture</text>
+  <text x="28" y="50" font-size="11.5" fill="#475569">Next.js 16 App Router · single deployment · MongoDB Atlas · B2B pharma marketplace with an in-shop retail system</text>
+
+  <!-- ============ entry points ============ -->
+  <g>
+    <rect x="28" y="74" width="168" height="68" rx="6" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="112" y="100" font-size="13" font-weight="600" fill="#0f172a" text-anchor="middle">Scheduler</text>
+    <text x="112" y="116" font-size="9.8" fill="#475569" text-anchor="middle">Vercel Cron or crontab</text>
+    <text x="112" y="130" font-size="9.8" fill="#475569" text-anchor="middle">03:30 daily</text>
+  </g>
+
+  <g fill="#f1f5f9" stroke="#94a3b8">
+    <rect x="220" y="74" width="185" height="68" rx="6"/>
+    <rect x="425" y="74" width="185" height="68" rx="6"/>
+    <rect x="630" y="74" width="185" height="68" rx="6"/>
+    <rect x="835" y="74" width="185" height="68" rx="6"/>
+  </g>
+  <g font-size="13" font-weight="600" fill="#0f172a" text-anchor="middle">
+    <text x="312" y="100">Retailer</text>
+    <text x="517" y="100">Wholesaler</text>
+    <text x="722" y="100">Pharma company</text>
+    <text x="927" y="100">Platform admin</text>
+  </g>
+  <g font-size="9.8" fill="#475569" text-anchor="middle">
+    <text x="312" y="116">medical shop</text>
+    <text x="312" y="130">mobile first · counter</text>
+    <text x="517" y="116">distributor</text>
+    <text x="517" y="130">sells into the catalogue</text>
+    <text x="722" y="116">manufacturer</text>
+    <text x="722" y="130">listings · recalls</text>
+    <text x="927" y="116">KYC, recalls, reports</text>
+    <text x="927" y="130">+ support desk</text>
+  </g>
+
+  <!-- ============ proxy ============ -->
+  <line x1="620" y1="142" x2="620" y2="170" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="630" y="160" font-size="10" fill="#475569">HTTPS · Google sign-in only</text>
+
+  <rect x="220" y="174" width="800" height="48" rx="6" fill="#ffffff" stroke="#94a3b8" stroke-dasharray="5 4"/>
+  <text x="620" y="196" font-size="13" font-weight="600" fill="#0f172a" text-anchor="middle">src/proxy.ts — optimistic cookie check only</text>
+  <text x="620" y="212" font-size="9.8" fill="#475569" text-anchor="middle">no session cookie → /sign-in · matches /app, /onboarding, /admin, /support-desk, /invite · decides nothing else</text>
+
+  <!-- ============ next.js runtime ============ -->
+  <line x1="620" y1="222" x2="620" y2="250" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <g fill="#f8fafc" stroke="#cbd5e1">
+    <rect x="220" y="254" width="250" height="80" rx="6"/>
+    <rect x="495" y="254" width="250" height="80" rx="6"/>
+    <rect x="770" y="254" width="250" height="80" rx="6"/>
+  </g>
+  <g font-size="13" font-weight="600" fill="#0f172a" text-anchor="middle">
+    <text x="345" y="278">Server Components</text>
+    <text x="620" y="278">Server Actions</text>
+    <text x="895" y="278">Route Handlers</text>
+  </g>
+  <g font-size="9.8" fill="#475569" text-anchor="middle">
+    <text x="345" y="296">pages, read-only queries</text>
+    <text x="345" y="310">PageProps&lt;"/route"&gt; types</text>
+    <text x="345" y="324">next-intl · en / hi / mr</text>
+    <text x="620" y="296">every mutation from a form</text>
+    <text x="620" y="310">returns error codes, not text</text>
+    <text x="620" y="324">useActionState on the client</text>
+    <text x="895" y="296">/api/auth/* · /api/cron/daily</text>
+    <text x="895" y="310">invoice PDF · KYC redirect</text>
+    <text x="895" y="324">product suggest · realtime token</text>
+  </g>
+
+  <!-- ============ authorization: the claim ============ -->
+  <line x1="620" y1="334" x2="620" y2="362" stroke="#0f766e" stroke-width="2" marker-end="url(#arrowAccent)"/>
+  <text x="632" y="352" font-size="10.5" font-weight="600" fill="#0f766e">every page and action calls a guard first</text>
+
+  <rect x="220" y="366" width="800" height="86" rx="6" fill="#ecfdf5" stroke="#0f766e" stroke-width="2"/>
+  <text x="620" y="390" font-size="13.5" font-weight="700" fill="#0f766e" text-anchor="middle">Authorization — src/lib/session.ts</text>
+  <text x="620" y="408" font-size="10.5" fill="#0f172a" text-anchor="middle">requireUser() · requirePlatformRole("admin") · requireBusiness({ permission })</text>
+  <text x="620" y="426" font-size="10.2" fill="#475569" text-anchor="middle">src/lib/permissions.ts — business type (retailer / wholesaler / company) × member role</text>
+  <text x="620" y="440" font-size="10.2" fill="#475569" text-anchor="middle">(owner · manager · inventory · billing · viewer) → permission. Features check a permission, never a role name.</text>
+
+  <!-- ============ domain services ============ -->
+  <line x1="620" y1="452" x2="620" y2="482" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <g fill="#f8fafc" stroke="#cbd5e1">
+    <rect x="220" y="486" width="147" height="54" rx="5"/>
+    <rect x="383" y="486" width="147" height="54" rx="5"/>
+    <rect x="546" y="486" width="147" height="54" rx="5"/>
+    <rect x="709" y="486" width="147" height="54" rx="5"/>
+    <rect x="872" y="486" width="147" height="54" rx="5"/>
+    <rect x="220" y="554" width="147" height="54" rx="5"/>
+    <rect x="383" y="554" width="147" height="54" rx="5"/>
+    <rect x="546" y="554" width="147" height="54" rx="5"/>
+    <rect x="709" y="554" width="147" height="54" rx="5"/>
+    <rect x="872" y="554" width="147" height="54" rx="5"/>
+  </g>
+  <g font-size="11.5" font-weight="600" fill="#0f172a" text-anchor="middle">
+    <text x="293" y="508">catalog</text>
+    <text x="456" y="508">orders</text>
+    <text x="619" y="508">retail / shop</text>
+    <text x="782" y="508">ledger</text>
+    <text x="945" y="508">alerts</text>
+    <text x="293" y="576">recalls</text>
+    <text x="456" y="576">compliance</text>
+    <text x="619" y="576">support</text>
+    <text x="782" y="576">mail</text>
+    <text x="945" y="576">chat</text>
+  </g>
+  <g font-size="9.3" fill="#475569" text-anchor="middle">
+    <text x="293" y="523">search, listings,</text>
+    <text x="293" y="534">offers, substitutes</text>
+    <text x="456" y="523">cart, cheapest split,</text>
+    <text x="456" y="534">GST invoice</text>
+    <text x="619" y="523">billing, FEFO stock,</text>
+    <text x="619" y="534">loyalty, refills</text>
+    <text x="782" y="523">credit terms, ageing,</text>
+    <text x="782" y="534">oldest-first settlement</text>
+    <text x="945" y="523">expiry 90 / 60 / 30,</text>
+    <text x="945" y="534">low stock, payments</text>
+    <text x="293" y="591">freeze listings,</text>
+    <text x="293" y="602">notify every holder</text>
+    <text x="456" y="591">Schedule H / H1 register,</text>
+    <text x="456" y="602">licence expiry</text>
+    <text x="619" y="591">tickets,</text>
+    <text x="619" y="602">support desk</text>
+    <text x="782" y="591">nodemailer</text>
+    <text x="782" y="602">templates</text>
+    <text x="945" y="591">buyer ↔ seller</text>
+    <text x="945" y="602">enquiries</text>
+  </g>
+
+  <!-- cron bypass -->
+  <polyline points="160,142 160,513 214,513" fill="none" stroke="#475569" stroke-width="1.6"
+            stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+  <text x="28" y="212" font-size="10" font-weight="600" fill="#0f172a">GET /api/cron/daily</text>
+  <text x="28" y="228" font-size="9.5" fill="#475569">Bearer CRON_SECRET,</text>
+  <text x="28" y="241" font-size="9.5" fill="#475569">not a user session.</text>
+  <text x="28" y="258" font-size="9.5" fill="#475569">The one path that</text>
+  <text x="28" y="271" font-size="9.5" fill="#475569">crosses neither the</text>
+  <text x="28" y="284" font-size="9.5" fill="#475569">proxy nor the guards.</text>
+  <text x="28" y="306" font-size="9.5" fill="#475569">Runs expiry alerts,</text>
+  <text x="28" y="319" font-size="9.5" fill="#475569">payment reminders,</text>
+  <text x="28" y="332" font-size="9.5" fill="#475569">licence checks and</text>
+  <text x="28" y="345" font-size="9.5" fill="#475569">shop housekeeping.</text>
+
+  <!-- ============ data access ============ -->
+  <line x1="620" y1="608" x2="620" y2="636" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="220" y="640" width="530" height="62" rx="6" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="485" y="662" font-size="12.5" font-weight="600" fill="#0f172a" text-anchor="middle">mongoose models — src/lib/models (19)</text>
+  <text x="485" y="678" font-size="9.5" fill="#475569" text-anchor="middle">business · membership · product · listing · cart · order · bill · shop-stock · customer</text>
+  <text x="485" y="692" font-size="9.5" fill="#475569" text-anchor="middle">ledger · loyalty · refill · recall · notification · chat · ticket · banner · condition · settings</text>
+
+  <rect x="766" y="640" width="254" height="62" rx="6" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="893" y="662" font-size="12.5" font-weight="600" fill="#0f172a" text-anchor="middle">native MongoDB driver</text>
+  <text x="893" y="678" font-size="9.5" fill="#475569" text-anchor="middle">better-auth collections:</text>
+  <text x="893" y="692" font-size="9.5" fill="#475569" text-anchor="middle">user · session · account</text>
+
+  <!-- ============ database ============ -->
+  <line x1="620" y1="702" x2="620" y2="730" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="220" y="734" width="800" height="62" rx="6" fill="#e2e8f0" stroke="#64748b"/>
+  <text x="620" y="757" font-size="13.5" font-weight="700" fill="#0f172a" text-anchor="middle">MongoDB Atlas — ap-south-1 (Mumbai)</text>
+  <text x="620" y="775" font-size="10" fill="#475569" text-anchor="middle">one database · multi-document transactions for checkout, counter billing and ledger posting</text>
+  <text x="620" y="789" font-size="10" fill="#475569" text-anchor="middle">so a bill can never exist for stock that was not on the shelf</text>
+
+  <!-- ============ external services ============ -->
+  <rect x="1052" y="254" width="200" height="354" rx="6" fill="#fafafa" stroke="#cbd5e1"/>
+  <text x="1152" y="274" font-size="11" font-weight="700" fill="#0f172a" text-anchor="middle" letter-spacing="0.5">EXTERNAL SERVICES</text>
+  <line x1="1052" y1="284" x2="1252" y2="284" stroke="#cbd5e1"/>
+
+  <text x="1068" y="306" font-size="11.5" font-weight="600" fill="#0f172a">Google OAuth</text>
+  <text x="1068" y="321" font-size="9.3" fill="#475569">better-auth · /api/auth/*</text>
+  <text x="1068" y="333" font-size="9.3" fill="#475569">the only way in; no passwords</text>
+  <line x1="1052" y1="345" x2="1252" y2="345" stroke="#e2e8f0"/>
+
+  <text x="1068" y="367" font-size="11.5" font-weight="600" fill="#0f172a">Cloudinary</text>
+  <text x="1068" y="382" font-size="9.3" fill="#475569">KYC documents, authenticated</text>
+  <text x="1068" y="394" font-size="9.3" fill="#475569">assets · signed redirects via</text>
+  <text x="1068" y="406" font-size="9.3" fill="#475569">/api/kyc-documents/*</text>
+  <line x1="1052" y1="418" x2="1252" y2="418" stroke="#e2e8f0"/>
+
+  <text x="1068" y="440" font-size="11.5" font-weight="600" fill="#0f172a">SMTP — Gmail</text>
+  <text x="1068" y="455" font-size="9.3" fill="#475569">expiry alerts, refill reminders,</text>
+  <text x="1068" y="467" font-size="9.3" fill="#475569">overdue notices, invoices</text>
+  <text x="1068" y="479" font-size="9.3" fill="#475569">no SMS or WhatsApp by design</text>
+  <line x1="1052" y1="491" x2="1252" y2="491" stroke="#e2e8f0"/>
+
+  <text x="1068" y="513" font-size="11.5" font-weight="600" fill="#0f172a">Realtime service</text>
+  <text x="1068" y="528" font-size="9.3" fill="#475569">separate Socket.io process</text>
+  <text x="1068" y="540" font-size="9.3" fill="#475569">for chat · stateless</text>
+  <text x="1068" y="552" font-size="9.3" fill="#475569">optional: chat falls back to</text>
+  <text x="1068" y="564" font-size="9.3" fill="#475569">polling when it is absent</text>
+  <line x1="1052" y1="576" x2="1252" y2="576" stroke="#e2e8f0"/>
+
+  <text x="1068" y="594" font-size="9.3" fill="#475569">Called server-side only, so no</text>
+  <text x="1068" y="604" font-size="9.3" fill="#475569">secret reaches the browser.</text>
+
+  <line x1="1020" y1="294" x2="1048" y2="294" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <polyline points="1019,513 1035,513 1035,455 1046,455" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <polyline points="1019,581 1035,581 1035,528 1046,528" fill="none" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <!-- ============ footnote ============ -->
+  <text x="28" y="826" font-size="10" fill="#475569">Written in one Next.js deployment: there is no separate API tier, so a page and the action that mutates its data share the same authorization code.</text>
+  <text x="28" y="842" font-size="10" fill="#475569">The proxy is deliberately weak — it only redirects visitors without a cookie. Nothing is authorised there, because a cookie proves nothing about permission.</text>
+</svg>
