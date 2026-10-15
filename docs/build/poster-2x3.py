@@ -140,35 +140,35 @@ section(M, TOP, COL2, A_H, "Background", text_h=A_H - BAND_H - 108, flowables=[
 chain = [("Manufacturer", "batch created"), ("Distributor", "batch moved"),
          ("Pharmacy", "batch dispensed"), ("Patient", "batch on the bill")]
 nw = (COL2 - 28 - 3 * 22) / 4.0
-ny = TOP + 232
+ny = TOP + 222
 for i, (t, sub) in enumerate(chain):
     nx = M + 14 + i * (nw + 22)
     c.setFillColor(PALE)
     c.setStrokeColor(TEAL)
     c.setLineWidth(1.1)
-    c.roundRect(nx, Y(ny + 52), nw, 52, 6, stroke=1, fill=1)
+    c.roundRect(nx, Y(ny + 58), nw, 58, 6, stroke=1, fill=1)
     c.setFillColor(BAND)
-    c.setFont("Times-Bold", 14)
-    c.drawCentredString(nx + nw / 2.0, Y(ny + 22), t)
+    c.setFont("Times-Bold", 17)
+    c.drawCentredString(nx + nw / 2.0, Y(ny + 25), t)
     c.setFillColor(TEAL)
-    c.setFont("Times-Italic", 12)
-    c.drawCentredString(nx + nw / 2.0, Y(ny + 40), sub)
+    c.setFont("Times-Italic", 14)
+    c.drawCentredString(nx + nw / 2.0, Y(ny + 46), sub)
     if i < 3:
         c.setStrokeColor(TEAL)
         c.setLineWidth(2)
         ax = nx + nw + 4
-        c.line(ax, Y(ny + 26), ax + 9, Y(ny + 26))
+        c.line(ax, Y(ny + 29), ax + 9, Y(ny + 29))
         c.setFillColor(TEAL)
         pth = c.beginPath()
-        pth.moveTo(ax + 8, Y(ny + 26) - 4.5)
-        pth.lineTo(ax + 15, Y(ny + 26))
-        pth.lineTo(ax + 8, Y(ny + 26) + 4.5)
+        pth.moveTo(ax + 8, Y(ny + 29) - 5)
+        pth.lineTo(ax + 16, Y(ny + 29))
+        pth.lineTo(ax + 8, Y(ny + 29) + 5)
         pth.close()
         c.drawPath(pth, stroke=0, fill=1)
 c.setFillColor(TEAL)
-c.setFont("Times-Bold", 13.5)
-c.drawCentredString(M + COL2 / 2.0, Y(ny + 74),
-                    "One unbroken chain of custody — godown to the single tablet cut at the counter.")
+c.setFont("Times-Bold", 15.5)
+c.drawCentredString(M + COL2 / 2.0, Y(ny + 82),
+                    "One unbroken chain of custody — godown to the tablet cut at the counter.")
 
 section(M + COL2 + GAP, TOP, COL2, A_H, "Problem Statement", [
     Paragraph("Pharmaceutical retail loses money in three places at once — and all three descend from the "
@@ -205,12 +205,12 @@ for i, chunk in enumerate([obj[:3], obj[3:]]):
 C_TOP, C_H = B_TOP + B_H + 12, 188.0
 band(M, C_TOP, CW, "Methodology")
 panel(M, C_TOP + BAND_H, CW, C_H - BAND_H)
-steps = [("1", "Requirement<br/>Engineering", "41 functional<br/>requirements, SRS"),
-         ("2", "Domain &amp;<br/>System Design", "modular monolith,<br/>permission matrix"),
-         ("3", "Iterative<br/>Development", "10 modules, built<br/>in dependency order"),
-         ("4", "Security &amp;<br/>Compliance", "RBAC, ACID<br/>transactions, KYC"),
-         ("5", "Verification", "208 automated tests,<br/>end-to-end typing"),
-         ("6", "Evaluation &amp;<br/>Pilot Readiness", "seeded demo shop,<br/>deployment")]
+steps = [("1", "Requirements", "41 FRs in the SRS"),
+         ("2", "System Design", "modular monolith"),
+         ("3", "Development", "10 modules, in order"),
+         ("4", "Security", "RBAC · ACID · KYC"),
+         ("5", "Verification", "208 automated tests"),
+         ("6", "Evaluation", "seeded pilot demo")]
 sw = (CW - 28 - 5 * 14) / 6.0
 sy_top = C_TOP + BAND_H + 16
 sh = C_H - BAND_H - 30
@@ -221,14 +221,14 @@ for i, (n, t, s) in enumerate(steps):
     c.setLineWidth(1.1)
     c.roundRect(x, Y(sy_top + sh), sw, sh, 7, stroke=1, fill=1)
     c.setFillColor(BAND)
-    c.circle(x + 19, Y(sy_top + 19), 13, stroke=0, fill=1)
+    c.circle(x + 22, Y(sy_top + sh / 2.0), 15, stroke=0, fill=1)
     c.setFillColor(white)
-    c.setFont("Times-Bold", 15)
-    c.drawCentredString(x + 19, Y(sy_top + 24), n)
-    f = Frame(x, Y(sy_top + sh), sw, sh - 6, leftPadding=36, rightPadding=6,
-              topPadding=5, bottomPadding=2, showBoundary=0)
-    f.addFromList([Paragraph("<b>%s</b>" % t, body(13, 15, TA_CENTER, BAND, space=3)),
-                   Paragraph(s, body(11.5, 13.5, TA_CENTER, MUTE, space=0))], c)
+    c.setFont("Times-Bold", 18)
+    c.drawCentredString(x + 22, Y(sy_top + sh / 2.0 + 6), n)
+    f = Frame(x, Y(sy_top + sh), sw, sh - 4, leftPadding=40, rightPadding=34,
+              topPadding=(sh - 48) / 2.0, bottomPadding=2, showBoundary=0)
+    f.addFromList([Paragraph("<b>%s</b>" % t, body(18, 21, TA_CENTER, BAND, space=4)),
+                   Paragraph(s, body(15, 17.5, TA_CENTER, MUTE, space=0))], c)
     if i < 5:
         c.setStrokeColor(BAND)
         c.setLineWidth(2)
