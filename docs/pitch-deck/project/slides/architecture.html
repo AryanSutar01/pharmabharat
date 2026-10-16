@@ -1,0 +1,32 @@
+<section id="architecture" data-transition="fade" style="background:#F7F6F1;color:#0B1F2A;font-family:'Public Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:26px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#0C6F66">How it is built</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:60px;font-weight:700;line-height:1.1">Every path to the data crosses one permission check</h2>
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+<div style="width:1500px;background:#FDFDFB;border:1px solid #DFDED6;border-radius:12px;padding:20px 36px;display:flex;justify-content:space-between;align-items:center">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600">Retailer · Wholesaler · Pharma company · Platform admin</h3>
+<p style="font-size:26px;color:#6A7179">Google sign-in only</p>
+</div>
+<x-shape kind="arrow-down" style="width:26px;height:46px;background:#9AA5AD"></x-shape>
+<div style="width:1500px;background:#FDFDFB;border:1px solid #DFDED6;border-radius:12px;padding:20px 36px;display:flex;justify-content:space-between;align-items:center">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600">Next.js 16 — pages, server actions, API routes</h3>
+<p style="font-size:26px;color:#6A7179">one deployment, no separate API tier</p>
+</div>
+<x-shape kind="arrow-down" style="width:26px;height:46px;background:#0C6F66"></x-shape>
+<div style="width:1500px;background:#0B1F2A;border:3px solid #0C6F66;border-radius:12px;padding:22px 36px;display:flex;justify-content:space-between;align-items:center">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:32px;font-weight:700;color:#4FD1C5">Authorization — business type × member role → permission</h3>
+<p style="font-size:26px;color:#C9DCD9">enforced server-side, every action</p>
+</div>
+<x-shape kind="arrow-down" style="width:26px;height:46px;background:#9AA5AD"></x-shape>
+<div style="width:1500px;background:#FDFDFB;border:1px solid #DFDED6;border-radius:12px;padding:20px 36px;display:flex;justify-content:space-between;align-items:center">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600">10 domain services — catalog, orders, shop, ledger, alerts, recalls, compliance</h3>
+<p style="font-size:26px;color:#6A7179">19 data models</p>
+</div>
+<x-shape kind="arrow-down" style="width:26px;height:46px;background:#9AA5AD"></x-shape>
+<div style="width:1500px;background:#E6EAE8;border:1px solid #C3CCC9;border-radius:12px;padding:20px 36px;display:flex;justify-content:space-between;align-items:center">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600">MongoDB Atlas — Mumbai</h3>
+<p style="font-size:26px;color:#4A5568">ACID transactions on checkout, counter billing and ledger posting</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:26px;color:#4A5568">A bill can never exist for stock that was not on the shelf — the database guarantees it, not the application code.</p>
+<aside>Do not read the boxes aloud. The point is the teal band: there is exactly one place where permission is decided, and nothing reaches the data without passing it. For a technical investor, the closing line about transactional guarantees is the one that lands.</aside>
+</section>

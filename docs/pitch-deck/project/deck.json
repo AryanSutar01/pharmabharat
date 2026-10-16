@@ -1,0 +1,63 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-10-16T09:00:00Z" },
+  "lists": "css",
+  "title": "PharmaBharat — Investor Pitch Deck",
+  "order": [
+    "cover",
+    "problem",
+    "cost",
+    "solution",
+    "architecture",
+    "marketplace",
+    "counter",
+    "expiry",
+    "whynow",
+    "market",
+    "revenue",
+    "economics",
+    "gtm",
+    "timeline",
+    "traction",
+    "swot",
+    "competition",
+    "airoadmap",
+    "aimoat",
+    "ecosystem",
+    "team",
+    "ask"
+  ],
+  "sections": {
+    "s1": {
+      "description": "Why pharmacy money dies twice over, and the single blind spot both losses come from.",
+      "start": "cover"
+    },
+    "s2": {
+      "description": "The platform, the counter, and the expiry chain that makes it defensible.",
+      "start": "solution"
+    },
+    "s3": {
+      "description": "Market size, revenue model and unit economics.",
+      "start": "market"
+    },
+    "s4": {
+      "description": "Go to market, what is already built, and an honest competitive picture.",
+      "start": "gtm"
+    },
+    "s5": {
+      "description": "The AI roadmap, the data moat, the ecosystem pathway and the ask.",
+      "start": "airoadmap"
+    }
+  },
+  "faces": {
+    "space-grotesk": {
+      "family": "Space Grotesk",
+      "href": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    },
+    "public-sans": {
+      "family": "Public Sans",
+      "href": "https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap"
+    }
+  },
+  "designSystems": []
+}
