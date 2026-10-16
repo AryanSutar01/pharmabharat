@@ -1,0 +1,43 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-10-16T11:00:00Z" },
+  "lists": "css",
+  "title": "PharmaBharat — Pitch Deck (10 slides)",
+  "order": [
+    "cover",
+    "problem",
+    "solution",
+    "product",
+    "business",
+    "gtm",
+    "traction",
+    "swot",
+    "ai",
+    "ask"
+  ],
+  "sections": {
+    "s1": {
+      "description": "The blind spot, the platform that closes it, and what it does at the counter.",
+      "start": "cover"
+    },
+    "s2": {
+      "description": "Market, revenue model, route to market and what is already built.",
+      "start": "business"
+    },
+    "s3": {
+      "description": "Honest position, the AI roadmap and the ask.",
+      "start": "swot"
+    }
+  },
+  "faces": {
+    "space-grotesk": {
+      "family": "Space Grotesk",
+      "href": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    },
+    "public-sans": {
+      "family": "Public Sans",
+      "href": "https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap"
+    }
+  },
+  "designSystems": []
+}
